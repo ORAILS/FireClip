@@ -1,0 +1,35 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true,
+    "source.fixAll.eslint": true
+  },
+  "eslint.workingDirectories": [
+    "./Client"
+  ],
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+  ],
+  "eslint.packageManager": "npm",
+  "eslint.enable": true,
+  "editor.formatOnSave": true,
+  "[handlebars]": {
+    "editor.formatOnSave": false
+  },
+  "terminal.integrated.profiles.osx": {
+    "zsh": {
+      "path": "zsh",
+      "args": [
+        "-l"
+      ]
+    },
+    "x86 zsh": {
+      "path": "/usr/bin/arch",
+      "args": [
+        "-arch",
+        "x86_64",
+        "/bin/zsh"
+      ]
+    }
+  },
+}

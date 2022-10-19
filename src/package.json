@@ -1,0 +1,139 @@
+{
+    "name": "fireclip",
+    "productName": "FireClip",
+    "description": "Privacy focused clipboard manager built using Electron",
+    "author": "Daniel Railean <me@ddlele.com>",
+    "license": "No licence, rights reserved",
+    "version": "1.4.9",
+    "main": "dist/index.js",
+    "iohook": {
+        "targets": [
+            "electron-87"
+        ],
+        "platforms": [
+            "win32",
+            "darwin",
+            "linux"
+        ],
+        "arches": [
+            "x64",
+            "ia32",
+            "arm64"
+        ]
+    },
+    "scripts": {
+        "nodemon": "nodemon",
+        "dev": "rollup -c -w",
+        "rebuild": "electron-rebuild",
+        "start": "npm run compile &&  electron .",
+        "start:svelte": "rollup -c & npm run compile && electron .",
+        "compile": "tsc",
+        "out:win": "rollup -c && tsc && electron-builder build --win --publish never",
+        "out:mac": "rollup -c && tsc && npm run rebuild && electron-builder build --mac --publish never",
+        "check-updates": "npx npm-check-updates",
+        "check-updates:minor": "npx npm-check-updates --target minor",
+        "check-updates:patch": "npx npm-check-updates --target patch",
+        "test": "npx playwright test",
+        "test:update-screenshot": "npx playwright test --update-snapshots",
+        "test:show-trace": "npx playwright show-trace tests/tracing/trace.zip",
+        "format": "prettier --write \"src/**/*.{css,html,ts,js,svelte,json}\" --write",
+        "lint": "eslint . --ext .ts",
+        "lint-and-fix": "eslint . --ext .ts --fix",
+        "deploy": "rollup -c && tsc && npm run rebuild && electron-builder build --mac --publish always"
+    },
+    "devDependencies": {
+        "@playwright/test": "1.18.1",
+        "@rollup/plugin-commonjs": "21.0.1",
+        "@rollup/plugin-node-resolve": "13.1.3",
+        "@rollup/plugin-typescript": "8.3.0",
+        "@tsconfig/svelte": "3.0.0",
+        "@types/crypto-js": "4.1.1",
+        "@types/json-stable-stringify": "^1.0.34",
+        "@types/node-fetch": "2.6.1",
+        "@types/node-forge": "1.0.2",
+        "@types/sjcl": "1.0.30",
+        "@types/superagent": "4.1.15",
+        "autoprefixer": "10.4.2",
+        "electron": "12.2.3",
+        "electron-builder": "23.6.0",
+        "electron-rebuild": "3.2.9",
+        "nodemon": "2.0.19",
+        "playwright": "1.18.1",
+        "postcss": "8.4.6",
+        "postcss-load-config": "3.1.1",
+        "prettier": "2.7.1",
+        "prettier-plugin-svelte": "2.7.0",
+        "rollup": "2.67.2",
+        "rollup-plugin-copy": "3.4.0",
+        "rollup-plugin-css-only": "3.1.0",
+        "rollup-plugin-livereload": "2.0.5",
+        "rollup-plugin-postcss": "4.0.2",
+        "rollup-plugin-svelte": "7.1.0",
+        "rollup-plugin-terser": "7.0.2",
+        "semver": "7.3.5",
+        "svelte": "3.49.0",
+        "svelte-check": "2.4.3",
+        "svelte-preprocess": "4.10.3",
+        "tailwindcss": "3.0.19",
+        "tslib": "2.3.1",
+        "typescript": "4.5.5"
+    },
+    "dependencies": {
+        "@typescript-eslint/eslint-plugin": "5.40.0",
+        "@typescript-eslint/parser": "5.40.0",
+        "ansi-regex": "6.0.1",
+        "crypto-js": "4.1.1",
+        "dotenv": "16.0.1",
+        "electron-notarize": "1.2.1",
+        "electron-reload": "2.0.0-alpha.1",
+        "electron-store": "8.0.1",
+        "electron-updater": "4.6.5",
+        "eslint": "8.25.0",
+        "eslint-config-prettier": "8.5.0",
+        "eslint-plugin-prettier": "4.2.1",
+        "fast-sort": "3.2.0",
+        "iohook": "0.9.3",
+        "json-stable-stringify": "1.0.1",
+        "robotjs": "0.6.0",
+        "superagent": "7.1.6"
+    },
+    "build": {
+        "productName": "FireClip",
+        "appId": "com.orails.fireclip",
+        "directories": {
+            "output": "out",
+            "buildResources": "resources"
+        },
+        "npmRebuild": false,
+        "mac": {
+            "target": [
+                "dmg",
+                "zip"
+            ],
+            "icon": "icon512.icns",
+            "category": "public.app-category.productivity",
+            "hardenedRuntime": true,
+            "entitlements": "entitlements.mac.plist",
+            "entitlementsInherit": "entitlements.mac.plist",
+            "gatekeeperAssess": false
+        },
+        "dmg": {
+            "sign": false
+        },
+        "afterSign": "notarize.js",
+        "win": {
+            "target": [
+                "nsis"
+            ],
+            "icon": "icon512.ico"
+        },
+        "nsis": {
+            "installerIcon": "icon512.ico",
+            "uninstallerIcon": "icon512.ico",
+            "uninstallDisplayName": "FireClip",
+            "license": "license.txt",
+            "oneClick": true,
+            "allowToChangeInstallationDirectory": false
+        }
+    }
+}
