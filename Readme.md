@@ -14,7 +14,7 @@ Until then, feel free to download a copy from [release.fireclip.net/download](ht
 
 ## About auto-updates
 
-As written above app supports auto updates and will automatically download the latest version and restart, unless disabled in the settings (Click on the name). An update notice will also be added in the future, as as support for optional and mandatory updates. The update server works by serving the last version from the GitHub releases at [release.fireclip.net/download/latest](https://release.fireclip.net/download/latest). You can verify the hash of the files to validate.
+As written above app supports auto updates and will automatically download the latest version and restart, unless disabled in the settings (Click on the name). An update notice will also be added in the future, as well as support for optional and mandatory updates. The update server works by serving the last version from the GitHub releases at [release.fireclip.net/download/latest](https://release.fireclip.net/download/latest). You can verify the hash of the files to validate.
 
 ## Supported platforms
 
