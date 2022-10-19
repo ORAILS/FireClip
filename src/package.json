@@ -6,6 +6,10 @@
     "license": "No licence, rights reserved",
     "version": "1.4.9",
     "main": "dist/index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/ORAILS/FireClip"
+    },
     "iohook": {
         "targets": [
             "electron-87"
