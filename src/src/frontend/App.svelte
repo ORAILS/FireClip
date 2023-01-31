@@ -15,7 +15,7 @@
 </svelte:head>
 
 <AppStructure title={$appName}>
-    <section class="h-full space-y-6">
+    <section class="h-full space-y-6 bg-white dark:bg-slate-900">
         {#if $page === IPages.items}
             <IOHook />
         {:else if $page === IPages.settings}

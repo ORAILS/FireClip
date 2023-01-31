@@ -1,6 +1,7 @@
-import { BrowserWindow, Clipboard, globalShortcut, IpcMain, nativeImage } from 'electron'
+import { BrowserWindow, Clipboard, dialog, globalShortcut, IpcMain, nativeImage } from 'electron'
 import Store from 'electron-store'
 import { IpcMainEvent } from 'electron/main'
+import * as fs from 'fs'
 import robot from 'robotjs'
 import { ItemRepo } from '../../Data/ItemRepository'
 import { IClipboardItem, isImageContent, isRTFContent, isTextContent } from '../../DataModels/DataTypes'
@@ -32,6 +33,24 @@ const defaultHandler = (e: IpcMainEvent, event: any) => {
     store.set(`${getPreferenceKey(event.key)}`, event.value)
     console.log(event)
 }
+
+async function saveJSONFile(data: object) {
+    // Show a "Save File" dialog to the user
+    const res = await dialog.showSaveDialog(localMainWindow, {
+        filters: [{ name: 'JSON', extensions: ['json'] }]
+    })
+    if (res.filePath) {
+        // Write the JSON data to the selected file
+        fs.writeFile(res.filePath, JSON.stringify(data), 'utf8', (err) => {
+            if (err) {
+                console.error(err)
+            } else {
+                console.log(`JSON file saved to ${res.filePath}`)
+            }
+        })
+    }
+}
+
 /**
  * Default user settings along with the default values if not already existing in the store.
  */
@@ -189,14 +208,7 @@ const action = {
         newItem.type = 2
         return newItem
     },
-    /**
-     * Idea:
-     * 1. check if was inited
-     * 2. check if image rtf text
-     * 3. create object
-     * 4. save locally
-     * 5. save remote
-     */
+
     TrySaveClipboard: async (delayMs: number) => {
         // check if was inited
         await JsUtil.waitforme(delayMs)
@@ -247,6 +259,13 @@ const channelsFromRender: IReceiveChannel[] = [
         name: 'get_settings',
         handler: () => {
             localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(defaultUserSettings))
+        }
+    },
+    {
+        name: 'save_items',
+        handler: async (event: IpcMainEvent, data: object) => {
+            // console.log(data)
+            await saveJSONFile(data)
         }
     },
     {

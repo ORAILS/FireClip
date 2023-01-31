@@ -16,10 +16,10 @@ label {
 }
 
 @font-face {
-  font-family: "JetBrainsMono-Thin";
-  src: url(./JetBrainsMono-Thin.ttf) format("truetype");
+    font-family: 'JetBrainsMono-Thin';
+    src: url(./JetBrainsMono-Thin.ttf) format('truetype');
 }
 @font-face {
-  font-family: "JetBrainsMono-Medium";
-  src: url(./JetBrainsMono-Medium.ttf) format("truetype");
+    font-family: 'JetBrainsMono-Medium';
+    src: url(./JetBrainsMono-Medium.ttf) format('truetype');
 }

@@ -12,6 +12,7 @@ export interface AppState {
     showPassword: boolean
     passwordButtonText: string
     hidden: boolean
+    defaultUserSettings: IUserSettings | undefined
 }
 
 export interface IReceiveChannel {
