@@ -33,7 +33,7 @@
         "start:svelte": "rollup -c & npm run compile && electron .",
         "compile": "tsc",
         "out:win": "rollup -c && tsc && electron-builder build --win --publish never",
-        "out:mac": "rollup -c && tsc && npm run rebuild && electron-builder build --mac --publish never",
+        "out:mac": "rollup -c && tsc  && electron-builder build --mac --publish never",
         "check-updates": "npx npm-check-updates",
         "check-updates:minor": "npx npm-check-updates --target minor",
         "check-updates:patch": "npx npm-check-updates --target patch",
@@ -43,7 +43,7 @@
         "format": "prettier --write \"src/**/*.{css,html,ts,js,svelte,json}\" --write",
         "lint": "eslint . --ext .ts",
         "lint-and-fix": "eslint . --ext .ts --fix",
-        "deploy": "rollup -c && tsc && npm run rebuild && electron-builder build --mac --publish always"
+        "deploy": "rollup -c && tsc && electron-builder build --mac --publish always"
     },
     "devDependencies": {
         "@playwright/test": "1.18.1",
