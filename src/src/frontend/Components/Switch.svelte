@@ -7,7 +7,7 @@
     export let defaultState: boolean
     let state = true
 
-    onMount(()=>{
+    onMount(() => {
         state = defaultState
     })
 
@@ -31,11 +31,6 @@
 </div>
 
 <style>
-    :root {
-        --active: rgb(160, 161, 162);
-        --inactive: rgb(214, 214, 214);
-    }
-
     .slider {
         display: flex;
         align-items: center;
@@ -49,10 +44,10 @@
         height: 1.6em;
         position: relative;
         margin: 0 0 0 0.5em;
-        background: var(--inactive);
         border: none;
         transition: 0.5s;
         border-radius: 1.5em;
+        @apply bg-slate-400;
     }
 
     .slider button::before {
@@ -60,14 +55,14 @@
         position: absolute;
         width: 1.3em;
         height: 1.3em;
-        background: #fff;
         top: 0.15em;
         right: 1.5em;
         transition: transform 0.3s;
+        @apply bg-gray-100 dark:bg-slate-900;
     }
 
     .slider button[aria-checked='true'] {
-        background-color: var(--active);
+        @apply bg-gray-200 dark:bg-slate-600;
     }
 
     .slider button[aria-checked='true']::before {
@@ -80,7 +75,7 @@
     }
 
     .slider button:hover {
-        box-shadow: 0 0px 8px var(--active);
+        @apply shadow-lg;
         border-radius: 1.5em;
         transition: 0.5s;
     }

@@ -37,14 +37,8 @@
 
 <style lang="postcss">
     .svg-container {
-        @apply h-[18px] max-w-[25px] mx-0 px-[1px] my-0 rounded mr-1;
-        fill: black;
-        font-size: 14px;
-        background-color: var(--background-color, theme('colors.gray.50'));
-        stroke: var(--text-color, theme('colors.gray.800'));
-        align-items: center;
+        @apply mx-0 my-0 mr-1 h-[18px] max-w-[25px] items-center rounded-sm border-0 bg-gray-50 fill-black stroke-slate-800 px-[1px] text-[14px] dark:bg-slate-800 dark:fill-white;
         font-family: JetBrainsMono-Thin;
-        border: 0px solid black;
     }
     svg {
         @apply h-[14px] w-5 p-[1px];

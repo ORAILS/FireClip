@@ -50,7 +50,7 @@
         --text-color: theme('colors.gray.600');
     }
     .page {
-        @apply p-0 overflow-y-auto w-full;
+        @apply w-full overflow-y-auto p-0;
         height: calc(100% - theme('spacing.8') - theme('spacing.10'));
     }
 

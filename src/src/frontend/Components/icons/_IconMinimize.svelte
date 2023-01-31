@@ -15,16 +15,10 @@
 
 <style lang="postcss">
     svg {
-        @apply h-5 w-5 mx-0 my-auto p-1;
-        fill: black;
-        background-color: var(--background-color, theme('colors.gray.50'));
-        stroke: var(--text-color, theme('colors.gray.800'));
+        @apply mx-0 my-auto h-5 w-5 bg-gray-50 fill-black stroke-gray-800 p-1 dark:bg-slate-900 dark:fill-white;
     }
     svg:hover {
-        @apply h-5 w-5 rounded p-1;
-        background-color: green;
-        fill: white;
-        cursor: pointer;
+        @apply h-5 w-5 rounded bg-green-600 fill-white p-1 dark:bg-green-700;
     }
     .dimmed {
         opacity: 0.4;

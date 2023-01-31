@@ -1,7 +1,8 @@
 <script lang="ts">
+    import stringify from 'json-stable-stringify'
     import { onDestroy, onMount } from 'svelte'
     import type { IUserSettings } from '../types'
-    import { appName } from './stores'
+    import { appName, state } from './stores'
     import Switch from './Switch.svelte'
 
     const ipcRenderer = window.require('electron').ipcRenderer
@@ -26,6 +27,10 @@
     onDestroy(() => {
         appName.set(initialName)
     })
+
+    /**
+     * Used to transform something like "aSentenceThatWork"s to "A sentence that Works".
+     */
     function camelToSentence(s: string) {
         let result = s[0].toUpperCase()
         var i = 1
@@ -36,6 +41,16 @@
         }
         return result
     }
+
+    const typeSizes = {
+        undefined: () => 0,
+        boolean: () => 4,
+        number: () => 8,
+        string: (item) => 2 * item.length,
+        object: (item) => (!item ? 0 : Object.keys(item).reduce((total, key) => sizeOf(key) + sizeOf(item[key]) + total, 0))
+    }
+
+    const sizeOf = (value) => typeSizes[typeof value](value)
 </script>
 
 <div class="settings flex flex-col justify-items-start">
@@ -52,14 +67,33 @@
                 />
             </div>
         {/each}
+        <div class="py-2 pl-3">
+            <p>
+                Total items: {$state.clipboardListFiltered.length}
+            </p>
+        </div>
+        <div class="py-2 pl-3">
+            <p>
+                Size: {sizeOf($state.clipboardListFiltered) / 1024} kB
+            </p>
+        </div>
+        <div class="py-2 pl-3">
+            <p>
+                <button
+                    on:click={() => {
+                        ipcRenderer.send('save_items', $state.clipboardListFiltered)
+                    }}>Save state as JSON</button
+                >
+            </p>
+        </div>
     {/if}
 </div>
 
 <style lang="postcss">
     div {
-        background-color: rgb(246, 246, 246);
+        @apply bg-slate-900 text-gray-900 dark:text-gray-200;
     }
     div:nth-child(even) {
-        background-color: rgb(255, 255, 255);
+        @apply border-y border-gray-800 bg-gray-900;
     }
 </style>
