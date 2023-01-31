@@ -1,6 +1,6 @@
 <script lang="ts">
     import AppStructure from './Components/AppStructure.svelte'
-    import IOHook from './Components/IOHook.svelte'
+    import Clips from './Components/Clips.svelte'
     import Notifications from './Components/Notifications.svelte'
     import Settings from './Components/Settings.svelte'
     import { appName } from './Components/stores'
@@ -17,7 +17,7 @@
 <AppStructure title={$appName}>
     <section class="h-full space-y-6 bg-white dark:bg-slate-900">
         {#if $page === IPages.items}
-            <IOHook />
+            <Clips />
         {:else if $page === IPages.settings}
             <Settings />
         {:else if $page === IPages.notifications}

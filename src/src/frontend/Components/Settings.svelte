@@ -15,7 +15,6 @@
     }
     onMount(() => {
         initialName = $appName
-
         appName.set('< Settings')
         ipcRenderer.send('get_settings')
     })
@@ -61,6 +60,7 @@
                     label={camelToSentence(key)}
                     fontSize={12}
                     defaultState={item.value}
+                    selectOptions={item.selectableOptions}
                     on:change={(e) => {
                         sendChange(key, { key, value: e.detail })
                     }}
@@ -91,9 +91,9 @@
 
 <style lang="postcss">
     div {
-        @apply bg-slate-900 text-gray-900 dark:text-gray-200;
+        @apply dark:bg-rock bg-gray-100 text-gray-900 dark:text-gray-200;
     }
     div:nth-child(even) {
-        @apply border-y border-gray-800 bg-gray-900;
+        @apply border-y dark:border-gray-800 dark:bg-slate-900 bg-white;
     }
 </style>

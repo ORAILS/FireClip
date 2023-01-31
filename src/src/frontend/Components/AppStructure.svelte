@@ -46,8 +46,6 @@
 <style lang="postcss">
     main {
         @apply w-full;
-        --background-color: theme('colors.gray.50');
-        --text-color: theme('colors.gray.600');
     }
     .page {
         @apply w-full overflow-y-auto p-0;
@@ -59,12 +57,9 @@
     }
 
     .page::-webkit-scrollbar-track {
-        @apply border-none;
-        background-color: var(--background-color);
-        border-color: var(--text-color);
-        border-left: 1px solid lightgray;
+        @apply border-l border-none border-gray-600 bg-gray-50 dark:bg-slate-600;
     }
     .page::-webkit-scrollbar-thumb {
-        background-color: lightgray;
+        @apply bg-gray-300 dark:bg-gray-800;
     }
 </style>

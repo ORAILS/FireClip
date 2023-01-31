@@ -4,14 +4,19 @@
 
     export let label: string
     export let fontSize = 16
-    export let defaultState: boolean
-    let state = true
+    export let defaultState: any
+
+    export let selectOptions: undefined | string[] = undefined
+    let state: any
 
     onMount(() => {
         state = defaultState
+        console.log(defaultState)
+        console.log(selectOptions)
     })
 
     function handleClick(event) {
+        if (selectOptions) return
         const target = event.target
 
         state = target.getAttribute('aria-checked') === 'true'
@@ -23,18 +28,35 @@
         }
         dispatch('change', state)
     }
+
+    function handleSelectChange(event) {
+        dispatch('change', state)
+    }
 </script>
 
-<div class="slider" style="font-size:{fontSize}px">
-    <span style="font-size: {fontSize * 1.3}px">{label}</span>
-    <button role="switch" aria-checked={state} on:click={handleClick} />
-</div>
+{#if selectOptions}
+    <div class="slider" style="font-size:{fontSize}px">
+        <span style="font-size: {fontSize * 1.3}px">{label}</span>
+        <select class="bg-gray-100 dark:bg-slate-900 cursor-pointer" bind:value={state} on:change={handleSelectChange}>
+            {#each selectOptions as option}
+                {#if option === state}
+                    <option selected value={option}>{option}</option>
+                {:else}
+                    <option value={option}>{option}</option>
+                {/if}
+            {/each}
+        </select>
+    </div>
+{:else}
+    <div class="slider" style="font-size:{fontSize}px">
+        <span style="font-size: {fontSize * 1.3}px">{label}</span>
+        <button role="switch" aria-checked={state} on:click={handleClick} />
+    </div>
+{/if}
 
-<style>
+<style lang="postcss">
     .slider {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+        @apply flex items-center justify-between
     }
 
     .slider button {
@@ -45,38 +67,28 @@
         position: relative;
         margin: 0 0 0 0.5em;
         border: none;
-        transition: 0.5s;
         border-radius: 1.5em;
-        @apply bg-slate-400;
+        @apply dark:bg-gray-800 shadow duration-500;
     }
 
     .slider button::before {
         content: '';
         position: absolute;
-        width: 1.3em;
-        height: 1.3em;
         top: 0.15em;
         right: 1.5em;
         transition: transform 0.3s;
-        @apply bg-gray-100 dark:bg-slate-900;
+        @apply bg-gray-300 dark:bg-slate-900 h-4 w-4;
     }
 
     .slider button[aria-checked='true'] {
-        @apply bg-gray-200 dark:bg-slate-600;
+        @apply bg-gray-300 dark:bg-slate-500;
     }
 
     .slider button[aria-checked='true']::before {
-        transform: translateX(1.3em);
-        transition: transform 0.3s;
+        @apply bg-gray-50 dark:bg-gray-800 duration-300 transition-transform translate-x-4
     }
 
     .slider button::before {
         border-radius: 100%;
-    }
-
-    .slider button:hover {
-        @apply shadow-lg;
-        border-radius: 1.5em;
-        transition: 0.5s;
     }
 </style>

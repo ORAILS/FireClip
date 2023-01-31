@@ -3,7 +3,7 @@ import { appSettings } from '../AppSettings'
 import { AppState, IPages } from '../types'
 
 const defaultPage: IPages = IPages.items
-
+export const ipcRenderer = window.require('electron').ipcRenderer
 /**
  * Wether the app is focused (used for seaching function), as it's only triggered when focused
  */
