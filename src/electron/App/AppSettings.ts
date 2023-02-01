@@ -48,8 +48,8 @@ const winPlatform = ['win32']
 export const AppSettings: AppSettings = {
     name: 'FireClip',
     isDev: false,
-    openDevTools: true,
-    enableDevTools: true,
+    openDevTools: false,
+    enableDevTools: false,
     enablePaste: true,
     widthNormal: 250,
     heightNormal: 400,
