@@ -40,7 +40,8 @@
         "format": "prettier --write \"src/**/*.{css,html,ts,js,svelte,json}\" --write",
         "lint": "eslint . --ext .ts",
         "lint-and-fix": "eslint . --ext .ts --fix",
-        "deploy": "rollup -c && tsc && electron-builder build --mac --publish always"
+        "deploy": "rollup -c && tsc && electron-builder build --mac --publish always",
+        "prepare": "husky install"
     },
     "pre-commit": [
         "format",
@@ -62,6 +63,7 @@
         "electron": "12.2.3",
         "electron-builder": "23.6.0",
         "electron-rebuild": "3.2.9",
+        "husky": "^8.0.3",
         "nodemon": "2.0.19",
         "postcss": "8.4.6",
         "postcss-load-config": "3.1.1",

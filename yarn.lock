@@ -2724,6 +2724,11 @@
   dependencies:
     "ms" "^2.0.0"
 
+"husky@^8.0.3":
+  "integrity" "sha512-+dQSyqPh4x1hlO1swXBiNb2HzTDN1I2IGLQx1GrBuiqFJfoMrnZWwVmatvSiO+Iz8fBUnf+lekwNo4c2LlXItg=="
+  "resolved" "https://registry.npmjs.org/husky/-/husky-8.0.3.tgz"
+  "version" "8.0.3"
+
 "iconv-corefoundation@^1.1.7":
   "integrity" "sha512-T10qvkw0zz4wnm560lOEg0PovVqUXuOFhhHAkixw8/sycy7TJt7v/RrkEKEQnAw2viPSJu6iAkErxnzR0g8PpQ=="
   "resolved" "https://registry.npmjs.org/iconv-corefoundation/-/iconv-corefoundation-1.1.7.tgz"
@@ -4216,7 +4221,7 @@
     "picocolors" "^1.0.0"
     "source-map-js" "^1.0.2"
 
-"pre-commit@^1.2.2":
+"pre-commit@1.2.2":
   "integrity" "sha512-qokTiqxD6GjODy5ETAIgzsRgnBWWQHQH2ghy86PU7mIn/wuWeTwF3otyNQZxWBwVn8XNr8Tdzj/QfUXpH+gRZA=="
   "resolved" "https://registry.npmjs.org/pre-commit/-/pre-commit-1.2.2.tgz"
   "version" "1.2.2"

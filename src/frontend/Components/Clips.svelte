@@ -260,8 +260,8 @@
             <div
                 title={getTitle(item)}
                 class="clipboard-item border-slate-800 {$state.itemIdSelected === item.contentHash
-                    ? 'bg-gray-300 even:bg-gray-300 dark:bg-slate-800 even:dark:bg-slate-800'
-                    : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-800'} dark:text-gray-100 dark:even:border-y"
+                    ? 'bg-gray-300 even:bg-gray-300 dark:bg-slate-700 even:dark:bg-slate-700'
+                    : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-700'} dark:text-gray-100 dark:even:border-y"
                 id={item.contentHash}
                 on:click|preventDefault={() => handleClick(item)}
             >

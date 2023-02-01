@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+export PATH=/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+. "$(dirname -- "$0")/_/husky.sh"
+
+yarn format

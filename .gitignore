@@ -1,3 +1,9 @@
+/node_modules
+/out
+/dist
+package-lock.json
+.DS_Store
+electron-builder.yml
 code/Client/.env
 secrets.json
 .env
