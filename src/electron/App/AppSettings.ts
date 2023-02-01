@@ -2,7 +2,6 @@ import { IpcMainEvent } from 'electron/main'
 
 interface AppSettings {
     name: string
-    isDev: boolean
     openDevTools: boolean
     enableDevTools: boolean
     enablePaste: boolean
@@ -47,7 +46,6 @@ const winPlatform = ['win32']
 
 export const AppSettings: AppSettings = {
     name: 'FireClip',
-    isDev: false,
     openDevTools: false,
     enableDevTools: false,
     enablePaste: true,
