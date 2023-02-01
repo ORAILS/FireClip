@@ -42,6 +42,11 @@
         "lint-and-fix": "eslint . --ext .ts --fix",
         "deploy": "rollup -c && tsc && electron-builder build --mac --publish always"
     },
+    "pre-commit": [
+        "format",
+        "lint",
+        "compile"
+    ],
     "devDependencies": {
         "@rollup/plugin-commonjs": "21.0.1",
         "@rollup/plugin-node-resolve": "13.1.3",
@@ -94,6 +99,7 @@
         "fast-sort": "3.2.0",
         "iohook": "0.9.3",
         "json-stable-stringify": "1.0.1",
+        "pre-commit": "1.2.2",
         "robotjs": "0.6.0",
         "superagent": "7.1.6"
     },

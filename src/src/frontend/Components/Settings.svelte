@@ -91,9 +91,9 @@
 
 <style lang="postcss">
     div {
-        @apply dark:bg-rock bg-gray-100 text-gray-900 dark:text-gray-200;
+        @apply bg-gray-100 text-gray-900 dark:bg-rock dark:text-gray-200;
     }
     div:nth-child(even) {
-        @apply border-y dark:border-gray-800 dark:bg-slate-900 bg-white;
+        @apply border-y bg-white dark:border-gray-800 dark:bg-slate-900;
     }
 </style>

@@ -28,7 +28,7 @@
     <div
         class="absolute inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50 text-slate-900 dark:bg-slate-900 dark:text-gray-100"
     >
-        <div class="dark:bg-rock max-w-sm bg-white p-6">
+        <div class="max-w-sm bg-white p-6 dark:bg-rock">
             <div class="">
                 <h3 class="text-center text-2xl">
                     {appSettings.name} is locked
@@ -67,7 +67,7 @@
                 </div>
                 {#if $state.passwordIncorrect}
                     <button
-                        class="mr-2 mt-2 w-full border border-red-500 px-5 py-2.5 text-center text-sm font-medium  text-red-700 hover:bg-red-500 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-red-600 dark:hover:text-white dark:focus:ring-red-800"
+                        class="border-red-500 text-red-700 hover:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800 mr-2 mt-2 w-full border px-5  py-2.5 text-center text-sm font-medium hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white"
                         on:click={onOkay}>Password incorrect!</button
                     >
                 {:else}
