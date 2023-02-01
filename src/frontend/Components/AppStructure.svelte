@@ -1,9 +1,10 @@
 <script lang="ts">
     import SearchBar from './SearchBar.svelte'
-    const ipcRenderer = window.require('electron').ipcRenderer
-
+    import { ipcRenderer, state } from './stores'
     import TitleBar from './TitleBar.svelte'
     export let title: string = 'Title'
+
+    let appClasses = ''
 
     let outerW = globalThis.outerWidth - 8
     let isMaximized = outerW >= globalThis.screen.availWidth
@@ -11,6 +12,19 @@
     $: {
         isMaximized = outerW >= globalThis.screen.availWidth
     }
+
+    state.subscribe((v) => {
+        if (!v.defaultUserSettings) return
+        const darkSetting = v.defaultUserSettings.darkMode.value
+        const isDarkSystem = window.matchMedia('(prefers-color-scheme: dark)').matches
+
+        if (darkSetting === 'on' || (darkSetting === 'system' && isDarkSystem)) {
+            appClasses = 'dark'
+        } else {
+            appClasses = ''
+        }
+        console.log(appClasses)
+    })
 
     function minimize() {
         ipcRenderer.send('window_minimize', true)
@@ -28,7 +42,7 @@
 
 <svelte:window bind:outerWidth={outerW} />
 
-<main class="dark">
+<main class={appClasses}>
     <TitleBar
         {title}
         {isMaximized}

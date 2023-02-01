@@ -28,10 +28,11 @@ export interface IClipboardItemEncrypted {
 }
 
 export interface IUserSettings {
-    darkMode: IUserSetting<boolean>
+    darkMode: IUserSetting<'system' | 'on' | 'off'>
     regiserCommandNumberShortcuts: IUserSetting<boolean>
     showCommandNumberIcons: IUserSetting<boolean>
     autoRestartOnUpdateAvailable: IUserSetting<boolean>
+    minimizeAfterPaste: IUserSetting<boolean>
 }
 
 export interface IUserSetting<T> {

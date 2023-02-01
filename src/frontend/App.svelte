@@ -8,12 +8,14 @@
 
     import { page } from './Components/stores'
     import { IPages } from './types'
+    import EventHandler from './Components/EventHandler.svelte'
 </script>
 
 <svelte:head>
     <title>{$appName}</title>
 </svelte:head>
 
+<EventHandler />
 <AppStructure title={$appName}>
     <section class="h-full space-y-6 bg-white dark:bg-slate-900">
         {#if $page === IPages.items}

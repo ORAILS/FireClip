@@ -1,6 +1,6 @@
 # [FireClip](https://fireclip.net)
 
-![img](src/src/frontend/www/raw.svg)
+![img](src/frontend/www/raw.svg)
 
 A privacy focused (zero-knowledge) clipboard manager with real-time synchronisation.
 
@@ -42,4 +42,4 @@ The app is not Open Source as a licencing model was not yet decided, so until fu
 
 ### More
 
-- [Disclaimer](./docs/legal/disclaimer.md)
+- [Disclaimer](./disclaimer.md)

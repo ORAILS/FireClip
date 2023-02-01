@@ -32,4 +32,8 @@ const appState: AppState = {
     hidden: true
 }
 
+export const delay = (delayInms: number) => {
+    return new Promise((resolve) => setTimeout(resolve, delayInms))
+}
+
 export const state = writable<AppState>(appState)

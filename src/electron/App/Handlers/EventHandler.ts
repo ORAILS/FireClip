@@ -62,6 +62,8 @@ export const userSettings: IUserSettings = {
         changeHandler: (e, event) => {
             defaultHandler(e, event)
             userSettings.darkMode.value = event.value
+            // so that the front end can also react to this change
+            localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(userSettings))
         }
     },
     regiserCommandNumberShortcuts: {
@@ -338,7 +340,7 @@ const channelsToRender = {
      * used to set a state in the front end
      */
     unhide: 'unhide',
-    setSettings: 'setSettings'
+    setSettings: 'to.renderer.set.settings'
 }
 
 let localClipboard: Clipboard

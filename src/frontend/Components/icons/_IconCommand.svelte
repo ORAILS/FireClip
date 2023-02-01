@@ -2,7 +2,9 @@
     export let number = 0
 </script>
 
-<div class="svg-container flex flex-row">
+<div
+    class="mx-0 my-0 mr-1 flex h-[18px] max-w-[25px] cursor-pointer flex-row items-center rounded-sm border-0 bg-gray-50 fill-black stroke-slate-800 px-[1px] text-[14px] dark:bg-slate-800 dark:fill-white"
+>
     <svg
         xmlns="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -21,15 +23,7 @@
 </div>
 
 <style lang="postcss">
-    .svg-container {
-        @apply mx-0 my-0 mr-1 h-[18px] max-w-[25px] items-center rounded-sm border-0 bg-gray-50 fill-black stroke-slate-800 px-[1px] text-[14px] dark:bg-slate-800 dark:fill-white;
-        font-family: JetBrainsMono-Thin;
-    }
     svg {
         @apply h-[14px] w-5 p-[1px];
-    }
-    .svg-container:hover {
-        @apply rounded;
-        cursor: pointer;
     }
 </style>

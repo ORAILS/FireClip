@@ -4,11 +4,8 @@
     import { isImageContent, isRTFContent, isTextContent } from '../types'
     import IconCommand from './icons/_IconCommand.svelte'
     import Login from './Login.svelte'
-    import { ipcRenderer, isFocused, state } from './stores'
+    import { ipcRenderer, isFocused, state, delay } from './stores'
 
-    const delay = (delayInms: number) => {
-        return new Promise((resolve) => setTimeout(resolve, delayInms))
-    }
     var { sort } = window.require('fast-sort')
 
     const channelsFromRender: IReceiveChannel[] = [
@@ -230,9 +227,6 @@
         return f
     }
 
-    ipcRenderer.on('setSettings', (e, value) => {
-        $state.defaultUserSettings = JSON.parse(value)
-    })
     onMount(async () => {
         ipcRenderer.send('RendererInit', true)
         setTimeout(() => {
@@ -243,9 +237,7 @@
                 masterKey: ''
             })
         }, 200)
-        setInterval(() => {
-            console.log(window.matchMedia('(prefers-color-scheme: dark)').matches)
-        }, 3000)
+
         ipcRenderer.send('get_settings')
     })
 </script>
