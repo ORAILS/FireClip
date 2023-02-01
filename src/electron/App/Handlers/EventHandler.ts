@@ -52,25 +52,29 @@ async function saveJSONFile(data: object) {
 }
 
 /**
- * Default user settings along with the default values if not already existing in the store.
+ * User settings along with the default values if not already existing in the store.
  */
-export const defaultUserSettings: IUserSettings = {
-    // darkMode: {
-    //     description: 'If enabled will turn on the dark mode',
-    //     value: true,
-    //     changeHandler: (e, event) => {
-    //         defaultHandler(e, event)
-    //         defaultUserSettings.darkMode.value = event.value
-    //     }
-    // },
+export const userSettings: IUserSettings = {
+    darkMode: {
+        description: 'Controls dark mode behaviour.',
+        value: 'system',
+        selectableOptions: ['off', 'on', 'system'],
+        changeHandler: (e, event) => {
+            defaultHandler(e, event)
+            userSettings.darkMode.value = event.value
+            // so that the front end can also react to this change
+            localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(userSettings))
+        }
+    },
     regiserCommandNumberShortcuts: {
         description: 'If enabled, will register the shortcuts cmd/ctrl+number from 0 to 9',
         value: true,
+        selectableOptions: undefined,
         changeHandler: (e, event) => {
             defaultHandler(e, event)
-            defaultUserSettings.regiserCommandNumberShortcuts.value = event.value
+            userSettings.regiserCommandNumberShortcuts.value = event.value
             for (const command of shortcutList) {
-                if (defaultUserSettings.regiserCommandNumberShortcuts) {
+                if (userSettings.regiserCommandNumberShortcuts) {
                     globalShortcut.register(command, () => null)
                     console.log(`shortcut registered`)
                 } else {
@@ -83,17 +87,28 @@ export const defaultUserSettings: IUserSettings = {
     showCommandNumberIcons: {
         description: 'If enabled, will show command and number icon at the start of the first 10 icons',
         value: true,
+        selectableOptions: undefined,
         changeHandler: (e, event) => {
             defaultHandler(e, event)
-            defaultUserSettings.showCommandNumberIcons.value = event.value
+            userSettings.showCommandNumberIcons.value = event.value
         }
     },
     autoRestartOnUpdateAvailable: {
         description: 'If enabled, the app will restart as soon as an update was downloaded',
         value: true,
+        selectableOptions: undefined,
         changeHandler: (e, event) => {
             defaultHandler(e, event)
-            defaultUserSettings.autoRestartOnUpdateAvailable.value = event.value
+            userSettings.autoRestartOnUpdateAvailable.value = event.value
+        }
+    },
+    minimizeAfterPaste: {
+        description: 'If enabled, the app will minimize after pasting the item.',
+        value: true,
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            defaultHandler(e, event)
+            userSettings.autoRestartOnUpdateAvailable.value = event.value
         }
     }
 }
@@ -108,10 +123,8 @@ const items = () => {
 
 const action = {
     askPassword: async () => localMainWindow.webContents.send(channelsToRender.askPassword, true),
-    hideWindow: (forced: boolean) => {
-        if (forced || AppSettings.closeOnPaste) {
-            localMainWindow.hide()
-        }
+    hideWindow: () => {
+        localMainWindow.hide()
         localMainWindow.webContents.send(channelsToRender.hide, true)
     },
     handleShortcut: () => {
@@ -159,7 +172,7 @@ const action = {
 
             state.ctrlA = false
         }
-        if (AppSettings.closeOnPaste) action.hideWindow(true)
+        if (userSettings.minimizeAfterPaste.value) action.hideWindow()
 
         if (AppSettings.isWin) robot.keyTap('v', 'control')
         if (AppSettings.isMac) robot.keyTap('v', 'command')
@@ -214,7 +227,6 @@ const action = {
         await JsUtil.waitforme(delayMs)
 
         const item = await action.getClipboardItem()
-        item ? console.log(item) : ''
         if (!item) return
         state.lastHash = item.contentHash
         items()?.add(item, state.user?.masterKey as string)
@@ -226,7 +238,7 @@ const action = {
 const ioHookChannels: IReceiveChannel[] = [
     {
         name: 'keydown',
-        handler: async (ipcEvent: IpcMainEvent, event: IKeyboardEvent) => {
+        handler: async () => {
             await action.TrySaveClipboard(50)
         }
     },
@@ -250,7 +262,7 @@ const ioHookChannels: IReceiveChannel[] = [
 const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'window_minimize',
-        handler: () => action.hideWindow(true)
+        handler: () => action.hideWindow()
     },
     /**
      * Event sent by the front-end to retreive the setting.
@@ -258,13 +270,12 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'get_settings',
         handler: () => {
-            localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(defaultUserSettings))
+            localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(userSettings))
         }
     },
     {
         name: 'save_items',
         handler: async (event: IpcMainEvent, data: object) => {
-            // console.log(data)
             await saveJSONFile(data)
         }
     },
@@ -321,9 +332,15 @@ const channelsToRender = {
     passwordIncorrect: 'passwordIncorrect',
     incrementIndex: 'incrementIndex',
     textSearched: 'textSearched',
+    /**
+     * used to set a state in the front end
+     */
     hide: 'hide',
+    /**
+     * used to set a state in the front end
+     */
     unhide: 'unhide',
-    setSettings: 'setSettings'
+    setSettings: 'to.renderer.set.settings'
 }
 
 let localClipboard: Clipboard
@@ -367,20 +384,20 @@ async function InitIOHook(ipcMain: IpcMain, clipboard: Clipboard, mainWindow: Br
     /**
      * Going over all enabled user settings (which can be turned on/off)
      */
-    for (const [key, val] of depictEntriesKeyType(defaultUserSettings)) {
+    for (const [key, val] of depictEntriesKeyType(userSettings)) {
         // getting key from the store
         const existin = store.get(getPreferenceKey(key))
         // if key not exist (is undefined) update the user setting
         if (existin !== undefined) {
             val.value = existin as typeof val.value
-            defaultUserSettings[key] = val
+            userSettings[key] = val as never
         }
         // Enabling all the event handlers by receiving the even called by the same name from the frontend
         messageFromRenderer.on(key, val.changeHandler as never)
     }
 
     // if registering shortcuts is enabled
-    if (defaultUserSettings.regiserCommandNumberShortcuts) {
+    if (userSettings.regiserCommandNumberShortcuts) {
         for (const command of shortcutList) {
             globalShortcut.register(command, () => null)
         }

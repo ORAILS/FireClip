@@ -2,11 +2,9 @@ import { IpcMainEvent } from 'electron/main'
 
 interface AppSettings {
     name: string
-    isDev: boolean
     openDevTools: boolean
     enableDevTools: boolean
     enablePaste: boolean
-    closeOnPaste: boolean
     widthWithDevTools: number
     heightWithDevTools: number
     widthNormal: number
@@ -21,19 +19,24 @@ interface AppSettings {
  */
 
 export interface IUserSettings {
-    // darkMode: IUserSetting<boolean>
+    darkMode: IUserSetting<'system' | 'on' | 'off'>
     regiserCommandNumberShortcuts: IUserSetting<boolean>
     showCommandNumberIcons: IUserSetting<boolean>
     autoRestartOnUpdateAvailable: IUserSetting<boolean>
+    minimizeAfterPaste: IUserSetting<boolean>
 }
 
 /**
- * User preference object
+ * User preference object, the property name is used as key for saving the preference
  */
 
 export interface IUserSetting<T> {
     description: string
+    /**
+     * default value for the setting
+     */
     value: T
+    selectableOptions: T[] | undefined
     changeHandler: (event: IpcMainEvent, data: any) => Promise<void> | void
 }
 
@@ -43,11 +46,9 @@ const winPlatform = ['win32']
 
 export const AppSettings: AppSettings = {
     name: 'FireClip',
-    isDev: false,
-    openDevTools: true,
-    enableDevTools: true,
-    enablePaste: false,
-    closeOnPaste: false,
+    openDevTools: false,
+    enableDevTools: false,
+    enablePaste: true,
     widthNormal: 250,
     heightNormal: 400,
     widthWithDevTools: 600,

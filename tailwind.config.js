@@ -2,7 +2,7 @@ const colors = require('tailwindcss/colors')
 
 module.exports = {
     content: ['./src/frontend/**/*'],
-    darkMode: 'media',
+    darkMode: 'class',
     theme: {
         colors: {
             rock: '#131221',
@@ -13,7 +13,8 @@ module.exports = {
             indigo: colors.indigo,
             yellow: colors.yellow,
             slate: colors.slate,
-            green: colors.green
+            green: colors.green,
+            stone: colors.stone
         },
         extend: {}
     },

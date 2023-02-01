@@ -1,16 +1,11 @@
 <script lang="ts">
     import { onMount } from 'svelte'
-    import { appSettings } from '../AppSettings'
-    import type { AppState, IClipboardItem, IHookKeyboardEvent, IHookMouseEvent, IReceiveChannel, IUserSettings } from '../types'
+    import type { IClipboardItem, IHookKeyboardEvent, IHookMouseEvent, IReceiveChannel } from '../types'
     import { isImageContent, isRTFContent, isTextContent } from '../types'
     import IconCommand from './icons/_IconCommand.svelte'
-    import { isFocused } from './stores'
-    import { state } from './stores'
+    import Login from './Login.svelte'
+    import { ipcRenderer, isFocused, state, delay } from './stores'
 
-    const delay = (delayInms: number) => {
-        return new Promise((resolve) => setTimeout(resolve, delayInms))
-    }
-    const ipcRenderer = window.require('electron').ipcRenderer
     var { sort } = window.require('fast-sort')
 
     const channelsFromRender: IReceiveChannel[] = [
@@ -196,27 +191,6 @@
 
     ioHook.start()
 
-    function togglePasswordInput() {
-        $state.passwordButtonText === 'show' ? ($state.passwordButtonText = 'hide') : ($state.passwordButtonText = 'show')
-        $state.showPassword === true ? ($state.showPassword = false) : ($state.showPassword = true)
-    }
-
-    function resetPasswordCorrect() {
-        $state.passwordIncorrect = false
-    }
-
-    const onKeyEnter = async (e: KeyboardEvent) => {
-        if (e.key == 'Enter') {
-            if ($state.password && $state.password.length > 0) {
-                ipcRenderer.send('setPassword', $state.password)
-            }
-        }
-    }
-    const onOkay = (e: Event) => {
-        if ($state.password && $state.password.length > 0) {
-            ipcRenderer.send('setPassword', $state.password)
-        }
-    }
     function getDateFormat(parsed: Date) {
         let date = new Date(parsed)
         let localString = date.toString()
@@ -253,11 +227,6 @@
         return f
     }
 
-    ipcRenderer.on('setSettings', (e, value) => {
-        console.log(e)
-        console.log(value)
-        $state.defaultUserSettings = JSON.parse(value)
-    })
     onMount(async () => {
         ipcRenderer.send('RendererInit', true)
         setTimeout(() => {
@@ -268,67 +237,13 @@
                 masterKey: ''
             })
         }, 200)
+
         ipcRenderer.send('get_settings')
     })
 </script>
 
 {#if $state.isAsked}
-    <div class="container mx-auto flex justify-center">
-        <div class="absolute inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50">
-            <div class="max-w-sm bg-white p-6">
-                <div class="">
-                    <h3 class="text-center text-2xl">
-                        {appSettings.name} is locked
-                    </h3>
-                </div>
-                <div class="mt-2">
-                    <p class="text-sm ">Use password to decrypt data</p>
-                    <div class="relative my-3 w-full">
-                        <div class="absolute inset-y-0 right-0 flex items-center px-2">
-                            <input class="js-$state.password-toggle hidden" id="toggle" type="checkbox" />
-                            <label
-                                on:click={togglePasswordInput}
-                                class="js-$state.password-label cursor-pointer bg-gray-300 px-2 py-1 font-mono text-sm text-gray-600 hover:bg-gray-400"
-                                for="toggle">{$state.passwordButtonText}</label
-                            >
-                        </div>
-                        {#if $state.showPassword}
-                            <input
-                                bind:value={$state.password}
-                                on:input={resetPasswordCorrect}
-                                on:keypress={onKeyEnter}
-                                class="border-1 js-$state.password  w-full appearance-none border-gray-300 bg-gray-100 py-3 px-3 pr-16  font-mono leading-tight text-gray-700 focus:border-gray-500  focus:bg-gray-200 focus:outline-none"
-                                id="text"
-                                type="text"
-                                autocomplete="off"
-                            />
-                        {:else}
-                            <input
-                                bind:value={$state.password}
-                                on:input={resetPasswordCorrect}
-                                on:keypress={onKeyEnter}
-                                class="border-1 js-$state.password  w-full appearance-none border-gray-300 bg-gray-100 py-3 px-3 pr-16 font-mono leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 focus:outline-none"
-                                id="$state.password"
-                                type="$state.password"
-                                autocomplete="off"
-                            />
-                        {/if}
-                    </div>
-                    {#if $state.passwordIncorrect}
-                        <button
-                            class="text-red-700 border-red-500 hover:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800 mr-2 mt-2 w-full border px-5  py-2.5 text-center text-sm font-medium hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white"
-                            on:click={onOkay}>Password incorrect!</button
-                        >
-                    {:else}
-                        <button
-                            class="mr-2 mt-2 w-full border border-gray-400 px-5 py-2.5 text-center text-sm font-medium  text-gray-700 hover:bg-gray-400 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:bg-gray-600 dark:hover:text-white dark:focus:ring-gray-800"
-                            on:click={onOkay}>Unlock</button
-                        >
-                    {/if}
-                </div>
-            </div>
-        </div>
-    </div>
+    <Login />
 {/if}
 
 <div class="flex flex-col">
@@ -336,9 +251,9 @@
         {#each $state.clipboardListFiltered as [key, item]}
             <div
                 title={getTitle(item)}
-                class="clipboard-item border-slate-800 bg-gray-100 even:bg-white dark:bg-rock dark:text-gray-100 dark:even:border-y even:dark:bg-slate-900"
-                class:selected={$state.itemIdSelected === item.contentHash}
-                class:even:bg-white={$state.itemIdSelected !== item.contentHash}
+                class="clipboard-item border-slate-800 {$state.itemIdSelected === item.contentHash
+                    ? 'bg-gray-300 even:bg-gray-300 dark:bg-slate-700 even:dark:bg-slate-700'
+                    : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-700'} dark:text-gray-100 dark:even:border-y"
                 id={item.contentHash}
                 on:click|preventDefault={() => handleClick(item)}
             >
@@ -369,11 +284,6 @@
 </div>
 
 <style lang="postcss">
-    .selected,
-    .clipboard-item:hover {
-        @apply bg-gray-300 dark:bg-slate-800;
-    }
-
     .clipboard-item {
         @apply mx-0 my-auto cursor-pointer overflow-hidden text-clip whitespace-nowrap py-2 pl-2 text-left;
         /* border-bottom: 0.3px solid lightgray; */

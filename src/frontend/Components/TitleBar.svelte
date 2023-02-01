@@ -21,7 +21,7 @@
 </script>
 
 <header
-    class="h-8 w-full border-b border-gray-300 bg-white p-1 font-bold text-gray-700 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-300 "
+    class="opacity h-8 w-full border-b border-gray-300 bg-white p-1 font-bold text-gray-700 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-300 "
 >
     <div class="drag-region" data-testid="drag-region">
         <div class="title" data-testid="title">

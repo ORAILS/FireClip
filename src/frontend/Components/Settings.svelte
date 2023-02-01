@@ -1,5 +1,4 @@
 <script lang="ts">
-    import stringify from 'json-stable-stringify'
     import { onDestroy, onMount } from 'svelte'
     import type { IUserSettings } from '../types'
     import { appName, state } from './stores'
@@ -15,11 +14,10 @@
     }
     onMount(() => {
         initialName = $appName
-
         appName.set('< Settings')
         ipcRenderer.send('get_settings')
     })
-    ipcRenderer.on('setSettings', (e, value) => {
+    ipcRenderer.on('to.renderer.set.settings', (e, value) => {
         console.log(e)
         console.log(value)
         defaultUserSettings = JSON.parse(value)
@@ -56,28 +54,50 @@
 <div class="settings flex flex-col justify-items-start">
     {#if defaultUserSettings}
         {#each Object.entries(defaultUserSettings) as [key, item]}
-            <div class="px-2 py-2 pl-3" title={item.description}>
+            <div
+                class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
+            dark:text-gray-200 
+            even:dark:border-gray-800 
+            even:dark:bg-slate-900"
+                title={item.description}
+            >
                 <Switch
                     label={camelToSentence(key)}
                     fontSize={12}
                     defaultState={item.value}
+                    selectOptions={item.selectableOptions}
                     on:change={(e) => {
                         sendChange(key, { key, value: e.detail })
                     }}
                 />
             </div>
         {/each}
-        <div class="py-2 pl-3">
+        <div
+            class="bg-gray-100 py-2 px-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
+        dark:text-gray-200 
+        even:dark:border-gray-800 
+        even:dark:bg-slate-900"
+        >
             <p>
                 Total items: {$state.clipboardListFiltered.length}
             </p>
         </div>
-        <div class="py-2 pl-3">
+        <div
+            class=" bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
+        dark:text-gray-200 
+        even:dark:border-gray-800 
+        even:dark:bg-slate-900"
+        >
             <p>
                 Size: {sizeOf($state.clipboardListFiltered) / 1024} kB
             </p>
         </div>
-        <div class="py-2 pl-3">
+        <div
+            class=" bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
+        dark:text-gray-200 
+        even:dark:border-gray-800 
+        even:dark:bg-slate-900"
+        >
             <p>
                 <button
                     on:click={() => {
@@ -90,10 +110,4 @@
 </div>
 
 <style lang="postcss">
-    div {
-        @apply bg-slate-900 text-gray-900 dark:text-gray-200;
-    }
-    div:nth-child(even) {
-        @apply border-y border-gray-800 bg-gray-900;
-    }
 </style>

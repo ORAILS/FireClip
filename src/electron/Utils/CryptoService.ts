@@ -22,7 +22,6 @@ const EncryptItem = (item: IClipboardItem, password: string): IClipboardItemEncr
         ...item,
         encryptedContent: encrypted
     }
-    console.log(result)
     return result
 }
 
@@ -32,7 +31,6 @@ const DecryptItem = (item: IClipboardItemEncrypted, password: string): IClipboar
         ...item,
         content: decrypted
     }
-    console.log(result)
     return result
 }
 
@@ -54,7 +52,6 @@ const HashUserLocal = (user: ILocalUser): ILocalUser => {
         password: '',
         masterKey
     }
-    console.log(hashed)
     return hashed
 }
 

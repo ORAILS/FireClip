@@ -3,7 +3,7 @@ import { autoUpdater } from 'electron-updater'
 import path from 'path'
 import { AppSettings } from './App/AppSettings'
 import CustomWindow from './App/CustomWindow'
-import { defaultUserSettings, ioHookHandler } from './App/Handlers/IohookHandler'
+import { ioHookHandler, userSettings } from './App/Handlers/EventHandler'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('electron-reload')(__dirname)
 
@@ -80,7 +80,7 @@ autoUpdater.on('download-progress', (progressObj) => {
  */
 autoUpdater.on('update-downloaded', (info) => {
     mainWindow.window.webContents.send('log', 'Update downloaded, restarting in 5 sec')
-    if (defaultUserSettings.autoRestartOnUpdateAvailable) {
+    if (userSettings.autoRestartOnUpdateAvailable) {
         setTimeout(() => autoUpdater.quitAndInstall(), 5000)
     }
 })
