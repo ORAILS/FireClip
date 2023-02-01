@@ -261,7 +261,7 @@
         {#each $state.clipboardListFiltered as [key, item]}
             <div
                 title={getTitle(item)}
-                class="clipboard-item border-slate-800 {$state.itemIdSelected === item.contentHash ? "bg-gray-300 dark:bg-slate-500 even:bg-gray-300 even:dark:bg-slate-500": " bg-gray-100 even:bg-white even:dark:bg-slate-900 dark:bg-rock"} dark:text-gray-100 dark:even:border-y"
+                class="clipboard-item border-slate-800 {$state.itemIdSelected === item.contentHash ? "bg-gray-300 dark:bg-slate-500 even:bg-gray-300 even:dark:bg-slate-500": "bg-gray-100 even:bg-white even:dark:bg-slate-900 dark:bg-rock hover:bg-gray-300 dark:hover:bg-slate-500"} dark:text-gray-100 dark:even:border-y"
                 id={item.contentHash}
                 on:click|preventDefault={() => handleClick(item)}
             >
