@@ -16,7 +16,7 @@
     }
     html,
     body {
-        @apply flex relative w-full h-full m-0 box-border text-gray-900;
+        @apply flex relative w-full h-full m-0 box-border text-gray-900 dark:bg-rock;
     }
     body {
         @apply overflow-y-hidden;
@@ -29,7 +29,12 @@
     h2 {
         @apply text-xl;
     }
-}
+
+    .nosbar::-webkit-scrollbar {
+        display: none;
+        width: 0px
+    }
+    }
 
 @layer components {
 }

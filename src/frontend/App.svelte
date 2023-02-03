@@ -1,14 +1,14 @@
 <script lang="ts">
-    import AppStructure from './Components/AppStructure.svelte'
+    import PageHandler from './Components/PageHandler.svelte'
     import Clips from './Components/Clips.svelte'
     import Notifications from './Components/Notifications.svelte'
     import Settings from './Components/Settings.svelte'
     import { appName } from './Components/stores'
     import './css/tailwind.pcss'
 
+    import EventHandler from './Components/EventHandler.svelte'
     import { page } from './Components/stores'
     import { IPages } from './types'
-    import EventHandler from './Components/EventHandler.svelte'
 </script>
 
 <svelte:head>
@@ -16,7 +16,7 @@
 </svelte:head>
 
 <EventHandler />
-<AppStructure title={$appName}>
+<PageHandler title={$appName}>
     <section class="h-full space-y-6 bg-white dark:bg-slate-900">
         {#if $page === IPages.items}
             <Clips />
@@ -26,7 +26,7 @@
             <Notifications />
         {/if}
     </section>
-</AppStructure>
+</PageHandler>
 
 <style lang="postcss">
 </style>

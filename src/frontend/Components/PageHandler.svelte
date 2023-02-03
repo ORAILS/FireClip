@@ -51,7 +51,7 @@
         on:clickMaximize={maximize}
         on:clickClose={close}
     />
-    <div class="page">
+    <div class="nosbar page">
         <slot />
     </div>
     <SearchBar />
@@ -67,7 +67,7 @@
     }
 
     .page::-webkit-scrollbar {
-        @apply w-[5px];
+        @apply w-[0px];
     }
 
     .page::-webkit-scrollbar-track {

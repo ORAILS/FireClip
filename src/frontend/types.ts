@@ -8,6 +8,10 @@ export interface AppState {
     password: string
     index: number
     clipboardList: [string, IClipboardItem][]
+    /**
+     * we need one to handle user searches
+     * The one above is the main one, the one below is displayed.
+     */
     clipboardListFiltered: [string, IClipboardItem][]
     showPassword: boolean
     passwordButtonText: string
@@ -41,7 +45,7 @@ export interface IUserSetting<T> {
     changeHandler: (newValue: T) => void | null
 }
 
-export interface ItemBase {
+export interface IClipboardItem {
     /**
      * 0 - image
      * 1 - rtf
@@ -53,6 +57,8 @@ export interface ItemBase {
     created: Date
     lastModified: Date
     contentHash: string
+    isVisible: boolean
+    content: string
 }
 
 /**
@@ -64,17 +70,13 @@ export enum IPages {
     notifications
 }
 
-export interface IClipboardItem extends ItemBase {
-    content: string
-}
-
-export function isTextContent(obj: ItemBase) {
+export function isTextContent(obj: IClipboardItem) {
     return obj.type === 2
 }
-export function isRTFContent(obj: ItemBase) {
+export function isRTFContent(obj: IClipboardItem) {
     return obj.type === 1
 }
-export function isImageContent(obj: ItemBase) {
+export function isImageContent(obj: IClipboardItem) {
     return obj.type === 0
 }
 

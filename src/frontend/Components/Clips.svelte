@@ -2,18 +2,36 @@
     import { onMount } from 'svelte'
     import type { IClipboardItem, IHookKeyboardEvent, IHookMouseEvent, IReceiveChannel } from '../types'
     import { isImageContent, isRTFContent, isTextContent } from '../types'
+    import viewport from '../viewPortAction'
     import IconCommand from './icons/_IconCommand.svelte'
     import Login from './Login.svelte'
-    import { ipcRenderer, isFocused, state, delay } from './stores'
+    import { delay, ipcRenderer, isFocused, state } from './stores'
 
     var { sort } = window.require('fast-sort')
 
     const channelsFromRender: IReceiveChannel[] = [
         {
             name: 'loadItems',
-            handler: function (event, store) {
-                $state.clipboardListFiltered = sort([...store]).desc((i) => i[1].lastModified)
+            handler: function (event, store: any[]) {
+                const storeSorted = sort([...store]).desc((i) => i[1].lastModified)
+
+                for (const item of storeSorted) {
+                    const exists = $state.clipboardListFiltered.find((i) => i[0] === item[0])
+                    console.log(item)
+                    console.log(exists)
+                    if (!exists) {
+                        $state.clipboardListFiltered.push(item)
+                    } else {
+                        exists[1].lastModified = item[1].lastModified
+                    }
+                }
+
+                $state.clipboardListFiltered = sort([...$state.clipboardListFiltered]).desc((i) => i[1].lastModified)
                 $state.clipboardList = $state.clipboardListFiltered
+                if ($state.clipboardListFiltered && $state.clipboardListFiltered[0]) {
+                    $state.clipboardListFiltered[0][1].isVisible = true
+                    visibleHashes.push($state.clipboardListFiltered[0][0])
+                }
             }
         },
         {
@@ -239,44 +257,91 @@
         }, 200)
 
         ipcRenderer.send('get_settings')
+
+        // setInterval(()=> {
+        //     console.log($state.clipboardListFiltered)
+        // }, 3000)
     })
+
+    let visibleHashes: string[] = []
+
+    const handleEnter = (hash: string, content: string) => {
+        visibleHashes.push(hash)
+        visibleHashes = visibleHashes
+        console.log(visibleHashes)
+        console.log(content.substring(0, 15) + ': entered ')
+        const currentIndex = $state.clipboardListFiltered.findIndex((i) => i[0] === hash)
+        const next = $state.clipboardListFiltered[currentIndex + 1]
+        if (next) {
+            next[1].isVisible = true
+        }
+        // console.log('entered')
+        // console.log($state.clipboardListFiltered)
+    }
+    const handleExit = (hash: string, content: string) => {
+        console.time('exit filter start')
+        const newArr = visibleHashes.filter((i) => i != hash)
+        console.timeEnd('exit filter start')
+        if (newArr.length < 2) {
+            console.log('not removed last')
+            return
+        }
+        visibleHashes = newArr
+        console.log(`new length ${visibleHashes.length}`)
+        console.log(content.substring(0, 15) + ': exit ')
+    }
+    const getPreviousHash = (hash: string, value: number) => {
+        console.time('find index start')
+        const currentIndex = $state.clipboardListFiltered.findIndex((i) => i[0] === hash)
+        console.timeEnd('find index start')
+        if ($state.clipboardListFiltered[currentIndex + value]) {
+            return $state.clipboardListFiltered[currentIndex + value][0]
+        }
+        return ''
+    }
 </script>
 
 {#if $state.isAsked}
     <Login />
 {/if}
 
-<div class="flex flex-col">
+<div class="nosbar flex flex-col">
     {#if $state.clipboardListFiltered}
         {#each $state.clipboardListFiltered as [key, item]}
-            <div
-                title={getTitle(item)}
-                class="clipboard-item border-slate-800 {$state.itemIdSelected === item.contentHash
-                    ? 'bg-gray-300 even:bg-gray-300 dark:bg-slate-700 even:dark:bg-slate-700'
-                    : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-700'} dark:text-gray-100 dark:even:border-y"
-                id={item.contentHash}
-                on:click|preventDefault={() => handleClick(item)}
-            >
-                <div class="flex">
-                    {#if $state.defaultUserSettings.showCommandNumberIcons.value}
-                        {#if $state.clipboardListFiltered.indexOf($state.clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1 < 10}
-                            <IconCommand
-                                number={$state.clipboardListFiltered.indexOf($state.clipboardListFiltered.filter((i) => i[0] === key)[0]) +
-                                    1}
-                            />
-                        {:else if $state.clipboardListFiltered.indexOf($state.clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1 === 10}
-                            <IconCommand number={0} />
+            {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1))}
+                <div
+                    use:viewport
+                    on:enterViewport={() => handleEnter(key, item.content)}
+                    on:exitViewport={() => handleExit(key, item.content)}
+                    title={getTitle(item)}
+                    class="clipboard-item border-slate-800 {$state.itemIdSelected === item.contentHash
+                        ? 'bg-gray-300 even:bg-gray-300 dark:bg-slate-700 even:dark:bg-slate-700'
+                        : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-700'} dark:text-gray-100 dark:even:border-y"
+                    id={item.contentHash}
+                    on:click|preventDefault={() => handleClick(item)}
+                >
+                    <div class="flex">
+                        {#if $state.defaultUserSettings.showCommandNumberIcons.value}
+                            {#if $state.clipboardListFiltered.indexOf($state.clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1 < 10}
+                                <IconCommand
+                                    number={$state.clipboardListFiltered.indexOf(
+                                        $state.clipboardListFiltered.filter((i) => i[0] === key)[0]
+                                    ) + 1}
+                                />
+                            {:else if $state.clipboardListFiltered.indexOf($state.clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1 === 10}
+                                <IconCommand number={0} />
+                            {/if}
                         {/if}
-                    {/if}
-                    {#if isTextContent(item)}
-                        <p>{item.content}</p>
-                    {:else if isRTFContent(item)}
-                        <p>{item.content}</p>
-                    {:else if isImageContent(item)}
-                        <img src={item.content} alt="Base64png" />
-                    {/if}
+                        {#if isTextContent(item)}
+                            <p>{item.content}</p>
+                        {:else if isRTFContent(item)}
+                            <p>{item.content}</p>
+                        {:else if isImageContent(item)}
+                            <img src={item.content} alt="Base64png" />
+                        {/if}
+                    </div>
                 </div>
-            </div>
+            {/if}
         {/each}
     {:else}
         <p class="mt-3 text-gray-600">No items!</p>
