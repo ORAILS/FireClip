@@ -51,8 +51,8 @@ export const AppSettings: AppSettings = {
     enablePaste: true,
     widthNormal: 250,
     heightNormal: 400,
-    widthWithDevTools: 600,
-    heightWithDevTools: 400,
+    widthWithDevTools: 900,
+    heightWithDevTools: 800,
     isLinux: contains(linuxPlatform, process.platform),
     isMac: contains(macPlatform, process.platform),
     isWin: contains(winPlatform, process.platform)
