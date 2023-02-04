@@ -1,13 +1,10 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte'
-    import type { IUserSettings } from '../types'
-    import { appName, state } from './stores'
+    import { appName, state } from '../stores'
     import Switch from './Switch.svelte'
 
     const ipcRenderer = window.require('electron').ipcRenderer
     let initialName: string
-
-    let defaultUserSettings: IUserSettings
 
     const sendChange = (key: string, newValue: never | any) => {
         ipcRenderer.send(key, newValue)
@@ -17,11 +14,7 @@
         appName.set('< Settings')
         ipcRenderer.send('get_settings')
     })
-    ipcRenderer.on('to.renderer.set.settings', (e, value) => {
-        console.log(e)
-        console.log(value)
-        defaultUserSettings = JSON.parse(value)
-    })
+
     onDestroy(() => {
         appName.set(initialName)
     })
@@ -52,8 +45,8 @@
 </script>
 
 <div class="settings flex flex-col justify-items-start">
-    {#if defaultUserSettings}
-        {#each Object.entries(defaultUserSettings) as [key, item]}
+    {#if $state.defaultUserSettings}
+        {#each Object.entries($state.defaultUserSettings) as [key, item]}
             <div
                 class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
             dark:text-gray-200 

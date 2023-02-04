@@ -330,7 +330,9 @@ const channelsToRender = {
     askPassword: 'askPassword',
     passwordConfirmed: 'passwordConfirmed',
     passwordIncorrect: 'passwordIncorrect',
-    incrementIndex: 'incrementIndex',
+    /**
+     * Used when new items are added to reset the search.
+     */
     textSearched: 'textSearched',
     /**
      * used to set a state in the front end

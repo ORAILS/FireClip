@@ -1,6 +1,6 @@
 <script lang="ts">
     import { appSettings } from '../AppSettings'
-    import { ipcRenderer, state } from './stores'
+    import { ipcRenderer, state } from '../stores'
 
     function togglePasswordInput() {
         $state.passwordButtonText === 'show' ? ($state.passwordButtonText = 'hide') : ($state.passwordButtonText = 'show')

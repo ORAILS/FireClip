@@ -1,4 +1,5 @@
 import type { IpcMainEvent } from 'electron'
+import type { Writable } from 'svelte/store'
 
 export interface AppState {
     previous: IHookKeyboardEvent | undefined
@@ -17,6 +18,7 @@ export interface AppState {
     passwordButtonText: string
     hidden: boolean
     defaultUserSettings: IUserSettings | undefined
+    searchedText: Writable<string>
 }
 
 export interface IReceiveChannel {

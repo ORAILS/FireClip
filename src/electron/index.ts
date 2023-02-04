@@ -33,10 +33,20 @@ app.on('ready', async () => {
             }
         },
         {
+            label: 'Settings',
+            toolTip: 'Open Settings',
+            click: () => {
+                appIcon
+                mainWindow.window.show()
+                mainWindow.window.webContents.send('to.renderer.open.window', 'settings')
+            }
+        },
+        {
             label: 'Quit',
             toolTip: 'Close the application',
             click: () => {
                 appIcon
+                // if we don't want to close
                 // mainWindow.window.close();
                 app.quit()
             }

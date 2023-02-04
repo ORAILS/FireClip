@@ -11,8 +11,6 @@
 
     onMount(() => {
         state = defaultState
-        console.log(defaultState)
-        console.log(selectOptions)
     })
 
     function handleClick(event) {

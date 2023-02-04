@@ -1,12 +1,10 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte'
-    const ipcRenderer = window.require('electron').ipcRenderer
-    import { isFocused } from './stores'
+    import { ipcRenderer, isFocused } from '../stores'
     let element: HTMLElement
     let text: string = ''
 
     isFocused.subscribe((v) => {
-        console.log(v)
         if (element) {
             element.focus()
         }

@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store'
-import { appSettings } from '../AppSettings'
-import { AppState, IPages } from '../types'
+import { appSettings } from './AppSettings'
+import { AppState, IPages } from './types'
 
 const defaultPage: IPages = IPages.items
 export const ipcRenderer = window.require('electron').ipcRenderer
@@ -17,7 +17,7 @@ export const page = writable<IPages>(defaultPage)
  */
 export const appName = writable(appSettings.name)
 
-const appState: AppState = {
+export const appState: AppState = {
     previous: undefined,
     isAsked: false,
     passwordIncorrect: false,
@@ -29,7 +29,8 @@ const appState: AppState = {
     showPassword: false,
     passwordButtonText: 'show',
     defaultUserSettings: undefined,
-    hidden: true
+    hidden: true,
+    searchedText: writable('')
 }
 
 export const delay = (delayInms: number) => {

@@ -1,10 +1,10 @@
 <script lang="ts">
+    import { ipcRenderer, state } from '../stores'
     import SearchBar from './SearchBar.svelte'
-    import { ipcRenderer, state } from './stores'
     import TitleBar from './TitleBar.svelte'
     export let title: string = 'Title'
 
-    let appClasses = ''
+    let appClasses = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : ''
 
     let outerW = globalThis.outerWidth - 8
     let isMaximized = outerW >= globalThis.screen.availWidth
@@ -23,7 +23,6 @@
         } else {
             appClasses = ''
         }
-        console.log(appClasses)
     })
 
     function minimize() {

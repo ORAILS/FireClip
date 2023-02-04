@@ -6,11 +6,10 @@
     export let title: string = 'Title'
     export const isMaximized: boolean = false
 
-    import { page } from '../Components/stores'
+    import { page } from '../stores'
     import { IPages } from '../types'
 
-    const handleSettings = () => {
-        console.log($page)
+    const handleTitleClick = () => {
         if ($page === IPages.items) {
             page.set(IPages.settings)
         } else {
@@ -25,7 +24,7 @@
 >
     <div class="drag-region" data-testid="drag-region">
         <div class="title" data-testid="title">
-            <p on:click={handleSettings} class="cursor-pointer">{title}</p>
+            <p on:click={handleTitleClick} class="cursor-pointer">{title}</p>
         </div>
         <div class="window-controls">
             <div class="ml-1 flex" data-testid="IconMinimize" on:click={(e) => dispatch('clickMinimize', true)}>

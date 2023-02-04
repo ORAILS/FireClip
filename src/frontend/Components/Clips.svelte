@@ -1,11 +1,11 @@
 <script lang="ts">
     import { onMount } from 'svelte'
+    import { delay, ipcRenderer, isFocused, state } from '../stores'
     import type { IClipboardItem, IHookKeyboardEvent, IHookMouseEvent, IReceiveChannel } from '../types'
     import { isImageContent, isRTFContent, isTextContent } from '../types'
     import viewport from '../viewPortAction'
     import IconCommand from './icons/_IconCommand.svelte'
     import Login from './Login.svelte'
-    import { delay, ipcRenderer, isFocused, state } from './stores'
 
     var { sort } = window.require('fast-sort')
 
@@ -17,8 +17,6 @@
 
                 for (const item of storeSorted) {
                     const exists = $state.clipboardListFiltered.find((i) => i[0] === item[0])
-                    console.log(item)
-                    console.log(exists)
                     if (!exists) {
                         $state.clipboardListFiltered.push(item)
                     } else {
@@ -155,10 +153,7 @@
     }
 
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
-        console.log(e)
-        // is scrolling throught list
         if (isWinShortcutStart(e) || isMacShortcutStart(e)) {
-            console.log('back')
             if (
                 $state.clipboardListFiltered &&
                 $state.index + 1 < $state.clipboardListFiltered.length &&
@@ -169,11 +164,9 @@
                 scrollIntoView($state.itemIdSelected)
             }
         }
-        console.log('previous is keydown')
         $state.previous = e
 
         if (!$state.hidden && isSearchShortcut(e)) {
-            console.log('search')
             ipcRenderer.send('focus', true)
             await delay(100)
             isFocused.set($isFocused + 1)
@@ -186,7 +179,6 @@
             $state.previous &&
             ((isWinShortcutStart($state.previous) && isWinShortcutEnd(e)) || (isMacShortcutStart($state.previous) && isMacShortcutEnd(e)))
         ) {
-            console.log('paste')
             ipcRenderer.send('paste', $state.itemIdSelected)
             $state.index = -1
             $state.itemIdSelected = ''
@@ -197,13 +189,11 @@
             if (index === -1) index = 9
 
             if ($state.clipboardListFiltered[index]) {
-                console.log(index)
                 ipcRenderer.send('paste', $state.clipboardListFiltered[index][1].contentHash)
                 $state.index = -1
                 $state.itemIdSelected = ''
             }
         }
-        console.log('previous is keyup')
         $state.previous = e
     })
 
@@ -226,7 +216,6 @@
     }
 
     function handleClick(item: IClipboardItem) {
-        console.log('paste')
         ipcRenderer.send('paste', item.contentHash)
         $state.index = -1
         $state.itemIdSelected = ''
@@ -257,10 +246,6 @@
         }, 200)
 
         ipcRenderer.send('get_settings')
-
-        // setInterval(()=> {
-        //     console.log($state.clipboardListFiltered)
-        // }, 3000)
     })
 
     let visibleHashes: string[] = []
@@ -268,32 +253,23 @@
     const handleEnter = (hash: string, content: string) => {
         visibleHashes.push(hash)
         visibleHashes = visibleHashes
-        console.log(visibleHashes)
-        console.log(content.substring(0, 15) + ': entered ')
+
         const currentIndex = $state.clipboardListFiltered.findIndex((i) => i[0] === hash)
         const next = $state.clipboardListFiltered[currentIndex + 1]
         if (next) {
             next[1].isVisible = true
         }
-        // console.log('entered')
-        // console.log($state.clipboardListFiltered)
     }
     const handleExit = (hash: string, content: string) => {
-        console.time('exit filter start')
         const newArr = visibleHashes.filter((i) => i != hash)
-        console.timeEnd('exit filter start')
         if (newArr.length < 2) {
-            console.log('not removed last')
             return
         }
         visibleHashes = newArr
-        console.log(`new length ${visibleHashes.length}`)
-        console.log(content.substring(0, 15) + ': exit ')
     }
     const getPreviousHash = (hash: string, value: number) => {
-        console.time('find index start')
         const currentIndex = $state.clipboardListFiltered.findIndex((i) => i[0] === hash)
-        console.timeEnd('find index start')
+
         if ($state.clipboardListFiltered[currentIndex + value]) {
             return $state.clipboardListFiltered[currentIndex + value][0]
         }
