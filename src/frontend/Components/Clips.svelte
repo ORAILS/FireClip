@@ -285,7 +285,7 @@
     {#if $state.clipboardListFiltered}
         {#each $state.clipboardListFiltered as [key, item]}
             {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1))}
-                <div
+                <item
                     use:viewport
                     on:enterViewport={() => handleEnter(key, item.content)}
                     on:exitViewport={() => handleExit(key, item.content)}
@@ -316,7 +316,7 @@
                             <img src={item.content} alt="Base64png" />
                         {/if}
                     </div>
-                </div>
+                </item>
             {/if}
         {/each}
     {:else}
