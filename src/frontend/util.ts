@@ -31,7 +31,10 @@ export const arrayToArrayMap = <K>(fn: (i: K) => boolean, array: K[]) => {
     return f
 }
 
-export const filterItem = (text: string, i: [string, IClipboardItem], caseSensitive = false) => {
+/**
+ * Return true if an item fulfils the condition inside
+ */
+export const itemMatchesText = (text: string, i: [string, IClipboardItem], caseSensitive = false): boolean => {
     let itemContent = i[1].content
     if (!caseSensitive) {
         itemContent = itemContent.toLowerCase()

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Login from './Components/Login.svelte';
+    import Login from './Components/Login.svelte'
     import Clips from './Components/Clips.svelte'
     import Notifications from './Components/Notifications.svelte'
     import PageHandler from './Components/PageHandler.svelte'

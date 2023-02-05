@@ -54,28 +54,22 @@
 
 <style lang="postcss">
     .slider {
-        @apply flex items-center justify-between;
+        @apply flex items-center justify-between mr-3;
     }
 
     .slider button {
-        width: 3em;
-        min-width: 3em;
-        max-width: 3em;
-        height: 1.6em;
         position: relative;
-        margin: 0 0 0 0.5em;
         border: none;
         border-radius: 1.5em;
-        @apply shadow duration-500 dark:bg-gray-800;
+        @apply shadow h-5 w-9 m-0 duration-500 dark:bg-gray-800;
     }
 
     .slider button::before {
         content: '';
         position: absolute;
-        top: 0.15em;
         right: 1.5em;
         transition: transform 0.3s;
-        @apply h-4 w-4 bg-gray-300 dark:bg-slate-900;
+        @apply h-4 w-4 top-[0.125rem] bg-gray-300 dark:bg-slate-900;
     }
 
     .slider button[aria-checked='true'] {

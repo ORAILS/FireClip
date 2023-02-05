@@ -17,7 +17,7 @@
                 email: 'email',
                 password: userPassword
             })
-        }, 200)
+        }, 400)
     })
 
     export const validatePassword = (pass: string, isRegisterPass = false): boolean => {

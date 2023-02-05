@@ -18,7 +18,6 @@
     import {
         arrayToArrayMap,
         delay,
-        filterItem,
         ioHook,
         ipcRenderer,
         isMacShortcutEnd,
@@ -27,6 +26,7 @@
         isSearchShortcut,
         isWinShortcutEnd,
         isWinShortcutStart,
+        itemMatchesText,
         sort
     } from '../util'
 
@@ -36,7 +36,7 @@
             return
         }
 
-        $clipListFiltered = arrayToArrayMap<[string, IClipboardItem]>((i) => filterItem(text, i), $clipList)
+        $clipListFiltered = arrayToArrayMap<[string, IClipboardItem]>((i) => itemMatchesText(text, i), $clipList)
     })
 
     const channelFromBackend: IReceiveChannel[] = [

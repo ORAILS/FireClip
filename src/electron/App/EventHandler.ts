@@ -29,9 +29,10 @@ const getPreferenceKey = (key: string) => `${AppSettings.name}.preferences.${key
 /**
  * Default handler for the preference changes event
  */
-const defaultHandler = (e: IpcMainEvent, event: any) => {
+const defaultHandler = async (e: IpcMainEvent, event: any) => {
     store.set(`${getPreferenceKey(event.key)}`, event.value)
     // so that the front end can also react to this change
+    await JsUtil.waitforme(50)
     action.sendSettings()
 }
 
@@ -93,7 +94,7 @@ export const userSettings: IUserSettings = {
         }
     },
     autoRestartOnUpdateAvailable: {
-        description: 'If enabled, the app will restart as soon as an update was downloaded',
+        description: 'If enabled, the app will restart as soon as an update was downloaded, if off, will update on restart.',
         value: true,
         selectableOptions: undefined,
         changeHandler: (e, event) => {
