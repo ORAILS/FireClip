@@ -1,8 +1,20 @@
 <script lang="ts">
     import { onMount } from 'svelte'
-    import { delay, ipcRenderer, isFocused, state } from '../stores'
+    import {
+        clipboardList,
+        clipboardListFiltered,
+        defaultUserSettings,
+        hidden,
+        index,
+        isAsked,
+        isFocused,
+        itemIdSelected,
+        passwordIncorrect,
+        previous
+    } from '../stores'
     import type { IClipboardItem, IHookKeyboardEvent, IHookMouseEvent, IReceiveChannel } from '../types'
     import { isImageContent, isRTFContent, isTextContent } from '../types'
+    import { delay, ipcRenderer } from '../util'
     import viewport from '../viewPortAction'
     import IconCommand from './icons/_IconCommand.svelte'
     import Login from './Login.svelte'
@@ -16,32 +28,32 @@
                 const storeSorted = sort([...store]).desc((i) => i[1].lastModified)
 
                 for (const item of storeSorted) {
-                    const exists = $state.clipboardListFiltered.find((i) => i[0] === item[0])
+                    const exists = $clipboardListFiltered.find((i) => i[0] === item[0])
                     if (!exists) {
-                        $state.clipboardListFiltered.push(item)
+                        $clipboardListFiltered.push(item)
                     } else {
                         exists[1].lastModified = item[1].lastModified
                     }
                 }
 
-                $state.clipboardListFiltered = sort([...$state.clipboardListFiltered]).desc((i) => i[1].lastModified)
-                $state.clipboardList = $state.clipboardListFiltered
-                if ($state.clipboardListFiltered && $state.clipboardListFiltered[0]) {
-                    $state.clipboardListFiltered[0][1].isVisible = true
-                    visibleHashes.push($state.clipboardListFiltered[0][0])
+                $clipboardListFiltered = sort([...$clipboardListFiltered]).desc((i) => i[1].lastModified)
+                $clipboardList = $clipboardListFiltered
+                if ($clipboardListFiltered && $clipboardListFiltered[0]) {
+                    $clipboardListFiltered[0][1].isVisible = true
+                    visibleHashes.push($clipboardListFiltered[0][0])
                 }
             }
         },
         {
             name: 'askPassword',
             handler: function (event, store) {
-                $state.isAsked = true
+                $isAsked = true
             }
         },
         {
             name: 'hide',
             handler: function (event, store) {
-                $state.hidden = true
+                $hidden = true
                 console.log(store)
             }
         },
@@ -54,7 +66,7 @@
         {
             name: 'unhide',
             handler: function (event, store) {
-                $state.hidden = false
+                $hidden = false
                 console.log(store)
             }
         },
@@ -68,9 +80,9 @@
         {
             name: 'passwordIncorrect',
             handler: function (event, store) {
-                $state.passwordIncorrect = true
+                $passwordIncorrect = true
                 setTimeout(() => {
-                    $state.passwordIncorrect = false
+                    $passwordIncorrect = false
                 }, 3000)
             }
         },
@@ -78,7 +90,7 @@
         {
             name: 'passwordConfirmed',
             handler: function (event, store) {
-                $state.isAsked = false
+                $isAsked = false
             }
         },
 
@@ -86,7 +98,7 @@
             name: 'textSearched',
             handler: function (event, text: string) {
                 if (text.length == 0) {
-                    $state.clipboardListFiltered = $state.clipboardList
+                    $clipboardListFiltered = $clipboardList
                     return
                 }
 
@@ -106,7 +118,7 @@
                     return result
                 }
 
-                $state.clipboardListFiltered = fil<null, [string, IClipboardItem]>((i) => filterItem(text, i), $state.clipboardList)
+                $clipboardListFiltered = fil<null, [string, IClipboardItem]>((i) => filterItem(text, i), $clipboardList)
             }
         }
     ]
@@ -154,19 +166,15 @@
 
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
         if (isWinShortcutStart(e) || isMacShortcutStart(e)) {
-            if (
-                $state.clipboardListFiltered &&
-                $state.index + 1 < $state.clipboardListFiltered.length &&
-                $state.clipboardListFiltered[$state.index + 1][0]
-            ) {
-                $state.index++
-                $state.itemIdSelected = $state.clipboardListFiltered[$state.index][0]
-                scrollIntoView($state.itemIdSelected)
+            if ($clipboardListFiltered && $index + 1 < $clipboardListFiltered.length && $clipboardListFiltered[$index + 1][0]) {
+                $index++
+                $itemIdSelected = $clipboardListFiltered[$index][0]
+                scrollIntoView($itemIdSelected)
             }
         }
-        $state.previous = e
+        $previous = e
 
-        if (!$state.hidden && isSearchShortcut(e)) {
+        if (!$hidden && isSearchShortcut(e)) {
             ipcRenderer.send('focus', true)
             await delay(100)
             isFocused.set($isFocused + 1)
@@ -176,25 +184,25 @@
     ioHook.on('keyup', (e: IHookKeyboardEvent) => {
         // scrolled items, wants and released ctrl
         if (
-            $state.previous &&
-            ((isWinShortcutStart($state.previous) && isWinShortcutEnd(e)) || (isMacShortcutStart($state.previous) && isMacShortcutEnd(e)))
+            $previous &&
+            ((isWinShortcutStart($previous) && isWinShortcutEnd(e)) || (isMacShortcutStart($previous) && isMacShortcutEnd(e)))
         ) {
-            ipcRenderer.send('paste', $state.itemIdSelected)
-            $state.index = -1
-            $state.itemIdSelected = ''
+            ipcRenderer.send('paste', $itemIdSelected)
+            $index = -1
+            $itemIdSelected = ''
         }
         if (isNumberPasted(e)) {
-            let index = getPastedNumber(e)
-            index = index - 1
-            if (index === -1) index = 9
+            let pastedIndex = getPastedNumber(e)
+            pastedIndex = pastedIndex - 1
+            if (pastedIndex === -1) pastedIndex = 9
 
-            if ($state.clipboardListFiltered[index]) {
-                ipcRenderer.send('paste', $state.clipboardListFiltered[index][1].contentHash)
-                $state.index = -1
-                $state.itemIdSelected = ''
+            if ($clipboardListFiltered[pastedIndex]) {
+                ipcRenderer.send('paste', $clipboardListFiltered[pastedIndex][1].contentHash)
+                $index = -1
+                $itemIdSelected = ''
             }
         }
-        $state.previous = e
+        $previous = e
     })
 
     ioHook.start()
@@ -217,8 +225,8 @@
 
     function handleClick(item: IClipboardItem) {
         ipcRenderer.send('paste', item.contentHash)
-        $state.index = -1
-        $state.itemIdSelected = ''
+        $index = -1
+        $itemIdSelected = ''
     }
 
     /**
@@ -254,8 +262,8 @@
         visibleHashes.push(hash)
         visibleHashes = visibleHashes
 
-        const currentIndex = $state.clipboardListFiltered.findIndex((i) => i[0] === hash)
-        const next = $state.clipboardListFiltered[currentIndex + 1]
+        const currentIndex = $clipboardListFiltered.findIndex((i) => i[0] === hash)
+        const next = $clipboardListFiltered[currentIndex + 1]
         if (next) {
             next[1].isVisible = true
         }
@@ -268,43 +276,41 @@
         visibleHashes = newArr
     }
     const getPreviousHash = (hash: string, value: number) => {
-        const currentIndex = $state.clipboardListFiltered.findIndex((i) => i[0] === hash)
+        const currentIndex = $clipboardListFiltered.findIndex((i) => i[0] === hash)
 
-        if ($state.clipboardListFiltered[currentIndex + value]) {
-            return $state.clipboardListFiltered[currentIndex + value][0]
+        if ($clipboardListFiltered[currentIndex + value]) {
+            return $clipboardListFiltered[currentIndex + value][0]
         }
         return ''
     }
 </script>
 
-{#if $state.isAsked}
+{#if $isAsked}
     <Login />
 {/if}
 
 <div class="nosbar flex flex-col">
-    {#if $state.clipboardListFiltered}
-        {#each $state.clipboardListFiltered as [key, item]}
+    {#if $clipboardListFiltered}
+        {#each $clipboardListFiltered as [key, item]}
             {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1))}
                 <item
                     use:viewport
                     on:enterViewport={() => handleEnter(key, item.content)}
                     on:exitViewport={() => handleExit(key, item.content)}
                     title={getTitle(item)}
-                    class="clipboard-item border-slate-800 {$state.itemIdSelected === item.contentHash
+                    class="clipboard-item border-slate-800 {$itemIdSelected === item.contentHash
                         ? 'bg-gray-300 even:bg-gray-300 dark:bg-slate-700 even:dark:bg-slate-700'
                         : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-700'} dark:text-gray-100 dark:even:border-y"
                     id={item.contentHash}
                     on:click|preventDefault={() => handleClick(item)}
                 >
                     <div class="flex">
-                        {#if $state.defaultUserSettings.showCommandNumberIcons.value}
-                            {#if $state.clipboardListFiltered.indexOf($state.clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1 < 10}
+                        {#if $defaultUserSettings.showCommandNumberIcons.value}
+                            {#if $clipboardListFiltered.indexOf($clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1 < 10}
                                 <IconCommand
-                                    number={$state.clipboardListFiltered.indexOf(
-                                        $state.clipboardListFiltered.filter((i) => i[0] === key)[0]
-                                    ) + 1}
+                                    number={$clipboardListFiltered.indexOf($clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1}
                                 />
-                            {:else if $state.clipboardListFiltered.indexOf($state.clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1 === 10}
+                            {:else if $clipboardListFiltered.indexOf($clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1 === 10}
                                 <IconCommand number={0} />
                             {/if}
                         {/if}

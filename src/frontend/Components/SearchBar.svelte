@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { createEventDispatcher } from 'svelte'
-    import { ipcRenderer, isFocused } from '../stores'
+    import { isFocused } from '../stores'
+    import { ipcRenderer } from '../util'
+
     let element: HTMLElement
     let text: string = ''
 

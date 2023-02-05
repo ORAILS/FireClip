@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte'
-    import { appName, state } from '../stores'
+    import { appName, clipboardListFiltered, defaultUserSettings } from '../stores'
     import Switch from './Switch.svelte'
 
     const ipcRenderer = window.require('electron').ipcRenderer
@@ -45,8 +45,8 @@
 </script>
 
 <div class="settings flex flex-col justify-items-start">
-    {#if $state.defaultUserSettings}
-        {#each Object.entries($state.defaultUserSettings) as [key, item]}
+    {#if $defaultUserSettings}
+        {#each Object.entries($defaultUserSettings) as [key, item]}
             <div
                 class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
             dark:text-gray-200 
@@ -72,7 +72,7 @@
         even:dark:bg-slate-900"
         >
             <p>
-                Total items: {$state.clipboardListFiltered.length}
+                Total items: {$clipboardListFiltered.length}
             </p>
         </div>
         <div
@@ -82,7 +82,7 @@
         even:dark:bg-slate-900"
         >
             <p>
-                Size: {sizeOf($state.clipboardListFiltered) / 1024} kB
+                Size: {sizeOf($clipboardListFiltered) / 1024} kB
             </p>
         </div>
         <div
@@ -94,7 +94,7 @@
             <p>
                 <button
                     on:click={() => {
-                        ipcRenderer.send('save_items', $state.clipboardListFiltered)
+                        ipcRenderer.send('save_items', $clipboardListFiltered)
                     }}>Save state as JSON</button
                 >
             </p>

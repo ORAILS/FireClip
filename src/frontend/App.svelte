@@ -4,7 +4,7 @@
     import Notifications from './Components/Notifications.svelte'
     import Settings from './Components/Settings.svelte'
     import { appName } from './stores'
-    import './css/tailwind.pcss'
+    import './www/tailwind.pcss'
 
     import EventHandler from './Components/EventHandler.svelte'
     import { page } from './stores'

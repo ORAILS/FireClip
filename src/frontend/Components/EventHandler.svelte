@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { ipcRenderer, page, state } from '../stores'
+    import { page, defaultUserSettings } from '../stores'
+    import { ipcRenderer } from '../util'
     import { IPages } from '../types'
 
     ipcRenderer.on('to.renderer.set.settings', (e, value) => {
-        $state.defaultUserSettings = JSON.parse(value)
+        $defaultUserSettings = JSON.parse(value)
     })
     ipcRenderer.on('to.renderer.open.window', (e, value) => {
         const colors = Object.values(IPages).filter((item) => {

@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { ipcRenderer, state } from '../stores'
+    import { defaultUserSettings } from '../stores'
+    import { ipcRenderer } from '../util'
     import SearchBar from './SearchBar.svelte'
     import TitleBar from './TitleBar.svelte'
     export let title: string = 'Title'
@@ -13,9 +14,9 @@
         isMaximized = outerW >= globalThis.screen.availWidth
     }
 
-    state.subscribe((v) => {
-        if (!v.defaultUserSettings) return
-        const darkSetting = v.defaultUserSettings.darkMode.value
+    defaultUserSettings.subscribe((v) => {
+        if (!v) return
+        const darkSetting = v.darkMode.value
         const isDarkSystem = window.matchMedia('(prefers-color-scheme: dark)').matches
 
         if (darkSetting === 'on' || (darkSetting === 'system' && isDarkSystem)) {
