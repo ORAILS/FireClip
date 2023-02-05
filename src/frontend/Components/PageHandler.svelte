@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { defaultUserSettings } from '../stores'
+    import { userSettings } from '../stores'
     import { ipcRenderer } from '../util'
     import SearchBar from './SearchBar.svelte'
     import TitleBar from './TitleBar.svelte'
@@ -14,7 +14,7 @@
         isMaximized = outerW >= globalThis.screen.availWidth
     }
 
-    defaultUserSettings.subscribe((v) => {
+    userSettings.subscribe((v) => {
         if (!v) return
         const darkSetting = v.darkMode.value
         const isDarkSystem = window.matchMedia('(prefers-color-scheme: dark)').matches

@@ -1,16 +1,16 @@
 <script lang="ts">
     import { onMount } from 'svelte'
     import {
-        clipboardList,
-        clipboardListFiltered,
-        defaultUserSettings,
-        hidden,
-        index,
-        isAsked,
+        clipList,
+        clipListFiltered,
+        currentScrollIndex,
+        isAppHidden,
         isFocused,
-        itemIdSelected,
-        passwordIncorrect,
-        previous
+        isPasswordAsked,
+        isPasswordIncorrect,
+        previousEvent,
+        selectedClipId,
+        userSettings
     } from '../stores'
     import type { IClipboardItem, IHookKeyboardEvent, IHookMouseEvent, IReceiveChannel } from '../types'
     import { isImageContent, isRTFContent, isTextContent } from '../types'
@@ -28,32 +28,32 @@
                 const storeSorted = sort([...store]).desc((i) => i[1].lastModified)
 
                 for (const item of storeSorted) {
-                    const exists = $clipboardListFiltered.find((i) => i[0] === item[0])
+                    const exists = $clipListFiltered.find((i) => i[0] === item[0])
                     if (!exists) {
-                        $clipboardListFiltered.push(item)
+                        $clipListFiltered.push(item)
                     } else {
                         exists[1].lastModified = item[1].lastModified
                     }
                 }
 
-                $clipboardListFiltered = sort([...$clipboardListFiltered]).desc((i) => i[1].lastModified)
-                $clipboardList = $clipboardListFiltered
-                if ($clipboardListFiltered && $clipboardListFiltered[0]) {
-                    $clipboardListFiltered[0][1].isVisible = true
-                    visibleHashes.push($clipboardListFiltered[0][0])
+                $clipListFiltered = sort([...$clipListFiltered]).desc((i) => i[1].lastModified)
+                $clipList = $clipListFiltered
+                if ($clipListFiltered && $clipListFiltered[0]) {
+                    $clipListFiltered[0][1].isVisible = true
+                    visibleHashes.push($clipListFiltered[0][0])
                 }
             }
         },
         {
             name: 'askPassword',
             handler: function (event, store) {
-                $isAsked = true
+                $isPasswordAsked = true
             }
         },
         {
             name: 'hide',
             handler: function (event, store) {
-                $hidden = true
+                $isAppHidden = true
                 console.log(store)
             }
         },
@@ -66,7 +66,7 @@
         {
             name: 'unhide',
             handler: function (event, store) {
-                $hidden = false
+                $isAppHidden = false
                 console.log(store)
             }
         },
@@ -80,9 +80,9 @@
         {
             name: 'passwordIncorrect',
             handler: function (event, store) {
-                $passwordIncorrect = true
+                $isPasswordIncorrect = true
                 setTimeout(() => {
-                    $passwordIncorrect = false
+                    $isPasswordIncorrect = false
                 }, 3000)
             }
         },
@@ -90,7 +90,7 @@
         {
             name: 'passwordConfirmed',
             handler: function (event, store) {
-                $isAsked = false
+                $isPasswordAsked = false
             }
         },
 
@@ -98,7 +98,7 @@
             name: 'textSearched',
             handler: function (event, text: string) {
                 if (text.length == 0) {
-                    $clipboardListFiltered = $clipboardList
+                    $clipListFiltered = $clipList
                     return
                 }
 
@@ -118,7 +118,7 @@
                     return result
                 }
 
-                $clipboardListFiltered = fil<null, [string, IClipboardItem]>((i) => filterItem(text, i), $clipboardList)
+                $clipListFiltered = fil<null, [string, IClipboardItem]>((i) => filterItem(text, i), $clipList)
             }
         }
     ]
@@ -166,15 +166,15 @@
 
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
         if (isWinShortcutStart(e) || isMacShortcutStart(e)) {
-            if ($clipboardListFiltered && $index + 1 < $clipboardListFiltered.length && $clipboardListFiltered[$index + 1][0]) {
-                $index++
-                $itemIdSelected = $clipboardListFiltered[$index][0]
-                scrollIntoView($itemIdSelected)
+            if ($clipListFiltered && $currentScrollIndex + 1 < $clipListFiltered.length && $clipListFiltered[$currentScrollIndex + 1][0]) {
+                $currentScrollIndex++
+                $selectedClipId = $clipListFiltered[$currentScrollIndex][0]
+                scrollIntoView($selectedClipId)
             }
         }
-        $previous = e
+        $previousEvent = e
 
-        if (!$hidden && isSearchShortcut(e)) {
+        if (!$isAppHidden && isSearchShortcut(e)) {
             ipcRenderer.send('focus', true)
             await delay(100)
             isFocused.set($isFocused + 1)
@@ -184,25 +184,25 @@
     ioHook.on('keyup', (e: IHookKeyboardEvent) => {
         // scrolled items, wants and released ctrl
         if (
-            $previous &&
-            ((isWinShortcutStart($previous) && isWinShortcutEnd(e)) || (isMacShortcutStart($previous) && isMacShortcutEnd(e)))
+            $previousEvent &&
+            ((isWinShortcutStart($previousEvent) && isWinShortcutEnd(e)) || (isMacShortcutStart($previousEvent) && isMacShortcutEnd(e)))
         ) {
-            ipcRenderer.send('paste', $itemIdSelected)
-            $index = -1
-            $itemIdSelected = ''
+            ipcRenderer.send('paste', $selectedClipId)
+            $currentScrollIndex = -1
+            $selectedClipId = ''
         }
         if (isNumberPasted(e)) {
             let pastedIndex = getPastedNumber(e)
             pastedIndex = pastedIndex - 1
             if (pastedIndex === -1) pastedIndex = 9
 
-            if ($clipboardListFiltered[pastedIndex]) {
-                ipcRenderer.send('paste', $clipboardListFiltered[pastedIndex][1].contentHash)
-                $index = -1
-                $itemIdSelected = ''
+            if ($clipListFiltered[pastedIndex]) {
+                ipcRenderer.send('paste', $clipListFiltered[pastedIndex][1].contentHash)
+                $currentScrollIndex = -1
+                $selectedClipId = ''
             }
         }
-        $previous = e
+        $previousEvent = e
     })
 
     ioHook.start()
@@ -225,8 +225,8 @@
 
     function handleClick(item: IClipboardItem) {
         ipcRenderer.send('paste', item.contentHash)
-        $index = -1
-        $itemIdSelected = ''
+        $currentScrollIndex = -1
+        $selectedClipId = ''
     }
 
     /**
@@ -262,8 +262,8 @@
         visibleHashes.push(hash)
         visibleHashes = visibleHashes
 
-        const currentIndex = $clipboardListFiltered.findIndex((i) => i[0] === hash)
-        const next = $clipboardListFiltered[currentIndex + 1]
+        const currentIndex = $clipListFiltered.findIndex((i) => i[0] === hash)
+        const next = $clipListFiltered[currentIndex + 1]
         if (next) {
             next[1].isVisible = true
         }
@@ -276,41 +276,39 @@
         visibleHashes = newArr
     }
     const getPreviousHash = (hash: string, value: number) => {
-        const currentIndex = $clipboardListFiltered.findIndex((i) => i[0] === hash)
+        const currentIndex = $clipListFiltered.findIndex((i) => i[0] === hash)
 
-        if ($clipboardListFiltered[currentIndex + value]) {
-            return $clipboardListFiltered[currentIndex + value][0]
+        if ($clipListFiltered[currentIndex + value]) {
+            return $clipListFiltered[currentIndex + value][0]
         }
         return ''
     }
 </script>
 
-{#if $isAsked}
+{#if $isPasswordAsked}
     <Login />
 {/if}
 
 <div class="nosbar flex flex-col">
-    {#if $clipboardListFiltered}
-        {#each $clipboardListFiltered as [key, item]}
+    {#if $clipListFiltered}
+        {#each $clipListFiltered as [key, item]}
             {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1))}
                 <item
                     use:viewport
                     on:enterViewport={() => handleEnter(key, item.content)}
                     on:exitViewport={() => handleExit(key, item.content)}
                     title={getTitle(item)}
-                    class="clipboard-item border-slate-800 {$itemIdSelected === item.contentHash
+                    class="clipboard-item border-slate-800 {$selectedClipId === item.contentHash
                         ? 'bg-gray-300 even:bg-gray-300 dark:bg-slate-700 even:dark:bg-slate-700'
                         : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-700'} dark:text-gray-100 dark:even:border-y"
                     id={item.contentHash}
                     on:click|preventDefault={() => handleClick(item)}
                 >
                     <div class="flex">
-                        {#if $defaultUserSettings.showCommandNumberIcons.value}
-                            {#if $clipboardListFiltered.indexOf($clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1 < 10}
-                                <IconCommand
-                                    number={$clipboardListFiltered.indexOf($clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1}
-                                />
-                            {:else if $clipboardListFiltered.indexOf($clipboardListFiltered.filter((i) => i[0] === key)[0]) + 1 === 10}
+                        {#if $userSettings.showCommandNumberIcons.value}
+                            {#if $clipListFiltered.indexOf($clipListFiltered.filter((i) => i[0] === key)[0]) + 1 < 10}
+                                <IconCommand number={$clipListFiltered.indexOf($clipListFiltered.filter((i) => i[0] === key)[0]) + 1} />
+                            {:else if $clipListFiltered.indexOf($clipListFiltered.filter((i) => i[0] === key)[0]) + 1 === 10}
                                 <IconCommand number={0} />
                             {/if}
                         {/if}
