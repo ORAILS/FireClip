@@ -59,12 +59,6 @@
             }
         },
         {
-            name: 'askPassword',
-            handler: function (event, store) {
-                $isPasswordAsked = true
-            }
-        },
-        {
             name: 'hide',
             handler: function (event, store) {
                 $isAppHidden = true
@@ -92,6 +86,14 @@
         },
 
         {
+            name: 'askPassword',
+            handler: function (event, store) {
+                $isPasswordAsked = true
+                $currentPage = IPages.login
+            }
+        },
+
+        {
             name: 'passwordIncorrect',
             handler: function (event, store) {
                 $isPasswordIncorrect = true
@@ -105,6 +107,7 @@
             name: 'passwordConfirmed',
             handler: function (event, store) {
                 $isPasswordAsked = false
+                $currentPage = IPages.items
             }
         },
 

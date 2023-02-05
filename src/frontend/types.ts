@@ -65,7 +65,8 @@ export interface IClipboardItem {
 export enum IPages {
     settings,
     items,
-    notifications
+    notifications,
+    login
 }
 
 export function isTextContent(obj: IClipboardItem) {

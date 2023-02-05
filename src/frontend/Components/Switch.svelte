@@ -35,7 +35,7 @@
 {#if selectOptions}
     <div class="slider" style="font-size:{fontSize}px">
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
-        <select class="cursor-pointer bg-gray-100 dark:bg-slate-900" bind:value={value} on:change={handleSelectChange}>
+        <select class="cursor-pointer bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange}>
             {#each selectOptions as option}
                 {#if option === value}
                     <option selected value={option}>{option}</option>

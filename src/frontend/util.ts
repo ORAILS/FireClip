@@ -9,6 +9,15 @@ export const delay = (delayInms: number) => {
     return new Promise((resolve) => setTimeout(resolve, delayInms))
 }
 
+export const getTitle = (item: IClipboardItem) => {
+    if (isTextContent(item))
+        return item.content + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.lastModified)
+    if (isImageContent(item))
+        return 'PNG Image' + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.lastModified)
+    if (isRTFContent(item))
+        return item.content + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.lastModified)
+}
+
 /**
  * Transforming the array to map array
  */

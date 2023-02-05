@@ -3,12 +3,12 @@ import Store from 'electron-store'
 import { IpcMainEvent } from 'electron/main'
 import * as fs from 'fs'
 import robot from 'robotjs'
-import { ItemRepo } from '../../Data/ItemRepository'
-import { IClipboardItem, isImageContent, isRTFContent, isTextContent } from '../../DataModels/DataTypes'
-import { IAppState, IKeyboardEvent, ILocalUser, IMouseEvent, IReceiveChannel } from '../../DataModels/LocalTypes'
-import { CryptoService } from '../../Utils/CryptoService'
-import { JsUtil } from '../../Utils/JsUtil'
-import { AppSettings, IUserSettings } from '../AppSettings'
+import { ItemRepo } from '../Data/ItemRepository'
+import { IClipboardItem, isImageContent, isRTFContent, isTextContent } from '../DataModels/DataTypes'
+import { IAppState, IKeyboardEvent, ILocalUser, IMouseEvent, IReceiveChannel } from '../DataModels/LocalTypes'
+import { CryptoService } from '../Utils/CryptoService'
+import { JsUtil } from '../Utils/JsUtil'
+import { AppSettings, IUserSettings } from './AppSettings'
 
 const store = new Store()
 
@@ -31,7 +31,8 @@ const getPreferenceKey = (key: string) => `${AppSettings.name}.preferences.${key
  */
 const defaultHandler = (e: IpcMainEvent, event: any) => {
     store.set(`${getPreferenceKey(event.key)}`, event.value)
-    console.log(event)
+    // so that the front end can also react to this change
+    action.sendSettings()
 }
 
 async function saveJSONFile(data: object) {
@@ -60,10 +61,8 @@ export const userSettings: IUserSettings = {
         value: 'system',
         selectableOptions: ['off', 'on', 'system'],
         changeHandler: (e, event) => {
-            defaultHandler(e, event)
             userSettings.darkMode.value = event.value
-            // so that the front end can also react to this change
-            localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(userSettings))
+            defaultHandler(e, event)
         }
     },
     regiserCommandNumberShortcuts: {
@@ -71,8 +70,8 @@ export const userSettings: IUserSettings = {
         value: true,
         selectableOptions: undefined,
         changeHandler: (e, event) => {
-            defaultHandler(e, event)
             userSettings.regiserCommandNumberShortcuts.value = event.value
+            defaultHandler(e, event)
             for (const command of shortcutList) {
                 if (userSettings.regiserCommandNumberShortcuts) {
                     globalShortcut.register(command, () => null)
@@ -89,8 +88,8 @@ export const userSettings: IUserSettings = {
         value: true,
         selectableOptions: undefined,
         changeHandler: (e, event) => {
-            defaultHandler(e, event)
             userSettings.showCommandNumberIcons.value = event.value
+            defaultHandler(e, event)
         }
     },
     autoRestartOnUpdateAvailable: {
@@ -98,8 +97,8 @@ export const userSettings: IUserSettings = {
         value: true,
         selectableOptions: undefined,
         changeHandler: (e, event) => {
-            defaultHandler(e, event)
             userSettings.autoRestartOnUpdateAvailable.value = event.value
+            defaultHandler(e, event)
         }
     },
     minimizeAfterPaste: {
@@ -107,8 +106,17 @@ export const userSettings: IUserSettings = {
         value: true,
         selectableOptions: undefined,
         changeHandler: (e, event) => {
+            userSettings.minimizeAfterPaste.value = event.value
             defaultHandler(e, event)
-            userSettings.autoRestartOnUpdateAvailable.value = event.value
+        }
+    },
+    enableAutoPaste: {
+        description: 'If enabled, the app will paste the selected item, if not, it will only be written to the clipboard',
+        value: true,
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userSettings.enableAutoPaste.value = event.value
+            defaultHandler(e, event)
         }
     }
 }
@@ -123,6 +131,7 @@ const items = () => {
 
 const action = {
     askPassword: async () => localMainWindow.webContents.send(channelsToRender.askPassword, true),
+    sendSettings: () => localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(userSettings)),
     hideWindow: () => {
         localMainWindow.hide()
         localMainWindow.webContents.send(channelsToRender.hide, true)
@@ -162,7 +171,9 @@ const action = {
         if (isRTFContent(result)) localClipboard.writeRTF(result.content)
         if (isImageContent(result)) localClipboard.writeImage(nativeImage.createFromDataURL(result.content))
 
-        await action.pasteItem()
+        if (userSettings.enableAutoPaste.value) {
+            await action.pasteItem()
+        }
     },
     async pasteItem() {
         if (!AppSettings.enablePaste) return
@@ -270,7 +281,7 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'get_settings',
         handler: () => {
-            localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(userSettings))
+            action.sendSettings()
         }
     },
     {
@@ -287,13 +298,15 @@ const channelsFromRender: IReceiveChannel[] = [
         name: 'loginUser',
         handler: async (event: IpcMainEvent, user: ILocalUser) => {
             try {
-                console.log(user)
                 const hashed = CryptoService.HashUserLocal(user)
                 state.user = hashed
                 console.log(state.user)
-                localMainWindow.webContents.send(channelsToRender.passwordConfirmed, true)
-                action.startClipboardPooling()
-                action.loadItems()
+                if (state.user.masterKey === '4f0a1743088714e60c5f0ada7d6a3717fa5aa5f195a9b121fc929151b8fb06da') {
+                    action.startClipboardPooling()
+                    action.loadItems()
+                    action.sendSettings()
+                    localMainWindow.webContents.send(channelsToRender.passwordConfirmed, true)
+                }
             } catch (e) {
                 console.log(e)
             }

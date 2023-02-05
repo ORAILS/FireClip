@@ -82,7 +82,7 @@
         even:dark:bg-slate-900"
         >
             <p>
-                Size: {sizeOf($clipListFiltered) / 1024} kB
+                Total clips size: {Math.round(sizeOf($clipListFiltered) / 1024)} kB
             </p>
         </div>
         <div

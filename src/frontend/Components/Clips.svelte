@@ -1,21 +1,12 @@
 <script lang="ts">
-    import { onMount } from 'svelte'
-    import { clipListFiltered, currentScrollIndex, isPasswordAsked, selectedClipId, userSettings } from '../stores'
+    import { clipListFiltered, currentScrollIndex, selectedClipId, userSettings } from '../stores'
     import type { IClipboardItem } from '../types'
     import { isImageContent, isRTFContent, isTextContent } from '../types'
-    import { getDateFormat, ipcRenderer } from '../util'
+    import { getTitle, ipcRenderer } from '../util'
     import viewport from '../viewPortAction'
     import IconCommand from './icons/_IconCommand.svelte'
-    import Login from './Login.svelte'
 
-    function getTitle(item: IClipboardItem) {
-        if (isTextContent(item))
-            return item.content + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.lastModified)
-        if (isImageContent(item))
-            return 'PNG Image' + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.lastModified)
-        if (isRTFContent(item))
-            return item.content + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.lastModified)
-    }
+    let visibleHashes: string[] = []
 
     function handleClick(item: IClipboardItem) {
         ipcRenderer.send('paste', item.contentHash)
@@ -30,21 +21,18 @@
         }
     })
 
-    onMount(async () => {
-        ipcRenderer.send('RendererInit', true)
-        setTimeout(() => {
-            ipcRenderer.send('loginUser', {
-                name: 'me',
-                email: 'email',
-                password: 'password',
-                masterKey: ''
-            })
-        }, 200)
-
-        ipcRenderer.send('get_settings')
-    })
-
-    let visibleHashes: string[] = []
+    function checkForNewDay() {
+        let currentDate = new Date()
+        let previousDate = currentDate
+        setInterval(() => {
+            currentDate = new Date()
+            if (previousDate.getDate() !== currentDate.getDate()) {
+                previousDate = currentDate
+                // your custom logic here, fx full the data from the external using node-fetch and load to db.
+                console.log('A new day has come!')
+            }
+        }, 1000)
+    }
 
     const handleEnter = (hash: string, content: string) => {
         visibleHashes.push(hash)
@@ -72,10 +60,6 @@
         return ''
     }
 </script>
-
-{#if $isPasswordAsked}
-    <Login />
-{/if}
 
 <div class="nosbar flex flex-col">
     {#if $clipListFiltered}

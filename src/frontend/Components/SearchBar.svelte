@@ -13,7 +13,7 @@
 
     ipcRenderer.on('searchReset', function (event, store) {
         text = ''
-        currentSearchedText.set("")
+        currentSearchedText.set('')
     })
 
     function handleChange() {

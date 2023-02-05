@@ -8,7 +8,7 @@ export const isFocused = writable(0)
 /**
  * Which page will be displayed to the user. Main user is App.svelte
  */
-export const currentPage = writable<IPages>(IPages.items)
+export const currentPage = writable<IPages>(IPages.login)
 /**
  * App name. Used by the pages above to update it.
  */
@@ -17,7 +17,6 @@ export const previousEvent: Writable<IHookKeyboardEvent | undefined> = writable(
 export const isPasswordAsked: Writable<boolean> = writable(false)
 export const isPasswordIncorrect: Writable<boolean> = writable(false)
 export const selectedClipId: Writable<string> = writable('')
-export const userPassword: Writable<string> = writable('')
 export const currentScrollIndex: Writable<number> = writable(-1)
 export const clipList: Writable<[string, IClipboardItem][]> = writable([])
 export const clipListFiltered: Writable<[string, IClipboardItem][]> = writable([])

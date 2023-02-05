@@ -3,7 +3,7 @@ import { autoUpdater } from 'electron-updater'
 import path from 'path'
 import { AppSettings } from './App/AppSettings'
 import CustomWindow from './App/CustomWindow'
-import { ioHookHandler, userSettings } from './App/Handlers/EventHandler'
+import { ioHookHandler, userSettings } from './App/EventHandler'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('electron-reload')(__dirname)
 

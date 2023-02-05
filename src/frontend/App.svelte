@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Login from './Components/Login.svelte';
     import Clips from './Components/Clips.svelte'
     import Notifications from './Components/Notifications.svelte'
     import PageHandler from './Components/PageHandler.svelte'
@@ -18,7 +19,9 @@
 <EventHandler />
 <PageHandler title={$appName}>
     <section class="h-full space-y-6 bg-white dark:bg-slate-900">
-        {#if $currentPage === IPages.items}
+        {#if $currentPage === IPages.login}
+            <Login />
+        {:else if $currentPage === IPages.items}
             <Clips />
         {:else if $currentPage === IPages.settings}
             <Settings />
