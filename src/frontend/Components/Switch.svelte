@@ -54,14 +54,14 @@
 
 <style lang="postcss">
     .slider {
-        @apply flex items-center justify-between mr-3;
+        @apply mr-3 flex items-center justify-between;
     }
 
     .slider button {
         position: relative;
         border: none;
         border-radius: 1.5em;
-        @apply shadow h-5 w-9 m-0 duration-500 dark:bg-gray-800;
+        @apply m-0 h-5 w-9 shadow duration-500 dark:bg-gray-800;
     }
 
     .slider button::before {
@@ -69,7 +69,7 @@
         position: absolute;
         right: 1.5em;
         transition: transform 0.3s;
-        @apply h-4 w-4 top-[0.125rem] bg-gray-300 dark:bg-slate-900;
+        @apply top-[0.125rem] h-4 w-4 bg-gray-300 dark:bg-slate-900;
     }
 
     .slider button[aria-checked='true'] {
