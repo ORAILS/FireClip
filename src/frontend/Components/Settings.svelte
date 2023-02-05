@@ -57,7 +57,7 @@
                 <Switch
                     label={camelToSentence(key)}
                     fontSize={12}
-                    defaultState={item.value}
+                    defaultValue={item.value}
                     selectOptions={item.selectableOptions}
                     on:change={(e) => {
                         sendChange(key, { key, value: e.detail })

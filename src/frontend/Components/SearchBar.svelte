@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { isFocused } from '../stores'
+    import { currentSearchedText, isFocused } from '../stores'
     import { ipcRenderer } from '../util'
 
     let element: HTMLElement
@@ -13,10 +13,11 @@
 
     ipcRenderer.on('searchReset', function (event, store) {
         text = ''
+        currentSearchedText.set("")
     })
 
     function handleChange() {
-        ipcRenderer.send('textSearched', text)
+        currentSearchedText.set(text)
     }
 </script>
 

@@ -4,40 +4,40 @@
 
     export let label: string
     export let fontSize = 16
-    export let defaultState: any
+    export let defaultValue: any
 
     export let selectOptions: undefined | string[] = undefined
-    let state: any
+    let value: any
 
     onMount(() => {
-        state = defaultState
+        value = defaultValue
     })
 
     function handleClick(event) {
         if (selectOptions) return
         const target = event.target
 
-        state = target.getAttribute('aria-checked') === 'true'
+        value = target.getAttribute('aria-checked') === 'true'
 
-        if (state) {
-            state = false
+        if (value) {
+            value = false
         } else {
-            state = true
+            value = true
         }
-        dispatch('change', state)
+        dispatch('change', value)
     }
 
     function handleSelectChange(event) {
-        dispatch('change', state)
+        dispatch('change', value)
     }
 </script>
 
 {#if selectOptions}
     <div class="slider" style="font-size:{fontSize}px">
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
-        <select class="cursor-pointer bg-gray-100 dark:bg-slate-900" bind:value={state} on:change={handleSelectChange}>
+        <select class="cursor-pointer bg-gray-100 dark:bg-slate-900" bind:value={value} on:change={handleSelectChange}>
             {#each selectOptions as option}
-                {#if option === state}
+                {#if option === value}
                     <option selected value={option}>{option}</option>
                 {:else}
                     <option value={option}>{option}</option>
@@ -48,7 +48,7 @@
 {:else}
     <div class="slider" style="font-size:{fontSize}px">
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
-        <button role="switch" aria-checked={state} on:click={handleClick} />
+        <button role="switch" aria-checked={value} on:click={handleClick} />
     </div>
 {/if}
 
