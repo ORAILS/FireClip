@@ -24,6 +24,9 @@ export interface IUserSettings {
     showCommandNumberIcons: IUserSetting<boolean>
     autoRestartOnUpdateAvailable: IUserSetting<boolean>
     minimizeAfterPaste: IUserSetting<boolean>
+    enableAutoPaste: IUserSetting<boolean>
+    maxClipAgeInHours: IUserSetting<number>
+    maxNumberOfClips: IUserSetting<number>
 }
 
 /**
@@ -36,6 +39,7 @@ export interface IUserSetting<T> {
      * default value for the setting
      */
     value: T
+    type: 'toggle' | 'select' | 'number' | 'string'
     selectableOptions: T[] | undefined
     changeHandler: (event: IpcMainEvent, data: any) => Promise<void> | void
 }

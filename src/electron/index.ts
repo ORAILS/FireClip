@@ -3,7 +3,7 @@ import { autoUpdater } from 'electron-updater'
 import path from 'path'
 import { AppSettings } from './App/AppSettings'
 import CustomWindow from './App/CustomWindow'
-import { ioHookHandler, userSettings } from './App/Handlers/EventHandler'
+import { ioHookHandler, userSettings } from './App/EventHandler'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('electron-reload')(__dirname)
 
@@ -16,7 +16,7 @@ app.on('ready', async () => {
 
     setInterval(() => {
         autoUpdater.checkForUpdatesAndNotify()
-    }, 2 * 60 * 1000)
+    }, 5 * 60 * 1000)
 
     const iconPath = path.join(__dirname, 'www', 'icon16.png')
     const icon = nativeImage.createFromPath(iconPath)
@@ -64,8 +64,8 @@ app.on('ready', async () => {
 })
 
 setInterval(() => {
-    mainWindow.window.webContents.send('log', `Ping each 10s from index.ts. Current version ${autoUpdater.currentVersion}`)
-}, 10000)
+    mainWindow.window.webContents.send('log', `Ping each 30s from index.ts. Current version ${autoUpdater.currentVersion}`)
+}, 30000)
 
 autoUpdater.on('checking-for-update', () => {
     mainWindow.window.webContents.send('log', 'Checking for update...')

@@ -1,9 +1,6 @@
-import { writable } from 'svelte/store'
-import { appSettings } from './AppSettings'
-import { AppState, IPages } from './types'
+import { Writable, writable } from 'svelte/store'
+import { IClipboardItem, IHookKeyboardEvent, IPages, IUserSettings } from './types'
 
-const defaultPage: IPages = IPages.items
-export const ipcRenderer = window.require('electron').ipcRenderer
 /**
  * Wether the app is focused (used for seaching function), as it's only triggered when focused
  */
@@ -11,30 +8,21 @@ export const isFocused = writable(0)
 /**
  * Which page will be displayed to the user. Main user is App.svelte
  */
-export const page = writable<IPages>(defaultPage)
+export const currentPage = writable<IPages>(IPages.login)
 /**
  * App name. Used by the pages above to update it.
  */
-export const appName = writable(appSettings.name)
-
-export const appState: AppState = {
-    previous: undefined,
-    isAsked: false,
-    passwordIncorrect: false,
-    itemIdSelected: '',
-    password: '',
-    index: -1,
-    clipboardList: [],
-    clipboardListFiltered: [],
-    showPassword: false,
-    passwordButtonText: 'show',
-    defaultUserSettings: undefined,
-    hidden: true,
-    searchedText: writable('')
-}
-
-export const delay = (delayInms: number) => {
-    return new Promise((resolve) => setTimeout(resolve, delayInms))
-}
-
-export const state = writable<AppState>(appState)
+export const appName: Writable<string> = writable('FireClip')
+export const previousEvent: Writable<IHookKeyboardEvent | undefined> = writable(undefined)
+export const isPasswordAsked: Writable<boolean> = writable(false)
+export const isPasswordIncorrect: Writable<boolean> = writable(false)
+export const selectedClipId: Writable<string> = writable('')
+export const currentScrollIndex: Writable<number> = writable(-1)
+export const clipList: Writable<[string, IClipboardItem][]> = writable([])
+export const clipListFiltered: Writable<[string, IClipboardItem][]> = writable([])
+export const visibleClipsHashes: Writable<string[]> = writable([])
+export const showPassword: Writable<boolean> = writable(false)
+export const passwordButtonText: Writable<string> = writable('show')
+export const userSettings: Writable<IUserSettings | undefined> = writable(undefined)
+export const isAppHidden: Writable<boolean> = writable(true)
+export const currentSearchedText: Writable<string> = writable('')

@@ -18,9 +18,9 @@ class CustomWindow {
                 contextIsolation: false,
                 devTools: AppSettings.enableDevTools,
                 preload: path.join(__dirname, 'preload.js')
-            },
-            x: -1300,
-            y: 335
+            }
+            // x: -1300,
+            // y: 335
         })
 
         window.setAlwaysOnTop(true, 'floating')

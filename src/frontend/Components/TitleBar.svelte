@@ -6,14 +6,14 @@
     export let title: string = 'Title'
     export const isMaximized: boolean = false
 
-    import { page } from '../stores'
+    import { currentPage } from '../stores'
     import { IPages } from '../types'
 
     const handleTitleClick = () => {
-        if ($page === IPages.items) {
-            page.set(IPages.settings)
+        if ($currentPage === IPages.items) {
+            currentPage.set(IPages.settings)
         } else {
-            page.set(IPages.items)
+            currentPage.set(IPages.items)
         }
     }
     const dispatch = createEventDispatcher()

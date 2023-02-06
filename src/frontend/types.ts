@@ -2,22 +2,18 @@ import type { IpcMainEvent } from 'electron'
 import type { Writable } from 'svelte/store'
 
 export interface AppState {
-    previous: IHookKeyboardEvent | undefined
-    isAsked: boolean
-    passwordIncorrect: boolean
-    itemIdSelected: string
-    password: string
-    index: number
-    clipboardList: [string, IClipboardItem][]
-    /**
-     * we need one to handle user searches
-     * The one above is the main one, the one below is displayed.
-     */
-    clipboardListFiltered: [string, IClipboardItem][]
-    showPassword: boolean
-    passwordButtonText: string
-    hidden: boolean
-    defaultUserSettings: IUserSettings | undefined
+    previous: Writable<IHookKeyboardEvent | undefined>
+    isAsked: Writable<boolean>
+    passwordIncorrect: Writable<boolean>
+    itemIdSelected: Writable<string>
+    password: Writable<string>
+    index: Writable<number>
+    clipboardList: Writable<[string, IClipboardItem][]>
+    clipboardListFiltered: Writable<[string, IClipboardItem][]>
+    showPassword: Writable<boolean>
+    passwordButtonText: Writable<string>
+    hidden: Writable<boolean>
+    defaultUserSettings: Writable<IUserSettings | undefined>
     searchedText: Writable<string>
 }
 
@@ -39,6 +35,9 @@ export interface IUserSettings {
     showCommandNumberIcons: IUserSetting<boolean>
     autoRestartOnUpdateAvailable: IUserSetting<boolean>
     minimizeAfterPaste: IUserSetting<boolean>
+    enableAutoPaste: IUserSetting<boolean>
+    maxClipAgeInSeconds: IUserSetting<number>
+    maxNumberOfClips: IUserSetting<number>
 }
 
 export interface IUserSetting<T> {
@@ -69,7 +68,8 @@ export interface IClipboardItem {
 export enum IPages {
     settings,
     items,
-    notifications
+    notifications,
+    login
 }
 
 export function isTextContent(obj: IClipboardItem) {

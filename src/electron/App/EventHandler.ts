@@ -3,12 +3,12 @@ import Store from 'electron-store'
 import { IpcMainEvent } from 'electron/main'
 import * as fs from 'fs'
 import robot from 'robotjs'
-import { ItemRepo } from '../../Data/ItemRepository'
-import { IClipboardItem, isImageContent, isRTFContent, isTextContent } from '../../DataModels/DataTypes'
-import { IAppState, IKeyboardEvent, ILocalUser, IMouseEvent, IReceiveChannel } from '../../DataModels/LocalTypes'
-import { CryptoService } from '../../Utils/CryptoService'
-import { JsUtil } from '../../Utils/JsUtil'
-import { AppSettings, IUserSettings } from '../AppSettings'
+import { ItemRepo } from '../Data/ItemRepository'
+import { IClipboardItem, isImageContent, isRTFContent, isTextContent } from '../DataModels/DataTypes'
+import { IAppState, IKeyboardEvent, ILocalUser, IMouseEvent, IReceiveChannel } from '../DataModels/LocalTypes'
+import { CryptoService } from '../Utils/CryptoService'
+import { JsUtil } from '../Utils/JsUtil'
+import { AppSettings, IUserSettings } from './AppSettings'
 
 const store = new Store()
 
@@ -29,9 +29,11 @@ const getPreferenceKey = (key: string) => `${AppSettings.name}.preferences.${key
 /**
  * Default handler for the preference changes event
  */
-const defaultHandler = (e: IpcMainEvent, event: any) => {
+const defaultHandler = async (e: IpcMainEvent, event: any) => {
     store.set(`${getPreferenceKey(event.key)}`, event.value)
-    console.log(event)
+    // so that the front end can also react to this change
+    await JsUtil.waitforme(50)
+    action.sendSettings()
 }
 
 async function saveJSONFile(data: object) {
@@ -58,21 +60,21 @@ export const userSettings: IUserSettings = {
     darkMode: {
         description: 'Controls dark mode behaviour.',
         value: 'system',
+        type: 'select',
         selectableOptions: ['off', 'on', 'system'],
         changeHandler: (e, event) => {
-            defaultHandler(e, event)
             userSettings.darkMode.value = event.value
-            // so that the front end can also react to this change
-            localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(userSettings))
+            defaultHandler(e, event)
         }
     },
     regiserCommandNumberShortcuts: {
         description: 'If enabled, will register the shortcuts cmd/ctrl+number from 0 to 9',
         value: true,
+        type: 'toggle',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
-            defaultHandler(e, event)
             userSettings.regiserCommandNumberShortcuts.value = event.value
+            defaultHandler(e, event)
             for (const command of shortcutList) {
                 if (userSettings.regiserCommandNumberShortcuts) {
                     globalShortcut.register(command, () => null)
@@ -87,30 +89,81 @@ export const userSettings: IUserSettings = {
     showCommandNumberIcons: {
         description: 'If enabled, will show command and number icon at the start of the first 10 icons',
         value: true,
+        type: 'toggle',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
-            defaultHandler(e, event)
             userSettings.showCommandNumberIcons.value = event.value
+            defaultHandler(e, event)
         }
     },
     autoRestartOnUpdateAvailable: {
-        description: 'If enabled, the app will restart as soon as an update was downloaded',
+        description: 'If enabled, the app will restart as soon as an update was downloaded, if off, will update on restart.',
         value: true,
+        type: 'toggle',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
-            defaultHandler(e, event)
             userSettings.autoRestartOnUpdateAvailable.value = event.value
+            defaultHandler(e, event)
         }
     },
     minimizeAfterPaste: {
         description: 'If enabled, the app will minimize after pasting the item.',
         value: true,
+        type: 'toggle',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
+            userSettings.minimizeAfterPaste.value = event.value
             defaultHandler(e, event)
-            userSettings.autoRestartOnUpdateAvailable.value = event.value
+        }
+    },
+    enableAutoPaste: {
+        description: 'If enabled, the app will paste the selected item, if not, it will only be written to the clipboard',
+        value: true,
+        type: 'toggle',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userSettings.enableAutoPaste.value = event.value
+            defaultHandler(e, event)
+        }
+    },
+    maxClipAgeInHours: {
+        description: 'Items older than this value in hours will get deleted. Supports fractional numbers',
+        value: 48,
+        type: 'number',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userSettings.maxClipAgeInHours.value = event.value
+            defaultHandler(e, event)
+            handleCleanUpParameterChange()
+        }
+    },
+    maxNumberOfClips: {
+        description: 'Any items over this value will get deleted, starting with the oldest',
+        value: 1000,
+        type: 'number',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userSettings.maxNumberOfClips.value = event.value
+            defaultHandler(e, event)
+            handleCleanUpParameterChange()
         }
     }
+}
+
+let cleanUpInterval: NodeJS.Timer | undefined = undefined
+
+const handleCleanUpParameterChange = () => {
+    if (cleanUpInterval) {
+        clearInterval(cleanUpInterval)
+    }
+    cleanUpInterval = setInterval(() => {
+        console.log('Cleaning started')
+        const wasCleaned = items()?.cleanUp(userSettings.maxClipAgeInHours.value * 60 * 60, userSettings.maxNumberOfClips.value)
+        if (wasCleaned) {
+            console.log('Was cleaned!')
+            action.loadItems()
+        }
+    }, 5 * 60 * 1000)
 }
 
 const items = () => {
@@ -123,6 +176,7 @@ const items = () => {
 
 const action = {
     askPassword: async () => localMainWindow.webContents.send(channelsToRender.askPassword, true),
+    sendSettings: () => localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(userSettings)),
     hideWindow: () => {
         localMainWindow.hide()
         localMainWindow.webContents.send(channelsToRender.hide, true)
@@ -162,7 +216,9 @@ const action = {
         if (isRTFContent(result)) localClipboard.writeRTF(result.content)
         if (isImageContent(result)) localClipboard.writeImage(nativeImage.createFromDataURL(result.content))
 
-        await action.pasteItem()
+        if (userSettings.enableAutoPaste.value) {
+            await action.pasteItem()
+        }
     },
     async pasteItem() {
         if (!AppSettings.enablePaste) return
@@ -270,7 +326,7 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'get_settings',
         handler: () => {
-            localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(userSettings))
+            action.sendSettings()
         }
     },
     {
@@ -287,13 +343,15 @@ const channelsFromRender: IReceiveChannel[] = [
         name: 'loginUser',
         handler: async (event: IpcMainEvent, user: ILocalUser) => {
             try {
-                console.log(user)
                 const hashed = CryptoService.HashUserLocal(user)
                 state.user = hashed
                 console.log(state.user)
-                localMainWindow.webContents.send(channelsToRender.passwordConfirmed, true)
-                action.startClipboardPooling()
-                action.loadItems()
+                if (state.user.masterKey === '4f0a1743088714e60c5f0ada7d6a3717fa5aa5f195a9b121fc929151b8fb06da') {
+                    action.startClipboardPooling()
+                    action.loadItems()
+                    action.sendSettings()
+                    localMainWindow.webContents.send(channelsToRender.passwordConfirmed, true)
+                }
             } catch (e) {
                 console.log(e)
             }
@@ -420,6 +478,8 @@ async function InitIOHook(ipcMain: IpcMain, clipboard: Clipboard, mainWindow: Br
     }
 
     action.resetIndex()
+
+    handleCleanUpParameterChange()
 }
 
 export const ioHookHandler = {

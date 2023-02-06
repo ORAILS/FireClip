@@ -1,9 +1,9 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte'
-    import { appName, state } from '../stores'
+    import { appName, clipListFiltered, userSettings } from '../stores'
+    import { ipcRenderer } from '../util'
     import Switch from './Switch.svelte'
 
-    const ipcRenderer = window.require('electron').ipcRenderer
     let initialName: string
 
     const sendChange = (key: string, newValue: never | any) => {
@@ -45,8 +45,8 @@
 </script>
 
 <div class="settings flex flex-col justify-items-start">
-    {#if $state.defaultUserSettings}
-        {#each Object.entries($state.defaultUserSettings) as [key, item]}
+    {#if $userSettings}
+        {#each Object.entries($userSettings) as [key, item]}
             <div
                 class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
             dark:text-gray-200 
@@ -55,9 +55,10 @@
                 title={item.description}
             >
                 <Switch
+                    type={item.type}
                     label={camelToSentence(key)}
                     fontSize={12}
-                    defaultState={item.value}
+                    defaultValue={item.value}
                     selectOptions={item.selectableOptions}
                     on:change={(e) => {
                         sendChange(key, { key, value: e.detail })
@@ -72,7 +73,7 @@
         even:dark:bg-slate-900"
         >
             <p>
-                Total items: {$state.clipboardListFiltered.length}
+                Total items: {$clipListFiltered.length}
             </p>
         </div>
         <div
@@ -82,7 +83,7 @@
         even:dark:bg-slate-900"
         >
             <p>
-                Size: {sizeOf($state.clipboardListFiltered) / 1024} kB
+                Total clips size: {Math.round(sizeOf($clipListFiltered) / 1024)} kB
             </p>
         </div>
         <div
@@ -94,13 +95,10 @@
             <p>
                 <button
                     on:click={() => {
-                        ipcRenderer.send('save_items', $state.clipboardListFiltered)
+                        ipcRenderer.send('save_items', $clipListFiltered)
                     }}>Save state as JSON</button
                 >
             </p>
         </div>
     {/if}
 </div>
-
-<style lang="postcss">
-</style>
