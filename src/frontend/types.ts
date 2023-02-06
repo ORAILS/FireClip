@@ -35,6 +35,9 @@ export interface IUserSettings {
     showCommandNumberIcons: IUserSetting<boolean>
     autoRestartOnUpdateAvailable: IUserSetting<boolean>
     minimizeAfterPaste: IUserSetting<boolean>
+    enableAutoPaste: IUserSetting<boolean>
+    maxClipAgeInSeconds: IUserSetting<number>
+    maxNumberOfClips: IUserSetting<number>
 }
 
 export interface IUserSetting<T> {

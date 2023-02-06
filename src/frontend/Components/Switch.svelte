@@ -7,6 +7,7 @@
     export let defaultValue: any
 
     export let selectOptions: undefined | string[] = undefined
+    export let type: string
     let value: any
 
     onMount(() => {
@@ -32,7 +33,7 @@
     }
 </script>
 
-{#if selectOptions}
+{#if type === 'select'}
     <div class="slider" style="font-size:{fontSize}px">
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
         <select class="cursor-pointer bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange}>
@@ -45,14 +46,35 @@
             {/each}
         </select>
     </div>
-{:else}
+{:else if type === 'toggle'}
     <div class="slider" style="font-size:{fontSize}px">
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
         <button role="switch" aria-checked={value} on:click={handleClick} />
     </div>
+{:else if type === 'number'}
+    <div class="slider" style="font-size:{fontSize}px">
+        <span style="font-size: {fontSize * 1.3}px">{label}</span>
+        <input type="number" class="cursor-pointer rounded w-16 text-right bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange}/>
+    </div>
+{:else if type === 'string'}
+    <div class="slider" style="font-size:{fontSize}px">
+        <span style="font-size: {fontSize * 1.3}px">{label}</span>
+        <input type="text" class="cursor-pointer w-16 bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange}/>
+    </div>
 {/if}
 
 <style lang="postcss">
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+    -moz-appearance: textfield;
+    }
+
     .slider {
         @apply mr-3 flex items-center justify-between;
     }
@@ -61,7 +83,7 @@
         position: relative;
         border: none;
         border-radius: 1.5em;
-        @apply m-0 h-5 w-9 shadow duration-500 dark:bg-gray-800;
+        @apply m-0 h-5 min-h-[1.25rem] w-9 min-w-[2.25rem] shadow duration-500 dark:bg-gray-800;
     }
 
     .slider button::before {

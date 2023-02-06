@@ -55,6 +55,7 @@
                 title={item.description}
             >
                 <Switch
+                    type={item.type}
                     label={camelToSentence(key)}
                     fontSize={12}
                     defaultValue={item.value}

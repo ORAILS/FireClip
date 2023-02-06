@@ -43,18 +43,7 @@
         {
             name: 'loadItems',
             handler: function (event, store: any[]) {
-                const storeSorted = sort([...store]).desc((i) => i[1].lastModified)
-
-                for (const item of storeSorted) {
-                    const exists = $clipListFiltered.find((i) => i[0] === item[0])
-                    if (!exists) {
-                        $clipListFiltered.push(item)
-                    } else {
-                        exists[1].lastModified = item[1].lastModified
-                    }
-                }
-
-                $clipListFiltered = sort([...$clipListFiltered]).desc((i) => i[1].lastModified)
+                $clipListFiltered = sort([...store]).desc((i) => i[1].lastModified)
                 $clipList = $clipListFiltered
             }
         },
@@ -107,7 +96,7 @@
             name: 'passwordConfirmed',
             handler: function (event, store) {
                 $isPasswordAsked = false
-                $currentPage = IPages.items
+                $currentPage = IPages.settings
             }
         },
 

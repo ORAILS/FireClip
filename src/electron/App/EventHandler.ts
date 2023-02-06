@@ -60,6 +60,7 @@ export const userSettings: IUserSettings = {
     darkMode: {
         description: 'Controls dark mode behaviour.',
         value: 'system',
+        type: 'select',
         selectableOptions: ['off', 'on', 'system'],
         changeHandler: (e, event) => {
             userSettings.darkMode.value = event.value
@@ -69,6 +70,7 @@ export const userSettings: IUserSettings = {
     regiserCommandNumberShortcuts: {
         description: 'If enabled, will register the shortcuts cmd/ctrl+number from 0 to 9',
         value: true,
+        type: 'toggle',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
             userSettings.regiserCommandNumberShortcuts.value = event.value
@@ -87,6 +89,7 @@ export const userSettings: IUserSettings = {
     showCommandNumberIcons: {
         description: 'If enabled, will show command and number icon at the start of the first 10 icons',
         value: true,
+        type: 'toggle',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
             userSettings.showCommandNumberIcons.value = event.value
@@ -96,6 +99,7 @@ export const userSettings: IUserSettings = {
     autoRestartOnUpdateAvailable: {
         description: 'If enabled, the app will restart as soon as an update was downloaded, if off, will update on restart.',
         value: true,
+        type: 'toggle',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
             userSettings.autoRestartOnUpdateAvailable.value = event.value
@@ -105,6 +109,7 @@ export const userSettings: IUserSettings = {
     minimizeAfterPaste: {
         description: 'If enabled, the app will minimize after pasting the item.',
         value: true,
+        type: 'toggle',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
             userSettings.minimizeAfterPaste.value = event.value
@@ -114,12 +119,51 @@ export const userSettings: IUserSettings = {
     enableAutoPaste: {
         description: 'If enabled, the app will paste the selected item, if not, it will only be written to the clipboard',
         value: true,
+        type: 'toggle',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
             userSettings.enableAutoPaste.value = event.value
             defaultHandler(e, event)
         }
+    },
+    maxClipAgeInHours: {
+        description: 'Items older than this value in hours will get deleted. Supports fractional numbers',
+        value: 48,
+        type: 'number',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userSettings.maxClipAgeInHours.value = event.value
+            defaultHandler(e, event)
+            handleCleanUpParameterChange()
+        }
+    },
+    maxNumberOfClips: {
+        description: 'Any items over this value will get deleted, starting with the oldest',
+        value: 1000,
+        type: 'number',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userSettings.maxNumberOfClips.value = event.value
+            defaultHandler(e, event)
+            handleCleanUpParameterChange()
+        }
     }
+}
+
+let cleanUpInterval: NodeJS.Timer | undefined = undefined
+
+const handleCleanUpParameterChange = () => {
+    if (cleanUpInterval) {
+        clearInterval(cleanUpInterval)
+    }
+    cleanUpInterval = setInterval(() => {
+        console.log('Cleaning started')
+        const wasCleaned = items()?.cleanUp(userSettings.maxClipAgeInHours.value * 60 * 60, userSettings.maxNumberOfClips.value)
+        if (wasCleaned) {
+            console.log('Was cleaned!')
+            action.loadItems()
+        }
+    }, 5 * 60 * 1000)
 }
 
 const items = () => {
@@ -434,6 +478,8 @@ async function InitIOHook(ipcMain: IpcMain, clipboard: Clipboard, mainWindow: Br
     }
 
     action.resetIndex()
+
+    handleCleanUpParameterChange()
 }
 
 export const ioHookHandler = {

@@ -1,7 +1,7 @@
 import { IClipboardItem } from '../DataModels/DataTypes'
 import { CryptoService } from '../Utils/CryptoService'
 
-let items: Map<string, IClipboardItem> = new Map()
+const items: Map<string, IClipboardItem> = new Map()
 
 const getAll = (): Map<string, IClipboardItem> => items
 
@@ -43,41 +43,42 @@ const exists = (itemHash: string): boolean => {
     return get(itemHash) !== undefined
 }
 
-const checkForOldItems = (maxAgeInSeconds: number) => {
+const checkForOldItems = (maxAgeInSeconds: number): boolean => {
+    let changed = false
     const maxAge = new Date(new Date().getTime() - maxAgeInSeconds * 1000)
-    console.log(maxAge)
     for (const [hash, item] of items) {
         if (item.lastModified.getTime() < maxAge.getTime()) {
             if (item.isFavourite) continue
-            console.log(item)
-            console.log('should be deleted')
+            remove(item)
+            changed = true
         }
     }
+    return changed
 }
 
-function limitMapSize(map: Map<string, IClipboardItem>, maxSize: number) {
-    const entries = Array.from(map.entries())
-    const diff = entries.length - maxSize
-    // if the difference is not big, not worth the effort
-    if (diff < 1) return
-    const favorites = entries.filter(([_, value]) => value.isFavourite)
-    if (favorites.length >= maxSize) return new Map(favorites)
-
-    const nonFavorites = entries.filter(([_, value]) => !value.isFavourite)
-    nonFavorites.sort((a, b) => a[1].lastModified.getTime() - b[1].lastModified.getTime())
-    const limitedNonFavorites = nonFavorites.slice(Math.max(nonFavorites.length - maxSize + favorites.length, 0))
-
-    return new Map(favorites.concat(limitedNonFavorites))
+function limitMapSize(maxSize: number): boolean {
+    const toDelete = []
+    let i = 0
+    for (const [key, value] of items.entries()) {
+        if (!value.isFavourite) {
+            toDelete[i++] = key
+        }
+    }
+    let changed = false
+    toDelete.sort((a, b) => items.get(a)!.created.getTime() - items.get(b)!.created?.getTime())
+    while (items.size > maxSize && toDelete.length > 0) {
+        changed = true
+        items.delete(toDelete.shift() ?? '')
+    }
+    return changed
 }
 
-// setInterval(() => {
-//     checkForOldItems(2 * 24 * 60 * 60)
-//     const newItems = limitMapSize(items, 10)
-//     if (newItems) {
-//         items = newItems
-//     }
-//     console.log(Array.from(items.entries()).length)
-// }, 30 * 1000)
+export const cleanUp = (maxAgeInSeconds: number, maxNumberTotal: number): boolean => {
+    let changed = false
+    changed = changed || checkForOldItems(maxAgeInSeconds)
+    changed = changed || limitMapSize(maxNumberTotal)
+    return changed
+}
 
 export const ItemRepo = {
     add,
@@ -85,5 +86,6 @@ export const ItemRepo = {
     update,
     remove,
     exists,
-    getAll
+    getAll,
+    cleanUp
 }
