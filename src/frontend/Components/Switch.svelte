@@ -54,25 +54,30 @@
 {:else if type === 'number'}
     <div class="slider" style="font-size:{fontSize}px">
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
-        <input type="number" class="cursor-pointer rounded w-16 text-right bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange}/>
+        <input
+            type="number"
+            class="w-16 cursor-pointer rounded bg-gray-100 text-right dark:bg-slate-900"
+            bind:value
+            on:change={handleSelectChange}
+        />
     </div>
 {:else if type === 'string'}
     <div class="slider" style="font-size:{fontSize}px">
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
-        <input type="text" class="cursor-pointer w-16 bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange}/>
+        <input type="text" class="w-16 cursor-pointer bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange} />
     </div>
 {/if}
 
 <style lang="postcss">
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+        -webkit-appearance: none;
+        margin: 0;
     }
 
     /* Firefox */
-    input[type=number] {
-    -moz-appearance: textfield;
+    input[type='number'] {
+        -moz-appearance: textfield;
     }
 
     .slider {
