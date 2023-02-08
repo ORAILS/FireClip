@@ -8,6 +8,7 @@ on:
 
 jobs:
   release:
+    environment: PROD
     runs-on: macos-latest
 
     steps:

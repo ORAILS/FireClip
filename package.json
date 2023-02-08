@@ -122,7 +122,6 @@
             "gatekeeperAssess": false
         },
         "dmg": {
-            "sign": false
         },
         "afterSign": "electron-builder-notarize",
         "win": {
