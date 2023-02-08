@@ -96,7 +96,7 @@
             name: 'passwordConfirmed',
             handler: function (event, store) {
                 $isPasswordAsked = false
-                $currentPage = IPages.settings
+                $currentPage = IPages.items
             }
         },
 
