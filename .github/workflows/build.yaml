@@ -18,10 +18,12 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16.1
-      
+
       - run: node -e  "console.log(process.arch)"
 
-      - run: yarn
+      - run: npm i
+
+      - run: npm rebuild
 
       - name: Prepare for app notarization
         # Import Apple API key for app notarization on macOS
