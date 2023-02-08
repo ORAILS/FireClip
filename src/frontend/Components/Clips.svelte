@@ -37,12 +37,6 @@
     const handleEnter = (hash: string, content: string) => {
         visibleHashes.push(hash)
         visibleHashes = visibleHashes
-
-        const currentIndex = $clipListFiltered.findIndex((i) => i[0] === hash)
-        const next = $clipListFiltered[currentIndex + 1]
-        if (next) {
-            next[1].isVisible = true
-        }
     }
     const handleExit = (hash: string, content: string) => {
         const newArr = visibleHashes.filter((i) => i != hash)
@@ -64,7 +58,7 @@
 <div class="nosbar flex flex-col">
     {#if $clipListFiltered}
         {#each $clipListFiltered as [key, item]}
-            {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1))}
+            {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1)) || visibleHashes.includes(getPreviousHash(key, -2)) || visibleHashes.includes(getPreviousHash(key, 2))}
                 <item
                     use:viewport
                     on:enterViewport={() => handleEnter(key, item.content)}
