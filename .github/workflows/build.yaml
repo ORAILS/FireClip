@@ -21,6 +21,8 @@ jobs:
       
       - run: node -e  "console.log(process.arch)"
 
+      - run: yarn
+
       - name: Prepare for app notarization
         # Import Apple API key for app notarization on macOS
         run: |
