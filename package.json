@@ -4,7 +4,7 @@
     "description": "Privacy focused clipboard manager built using Electron",
     "author": "Daniel Railean <me@ddlele.com>",
     "license": "No licence, rights reserved",
-    "version": "1.5.0",
+    "version": "1.5.1",
     "main": "dist/index.js",
     "repository": {
         "type": "git",
@@ -32,6 +32,7 @@
         "start": "npm run compile &&  electron .",
         "start:svelte": "rollup -c & npm run compile && electron .",
         "compile": "tsc",
+        "build" : "yarn rebuild && rollup -c && tsc",
         "out:win": "rollup -c && tsc && electron-builder build --win --publish never",
         "out:mac": "rollup -c && tsc  && electron-builder build --mac --publish never",
         "check-updates": "npx npm-check-updates",
@@ -123,7 +124,7 @@
         "dmg": {
             "sign": false
         },
-        "afterSign": "notarize.js",
+        "afterSign": "electron-builder-notarize",
         "win": {
             "target": [
                 "nsis"
