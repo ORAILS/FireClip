@@ -21,19 +21,6 @@
         }
     })
 
-    function checkForNewDay() {
-        let currentDate = new Date()
-        let previousDate = currentDate
-        setInterval(() => {
-            currentDate = new Date()
-            if (previousDate.getDate() !== currentDate.getDate()) {
-                previousDate = currentDate
-                // your custom logic here, fx full the data from the external using node-fetch and load to db.
-                console.log('A new day has come!')
-            }
-        }, 1000)
-    }
-
     const handleEnter = (hash: string, content: string) => {
         visibleHashes.push(hash)
         visibleHashes = visibleHashes
