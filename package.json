@@ -32,7 +32,7 @@
         "start": "npm run compile &&  electron .",
         "start:svelte": "rollup -c & npm run compile && electron .",
         "compile": "tsc",
-        "build" : "rollup -c && tsc",
+        "build" : "yarn rebuild && rollup -c && tsc",
         "out:win": "rollup -c && tsc && electron-builder build --win --publish never",
         "out:mac": "rollup -c && tsc  && electron-builder build --mac --publish never",
         "check-updates": "npx npm-check-updates",
@@ -108,7 +108,7 @@
             "output": "out",
             "buildResources": "resources"
         },
-        "npmRebuild": true,
+        "npmRebuild": false,
         "mac": {
             "target": [
                 "dmg",
