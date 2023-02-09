@@ -6,7 +6,6 @@ on:
 jobs:
   release:
     environment: PROD
-    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: macos-latest
 
     steps:
