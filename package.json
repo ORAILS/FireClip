@@ -4,7 +4,7 @@
     "description": "Privacy focused clipboard manager built using Electron",
     "author": "Daniel Railean <me@ddlele.com>",
     "license": "No licence, rights reserved",
-    "version": "1.5.3",
+    "version": "0.8.1",
     "main": "dist/index.js",
     "repository": {
         "type": "git",
