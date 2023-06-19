@@ -20,20 +20,6 @@
         appName.set(initialName)
     })
 
-    /**
-     * Used to transform something like "aSentenceThatWork"s to "A sentence that Works".
-     */
-    function camelToSentence(s: string) {
-        let result = s[0].toUpperCase()
-        var i = 1
-        while (i < s.length) {
-            if (s[i].charCodeAt(0) >= 'A'.charCodeAt(0) && s[i].charCodeAt(0) <= 'Z'.charCodeAt(0)) result += '  ' + s[i].toLowerCase()
-            else result += s[i]
-            i++
-        }
-        return result
-    }
-
     const typeSizes = {
         undefined: () => 0,
         boolean: () => 4,
@@ -65,7 +51,7 @@
             >
                 <Switch
                     type={item.type}
-                    label={camelToSentence(key)}
+                    label={item.displayName}
                     fontSize={12}
                     defaultValue={item.value}
                     selectOptions={item.selectableOptions}

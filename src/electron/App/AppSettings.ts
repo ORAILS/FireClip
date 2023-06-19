@@ -20,6 +20,7 @@ interface AppSettings {
 
 export interface IUserSettings {
     darkMode: IUserSetting<'system' | 'on' | 'off'>
+    keyboardLayout: IUserSetting<'qwerty' | 'dvorak'>
     regiserCommandNumberShortcuts: IUserSetting<boolean>
     showCommandNumberIcons: IUserSetting<boolean>
     autoRestartOnUpdateAvailable: IUserSetting<boolean>
@@ -34,6 +35,7 @@ export interface IUserSettings {
  */
 
 export interface IUserSetting<T> {
+    displayName: string
     description: string
     /**
      * default value for the setting

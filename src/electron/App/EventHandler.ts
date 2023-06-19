@@ -58,6 +58,7 @@ async function saveJSONFile(data: object) {
  */
 export const userSettings: IUserSettings = {
     darkMode: {
+        displayName: 'Dark Mode',
         description: 'Controls dark mode behaviour.',
         value: 'system',
         type: 'select',
@@ -67,7 +68,19 @@ export const userSettings: IUserSettings = {
             defaultHandler(e, event)
         }
     },
+    keyboardLayout: {
+        displayName: 'Keyboard layout',
+        description: 'Controls the buttons displayed in shortcuts menu',
+        value: 'qwerty',
+        type: 'select',
+        selectableOptions: ['dvorak', 'qwerty'],
+        changeHandler: (e, event) => {
+            userSettings.keyboardLayout.value = event.value
+            defaultHandler(e, event)
+        }
+    },
     regiserCommandNumberShortcuts: {
+        displayName: 'Register [CMD+No] shortcuts',
         description: 'If enabled, will register the shortcuts cmd/ctrl+number from 0 to 9',
         value: true,
         type: 'toggle',
@@ -87,6 +100,7 @@ export const userSettings: IUserSettings = {
         }
     },
     showCommandNumberIcons: {
+        displayName: 'Show [CMD+No] icons on items page',
         description: 'If enabled, will show command and number icon at the start of the first 10 icons',
         value: true,
         type: 'toggle',
@@ -97,6 +111,7 @@ export const userSettings: IUserSettings = {
         }
     },
     autoRestartOnUpdateAvailable: {
+        displayName: 'Auto restart on update available',
         description: 'If enabled, the app will restart as soon as an update was downloaded, if off, will update on restart.',
         value: true,
         type: 'toggle',
@@ -107,6 +122,7 @@ export const userSettings: IUserSettings = {
         }
     },
     minimizeAfterPaste: {
+        displayName: 'Minimize after paste',
         description: 'If enabled, the app will minimize after pasting the item.',
         value: true,
         type: 'toggle',
@@ -117,6 +133,7 @@ export const userSettings: IUserSettings = {
         }
     },
     enableAutoPaste: {
+        displayName: 'Auto paste item',
         description: 'If enabled, the app will paste the selected item, if not, it will only be written to the clipboard',
         value: true,
         type: 'toggle',
@@ -127,6 +144,7 @@ export const userSettings: IUserSettings = {
         }
     },
     maxClipAgeInHours: {
+        displayName: 'Maximum clip age in hours',
         description: 'Items older than this value in hours will get deleted. Supports fractional numbers',
         value: 48,
         type: 'number',
@@ -138,6 +156,7 @@ export const userSettings: IUserSettings = {
         }
     },
     maxNumberOfClips: {
+        displayName: 'Maximum number of clips saved',
         description: 'Any items over this value will get deleted, starting with the oldest',
         value: 1000,
         type: 'number',

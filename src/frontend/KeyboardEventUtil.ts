@@ -285,12 +285,7 @@ export const qwertyToDvorak = {
     ' ': ' '
 }
 
-export const getKeyName = (
-    keycode: number,
-    rawcode: number,
-    layout: 'qwerty' | 'dvorak' = 'qwerty',
-    platform: 'mac' | 'win' = 'mac'
-): string => {
+export const getKeyName = (keycode: number, rawcode: number, layout: string, platform: 'mac' | 'win' = 'mac'): string => {
     if (macRawKeys[rawcode]) {
         return macRawKeys[rawcode]
     }

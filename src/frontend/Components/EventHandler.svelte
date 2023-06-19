@@ -30,8 +30,6 @@
         isWinShortcutEnd,
         isWinShortcutStart,
         itemMatchesText,
-        keyNames,
-        qwertyToDvorak,
         sort
     } from '../KeyboardEventUtil'
 
@@ -101,7 +99,7 @@
             name: 'passwordConfirmed',
             handler: function (event, store) {
                 $isPasswordAsked = false
-                $currentPage = IPages.items
+                $currentPage = IPages.shortcuts
             }
         },
 
@@ -146,15 +144,14 @@
     }
 
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
-        console.log(e)
-        const key = getKeyName(e.keycode, e.rawcode, 'dvorak')
+        currentEvent.set(e)
+        const key = getKeyName(e.keycode, e.rawcode, $userSettings.keyboardLayout.value)
         const exists = $pressedKeys.find((k) => k === key)
         if (!exists) {
             const temp = $pressedKeys
             temp.push(key)
             pressedKeys.set(temp)
         }
-        currentEvent.set(e)
         if (isWinShortcutStart(e) || isMacShortcutStart(e)) {
             if ($clipListFiltered && $currentScrollIndex + 1 < $clipListFiltered.length && $clipListFiltered[$currentScrollIndex + 1][0]) {
                 $currentScrollIndex++
@@ -173,7 +170,7 @@
 
     ioHook.on('keyup', (e: IHookKeyboardEvent) => {
         // scrolled items, wants and released ctrl
-        const key = getKeyName(e.keycode, e.rawcode, 'dvorak')
+        const key = getKeyName(e.keycode, e.rawcode, $userSettings.keyboardLayout.value)
         $pressedKeys = $pressedKeys.filter((k) => k != key)
         currentEvent.set(e)
         if (

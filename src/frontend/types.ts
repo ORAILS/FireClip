@@ -31,19 +31,23 @@ export interface IClipboardItemEncrypted {
 
 export interface IUserSettings {
     darkMode: IUserSetting<'system' | 'on' | 'off'>
+    keyboardLayout: IUserSetting<'qwerty' | 'dvorak'>
     regiserCommandNumberShortcuts: IUserSetting<boolean>
     showCommandNumberIcons: IUserSetting<boolean>
     autoRestartOnUpdateAvailable: IUserSetting<boolean>
     minimizeAfterPaste: IUserSetting<boolean>
     enableAutoPaste: IUserSetting<boolean>
-    maxClipAgeInSeconds: IUserSetting<number>
+    maxClipAgeInHours: IUserSetting<number>
     maxNumberOfClips: IUserSetting<number>
 }
 
 export interface IUserSetting<T> {
+    displayName: string
     description: string
     value: T
-    changeHandler: (newValue: T) => void | null
+    type: 'toggle' | 'select' | 'number' | 'string'
+    selectableOptions: T[] | undefined
+    changeHandler: (event: IpcMainEvent, data: any) => Promise<void> | void
 }
 
 export interface IClipboardItem {
