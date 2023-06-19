@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte'
     import { appName, currentPage, isPasswordIncorrect, passwordButtonText, showPassword } from '../stores'
-    import { ipcRenderer } from '../util'
+    import { ipcRenderer } from '../KeyboardEventUtil'
 
     function togglePasswordInput() {
         $passwordButtonText === 'show' ? ($passwordButtonText = 'hide') : ($passwordButtonText = 'show')

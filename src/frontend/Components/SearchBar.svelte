@@ -1,6 +1,6 @@
 <script lang="ts">
     import { currentSearchedText, isFocused } from '../stores'
-    import { ipcRenderer } from '../util'
+    import { ipcRenderer } from '../KeyboardEventUtil'
 
     let element: HTMLElement
     let text: string = ''

@@ -10,6 +10,7 @@
     import EventHandler from './Components/EventHandler.svelte'
     import { currentPage } from './stores'
     import { IPages } from './types'
+    import Shortcuts from './Components/Shortcuts.svelte'
 </script>
 
 <svelte:head>
@@ -25,6 +26,8 @@
             <Clips />
         {:else if $currentPage === IPages.settings}
             <Settings />
+        {:else if $currentPage === IPages.shortcuts}
+            <Shortcuts />
         {:else if $currentPage === IPages.notifications}
             <Notifications />
         {/if}

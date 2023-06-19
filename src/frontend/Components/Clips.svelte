@@ -2,7 +2,7 @@
     import { clipListFiltered, currentScrollIndex, selectedClipId, userSettings } from '../stores'
     import type { IClipboardItem } from '../types'
     import { isImageContent, isRTFContent, isTextContent } from '../types'
-    import { getTitle, ipcRenderer } from '../util'
+    import { getTitle, ipcRenderer } from '../KeyboardEventUtil'
     import viewport from '../viewPortAction'
     import IconCommand from './icons/_IconCommand.svelte'
 

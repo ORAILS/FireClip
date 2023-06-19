@@ -14,6 +14,8 @@ export const currentPage = writable<IPages>(IPages.login)
  */
 export const appName: Writable<string> = writable('FireClip')
 export const previousEvent: Writable<IHookKeyboardEvent | undefined> = writable(undefined)
+export const currentEvent: Writable<IHookKeyboardEvent | undefined> = writable(undefined)
+export const pressedKeys: Writable<string[]> = writable([])
 export const isPasswordAsked: Writable<boolean> = writable(false)
 export const isPasswordIncorrect: Writable<boolean> = writable(false)
 export const selectedClipId: Writable<string> = writable('')
