@@ -147,7 +147,7 @@
 
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
         console.log(e)
-        const key = getKeyName(e.keycode, "dvorak")
+        const key = getKeyName(e.keycode, 'dvorak')
         const exists = $pressedKeys.find((k) => k === key)
         if (!exists) {
             const temp = $pressedKeys
@@ -173,7 +173,7 @@
 
     ioHook.on('keyup', (e: IHookKeyboardEvent) => {
         // scrolled items, wants and released ctrl
-        const key = getKeyName(e.keycode, "dvorak");
+        const key = getKeyName(e.keycode, 'dvorak')
         $pressedKeys = $pressedKeys.filter((k) => k != key)
         currentEvent.set(e)
         if (
