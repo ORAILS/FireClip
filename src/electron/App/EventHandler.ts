@@ -259,15 +259,16 @@ const action = {
             return newItem
         }
 
-        const rtf = localClipboard.readRTF()
-        if (rtf.length > 0) {
-            const hash = CryptoService.ContentHash(rtf, state.user.masterKey)
-            if (hash === state.lastHash) return undefined
-            newItem.content = rtf
-            newItem.contentHash = hash
-            newItem.type = 1
-            return newItem
-        }
+        // TODO REVISIT RTF SUPPORT IN FUTURE.
+        // const rtf = localClipboard.readRTF()
+        // if (rtf.length > 0) {
+        //     const hash = CryptoService.ContentHash(rtf, state.user.masterKey)
+        //     if (hash === state.lastHash) return undefined
+        //     newItem.content = rtf
+        //     newItem.contentHash = hash
+        //     newItem.type = 1
+        //     return newItem
+        // }
 
         const text = localClipboard.readText()
         const hash = CryptoService.ContentHash(text, state.user.masterKey)

@@ -88,7 +88,7 @@
         line-height: 15px;
     }
     img {
-        max-height: 60px;
+        max-height: 75px;
     }
 
     ::selection {
