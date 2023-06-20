@@ -26,7 +26,7 @@
             <Clips />
         {:else if $currentPage === IPages.settings}
             <Settings />
-        <!-- {:else if $currentPage === IPages.shortcuts}
+            <!-- {:else if $currentPage === IPages.shortcuts}
             <Shortcuts /> -->
         {:else if $currentPage === IPages.notifications}
             <Notifications />
