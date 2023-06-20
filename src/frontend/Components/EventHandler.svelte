@@ -1,37 +1,19 @@
 <script lang="ts">
+    import { arrayToArrayMap, getKeyName, ioHook, ipcRenderer, itemMatchesText, sort } from '../KeyboardEventUtil'
     import {
         clipList,
         clipListFiltered,
-        currentEvent,
         currentPage,
-        currentScrollIndex,
         currentSearchedText,
         isAppHidden,
-        isFocused,
         isPasswordAsked,
         isPasswordIncorrect,
         pressedKeys,
-        previousEvent,
-        selectedClipId,
+        pressedKeysSizeLimit,
         userSettings
     } from '../stores'
     import type { IClipboardItem, IHookKeyboardEvent, IHookMouseEvent, IReceiveChannel } from '../types'
     import { IPages } from '../types'
-    import {
-        arrayToArrayMap,
-        delay,
-        getKeyName,
-        ioHook,
-        ipcRenderer,
-        isMacShortcutEnd,
-        isMacShortcutStart,
-        isNumberPasted,
-        isSearchShortcut,
-        isWinShortcutEnd,
-        isWinShortcutStart,
-        itemMatchesText,
-        sort
-    } from '../KeyboardEventUtil'
 
     currentSearchedText.subscribe((text: string) => {
         if (text.length == 0) {
@@ -99,7 +81,7 @@
             name: 'passwordConfirmed',
             handler: function (event, store) {
                 $isPasswordAsked = false
-                $currentPage = IPages.shortcuts
+                $currentPage = IPages.items
             }
         },
 
@@ -135,65 +117,44 @@
         return e.keycode - 1
     }
 
-    function scrollIntoView(element: string) {
-        const el = document.getElementById(element)
-        if (!el) return
-        el.scrollIntoView({
-            block: 'nearest'
-        })
-    }
-
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
-        currentEvent.set(e)
         const key = getKeyName(e.keycode, e.rawcode, $userSettings.keyboardLayout.value)
-        const exists = $pressedKeys.find((k) => k === key)
+        const exists = $pressedKeys[$pressedKeys.length - 1].find((k) => k === key)
         if (!exists) {
-            const temp = $pressedKeys
+            const temp: string[] = JSON.parse(JSON.stringify($pressedKeys[$pressedKeys.length - 1]))
             temp.push(key)
-            pressedKeys.set(temp)
-        }
-        if (isWinShortcutStart(e) || isMacShortcutStart(e)) {
-            if ($clipListFiltered && $currentScrollIndex + 1 < $clipListFiltered.length && $clipListFiltered[$currentScrollIndex + 1][0]) {
-                $currentScrollIndex++
-                $selectedClipId = $clipListFiltered[$currentScrollIndex][0]
-                scrollIntoView($selectedClipId)
+            const val = $pressedKeys
+            val.push(temp)
+            pressedKeys.set(val)
+            if ($pressedKeys.length > pressedKeysSizeLimit) {
+                $pressedKeys.shift()
             }
-        }
-        $previousEvent = e
-
-        if (!$isAppHidden && isSearchShortcut(e)) {
-            ipcRenderer.send('focus', true)
-            await delay(100)
-            isFocused.set($isFocused + 1)
         }
     })
 
     ioHook.on('keyup', (e: IHookKeyboardEvent) => {
-        // scrolled items, wants and released ctrl
         const key = getKeyName(e.keycode, e.rawcode, $userSettings.keyboardLayout.value)
-        $pressedKeys = $pressedKeys.filter((k) => k != key)
-        currentEvent.set(e)
-        if (
-            $previousEvent &&
-            ((isWinShortcutStart($previousEvent) && isWinShortcutEnd(e)) || (isMacShortcutStart($previousEvent) && isMacShortcutEnd(e)))
-        ) {
-            ipcRenderer.send('paste', $selectedClipId)
-            $currentScrollIndex = -1
-            $selectedClipId = ''
+        const temp: string[] = JSON.parse(JSON.stringify($pressedKeys[$pressedKeys.length - 1])).filter((k) => k != key)
+        const val = $pressedKeys
+        val.push(temp)
+        pressedKeys.set(val)
+        if ($pressedKeys.length > pressedKeysSizeLimit) {
+            $pressedKeys.shift()
         }
-        if (isNumberPasted(e)) {
-            let pastedIndex = getPastedNumber(e)
-            pastedIndex = pastedIndex - 1
-            if (pastedIndex === -1) pastedIndex = 9
+        // if (isNumberPasted(e)) {
+        //     let pastedIndex = getPastedNumber(e)
+        //     pastedIndex = pastedIndex - 1
+        //     if (pastedIndex === -1) pastedIndex = 9
 
-            if ($clipListFiltered[pastedIndex]) {
-                ipcRenderer.send('paste', $clipListFiltered[pastedIndex][1].contentHash)
-                $currentScrollIndex = -1
-                $selectedClipId = ''
-            }
-        }
-        $previousEvent = e
+        //     if ($clipListFiltered[pastedIndex]) {
+        //         ipcRenderer.send('paste', $clipListFiltered[pastedIndex][1].contentHash)
+        //         $currentScrollIndex = -1
+        //         $selectedClipId = ''
+        //     }
+        // }
     })
+
+    pressedKeys.subscribe((v) => {})
 
     ioHook.start()
 </script>

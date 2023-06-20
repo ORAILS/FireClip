@@ -26,12 +26,13 @@
             <Clips />
         {:else if $currentPage === IPages.settings}
             <Settings />
-        {:else if $currentPage === IPages.shortcuts}
-            <Shortcuts />
+        <!-- {:else if $currentPage === IPages.shortcuts}
+            <Shortcuts /> -->
         {:else if $currentPage === IPages.notifications}
             <Notifications />
         {/if}
     </section>
+    <Shortcuts />
 </PageHandler>
 
 <style lang="postcss">

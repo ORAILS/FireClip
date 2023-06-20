@@ -1,5 +1,5 @@
 import { Writable, writable } from 'svelte/store'
-import { IClipboardItem, IHookKeyboardEvent, IPages, IUserSettings } from './types'
+import { IClipboardItem, IPages, IUserSettings } from './types'
 
 /**
  * Wether the app is focused (used for seaching function), as it's only triggered when focused
@@ -13,9 +13,10 @@ export const currentPage = writable<IPages>(IPages.login)
  * App name. Used by the pages above to update it.
  */
 export const appName: Writable<string> = writable('FireClip')
-export const previousEvent: Writable<IHookKeyboardEvent | undefined> = writable(undefined)
-export const currentEvent: Writable<IHookKeyboardEvent | undefined> = writable(undefined)
-export const pressedKeys: Writable<string[]> = writable([])
+// export const previousEvent: Writable<IHookKeyboardEvent | undefined> = writable(undefined)
+// export const currentEvent: Writable<IHookKeyboardEvent | undefined> = writable(undefined)
+export const pressedKeysSizeLimit = 20
+export const pressedKeys: Writable<string[][]> = writable([[]])
 export const isPasswordAsked: Writable<boolean> = writable(false)
 export const isPasswordIncorrect: Writable<boolean> = writable(false)
 export const selectedClipId: Writable<string> = writable('')

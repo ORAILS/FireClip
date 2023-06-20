@@ -1,4 +1,19 @@
 import type { IClipboardItem, IHookKeyboardEvent } from './types'
+import {
+    clipList,
+    clipListFiltered,
+    currentPage,
+    currentScrollIndex,
+    currentSearchedText,
+    isAppHidden,
+    isFocused,
+    isPasswordAsked,
+    isPasswordIncorrect,
+    pressedKeys,
+    // previousEvent,
+    selectedClipId,
+    userSettings
+} from './stores'
 import { isImageContent, isRTFContent, isTextContent } from './types'
 
 export const ipcRenderer = window.require('electron').ipcRenderer

@@ -1,6 +1,11 @@
 import type { IpcMainEvent } from 'electron'
 import type { Writable } from 'svelte/store'
 
+export interface IShortCut {
+    combination: string[][]
+    handler: () => Promise<void> | void
+}
+
 export interface AppState {
     previous: Writable<IHookKeyboardEvent | undefined>
     isAsked: Writable<boolean>

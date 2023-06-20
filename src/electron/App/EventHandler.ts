@@ -200,7 +200,7 @@ const action = {
         localMainWindow.hide()
         localMainWindow.webContents.send(channelsToRender.hide, true)
     },
-    handleShortcut: () => {
+    unhide: () => {
         localMainWindow.showInactive()
         localMainWindow.webContents.send(channelsToRender.unhide, true)
     },
@@ -291,7 +291,7 @@ const action = {
 
         const text = localClipboard.readText()
         const hash = CryptoService.ContentHash(text, state.user.masterKey)
-        if (hash === state.lastHash) return undefined
+        if (hash === state.lastHash || !text || text === '') return undefined
         newItem.content = text
         newItem.contentHash = hash
         newItem.type = 2
@@ -389,8 +389,11 @@ const channelsFromRender: IReceiveChannel[] = [
         name: 'focus',
         handler: async (event: IpcMainEvent, value: boolean) => {
             localMainWindow.show()
-            console.log('focus')
         }
+    },
+    {
+        name: 'unhide',
+        handler: async (event: IpcMainEvent, value: boolean) => await action.unhide()
     },
     {
         name: 'textSearched',
@@ -486,7 +489,7 @@ async function InitIOHook(ipcMain: IpcMain, clipboard: Clipboard, mainWindow: Br
 
     // default triggering shortcut, always enabled (most likely also a user settings in the future)
     globalShortcut.register('CommandOrControl+`', () => {
-        action.handleShortcut()
+        // action.handleShortcut()
     })
 
     for (const event of channelsFromRender) {
