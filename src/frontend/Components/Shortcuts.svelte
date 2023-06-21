@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { delay, ipcRenderer } from '../KeyboardEventUtil'
-	import { isAppHidden, isFocused } from '../stores'
-	import type { IShortCut } from '../types'
-	import { clipListFiltered, currentScrollIndex, selectedClipId, pressedKeys } from './../stores'
+    import { delay, ipcRenderer } from '../KeyboardEventUtil'
+    import { isAppHidden, isFocused } from '../stores'
+    import type { IShortCut } from '../types'
+    import { clipListFiltered, currentScrollIndex, selectedClipId, pressedKeys } from './../stores'
 
     // const recordShortcut = async (key: string) => {
     //     console.log(key)
@@ -75,7 +75,7 @@
             }
         ]
     ]
-    let allowPull = false;
+    let allowPull = false
 
     export const areEqual = (arr1: string[], arr2: string[]): boolean => {
         if (!arr1 || !arr2) return false
@@ -85,10 +85,9 @@
 
     let timeout: NodeJS.Timeout
 
-    const checkShortcuts = async (currentlyPressed:string[][], allow = false) => {
-        if(!allow)
-        {
-            console.log("not allowed to check shortcuts")
+    const checkShortcuts = async (currentlyPressed: string[][], allow = false) => {
+        if (!allow) {
+            console.log('not allowed to check shortcuts')
             return
         }
         for (const shortcut of combinationToActionMapping) {
@@ -112,22 +111,21 @@
             }
         }
 
-        if(timeout)
-        {
+        if (timeout) {
             clearTimeout(timeout)
         }
         timeout = setTimeout(() => {
-            allowPull = true; 
-        }, 500);
+            allowPull = true
+        }, 500)
     }
     pressedKeys.subscribe(async (updatedPressed) => {
-        allowPull = false;
+        allowPull = false
         await checkShortcuts(updatedPressed, true)
     })
 
-    setInterval(async()=> {
+    setInterval(async () => {
         await checkShortcuts($pressedKeys, allowPull)
-    }, 200);
+    }, 200)
 </script>
 
 <!-- <div
