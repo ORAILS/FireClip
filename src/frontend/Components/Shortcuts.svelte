@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { delay, ipcRenderer } from '../KeyboardEventUtil'
-    import { isAppHidden, isFocused, pressedKeys } from '../stores'
-    import type { IShortCut } from '../types'
-    import { clipListFiltered, currentScrollIndex, selectedClipId } from './../stores'
+	import { delay, ipcRenderer } from '../KeyboardEventUtil'
+	import { isAppHidden, isFocused } from '../stores'
+	import type { IShortCut } from '../types'
+	import { clipListFiltered, currentScrollIndex, selectedClipId, pressedKeys } from './../stores'
 
     // const recordShortcut = async (key: string) => {
     //     console.log(key)
@@ -75,24 +75,33 @@
             }
         ]
     ]
+    let allowPull = false;
 
     export const areEqual = (arr1: string[], arr2: string[]): boolean => {
         if (!arr1 || !arr2) return false
         const res = arr1.sort().join(',') === arr2.sort().join(',')
         return res
     }
-    pressedKeys.subscribe(async (v) => {
+
+    let timeout: NodeJS.Timeout
+
+    const checkShortcuts = async (currentlyPressed:string[][], allow = false) => {
+        if(!allow)
+        {
+            console.log("not allowed to check shortcuts")
+            return
+        }
         for (const shortcut of combinationToActionMapping) {
             const combination = shortcut[1].combination
             if (combination.length == 0) continue
             if (combination.length == 1) {
-                if (areEqual(combination[0], v[v.length - 1])) {
+                if (areEqual(combination[0], currentlyPressed[currentlyPressed.length - 1])) {
                     await shortcut[1].handler()
                 }
             } else {
                 let matched = true
                 combinLoop: for (let index = 0; index < combination.length; index++) {
-                    if (!areEqual(combination[combination.length - index - 1], v[v.length - index - 1])) {
+                    if (!areEqual(combination[combination.length - index - 1], currentlyPressed[currentlyPressed.length - index - 1])) {
                         matched = false
                         break combinLoop
                     }
@@ -101,16 +110,24 @@
                     await shortcut[1].handler()
                 }
             }
-            // if(areEqual(combination, v))
-            // {
-            //     await shortcut[1].handler()
-            // }
         }
 
-        // // custom logic for pasting on scroll release
-        // var scroll = combinationToActionMapping.find(i=>i[0]==="scroll")
-        // scroll[1].combination
+        if(timeout)
+        {
+            clearTimeout(timeout)
+        }
+        timeout = setTimeout(() => {
+            allowPull = true; 
+        }, 500);
+    }
+    pressedKeys.subscribe(async (updatedPressed) => {
+        allowPull = false;
+        await checkShortcuts(updatedPressed, true)
     })
+
+    setInterval(async()=> {
+        await checkShortcuts($pressedKeys, allowPull)
+    }, 200);
 </script>
 
 <!-- <div
