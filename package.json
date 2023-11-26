@@ -4,7 +4,7 @@
     "description": "Privacy focused clipboard manager built using Electron",
     "author": "Daniel Railean <me@ddlele.com>",
     "license": "No licence, rights reserved",
-    "version": "0.8.1",
+    "version": "0.8.2-26nov23",
     "main": "dist/index.js",
     "repository": {
         "type": "git",
@@ -32,7 +32,7 @@
         "start": "npm run compile &&  electron .",
         "start:svelte": "rollup -c & npm run compile && electron .",
         "compile": "tsc",
-        "build" : "yarn rebuild && rollup -c && tsc",
+        "build": "yarn rebuild && rollup -c && tsc",
         "out:win": "rollup -c && tsc && electron-builder build --win --publish never",
         "out:mac": "rollup -c && tsc  && electron-builder build --mac --publish never",
         "check-updates": "npx npm-check-updates",
@@ -83,6 +83,7 @@
         "typescript": "4.5.5"
     },
     "dependencies": {
+        "@rollup/plugin-json": "6.0.1",
         "@typescript-eslint/eslint-plugin": "5.40.0",
         "@typescript-eslint/parser": "5.40.0",
         "ansi-regex": "6.0.1",

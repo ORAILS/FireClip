@@ -11,6 +11,7 @@
     import { currentPage } from './stores'
     import { IPages } from './types'
     import Shortcuts from './Components/Shortcuts.svelte'
+    import Info from './Components/Info.svelte'
 </script>
 
 <svelte:head>
@@ -28,8 +29,10 @@
             <Settings />
         {:else if $currentPage === IPages.shortcuts}
             <Shortcuts />
-        {:else if $currentPage === IPages.notifications}
+            {:else if $currentPage === IPages.notifications}
             <Notifications />
+            {:else if $currentPage === IPages.info}
+                <Info />
         {/if}
     </section>
     <Shortcuts />
