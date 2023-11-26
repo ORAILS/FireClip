@@ -12,6 +12,7 @@
     import { IPages } from './types'
     import Shortcuts from './Components/Shortcuts.svelte'
     import Info from './Components/Info.svelte'
+    import ShortcutsHandler from './Components/ShortcutsHandler.svelte'
 </script>
 
 <svelte:head>
@@ -35,7 +36,7 @@
             <Info />
         {/if}
     </section>
-    <Shortcuts />
+    <ShortcutsHandler />
 </PageHandler>
 
 <style lang="postcss">
