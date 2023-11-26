@@ -119,8 +119,7 @@
 
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
         // the settings are send from the back
-        if(!$userSettings)
-        {
+        if (!$userSettings) {
             return
         }
         const key = getKeyName(e.keycode, e.rawcode, $userSettings.keyboardLayout.value)
@@ -139,8 +138,7 @@
 
     ioHook.on('keyup', (e: IHookKeyboardEvent) => {
         // the settings are send from the back
-        if(!$userSettings)
-        {
+        if (!$userSettings) {
             return
         }
         const key = getKeyName(e.keycode, e.rawcode, $userSettings.keyboardLayout.value)
