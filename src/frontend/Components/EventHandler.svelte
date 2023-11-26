@@ -118,6 +118,11 @@
     }
 
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
+        // the settings are send from the back
+        if(!$userSettings)
+        {
+            return
+        }
         const key = getKeyName(e.keycode, e.rawcode, $userSettings.keyboardLayout.value)
         const exists = $pressedKeys[$pressedKeys.length - 1].find((k) => k === key)
         if (!exists) {
@@ -133,6 +138,11 @@
     })
 
     ioHook.on('keyup', (e: IHookKeyboardEvent) => {
+        // the settings are send from the back
+        if(!$userSettings)
+        {
+            return
+        }
         const key = getKeyName(e.keycode, e.rawcode, $userSettings.keyboardLayout.value)
         const temp: string[] = JSON.parse(JSON.stringify($pressedKeys[$pressedKeys.length - 1])).filter((k) => k != key)
         const val = $pressedKeys
