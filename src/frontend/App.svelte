@@ -29,10 +29,10 @@
             <Settings />
         {:else if $currentPage === IPages.shortcuts}
             <Shortcuts />
-            {:else if $currentPage === IPages.notifications}
+        {:else if $currentPage === IPages.notifications}
             <Notifications />
-            {:else if $currentPage === IPages.info}
-                <Info />
+        {:else if $currentPage === IPages.info}
+            <Info />
         {/if}
     </section>
     <Shortcuts />

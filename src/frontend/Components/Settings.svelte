@@ -40,7 +40,7 @@
     >
         <p on:click={() => currentPage.set(IPages.shortcuts)}>Shortcuts ></p>
     </div>
-    
+
     {#if $userSettings}
         {#each Object.entries($userSettings) as [key, item]}
             <div
