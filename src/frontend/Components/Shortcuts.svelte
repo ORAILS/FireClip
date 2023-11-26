@@ -85,7 +85,7 @@
                     $selectedClipId = ''
                 }
             }
-        ],
+        ]
         // [
         //     'paste_nr',
         //     {
