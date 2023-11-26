@@ -1,7 +1,7 @@
 <script lang="ts">
     import { delay, ipcRenderer } from '../KeyboardEventUtil'
-    import { isAppHidden, isFocused } from '../stores'
-    import type { IShortCut } from '../types'
+    import { isAppHidden, isFocused, currentPage } from '../stores'
+    import { IPages, type IShortCut } from '../types'
     import { clipListFiltered, currentScrollIndex, selectedClipId, pressedKeys } from './../stores'
 
     // const recordShortcut = async (key: string) => {
@@ -34,6 +34,10 @@
             {
                 combination: [['Left Command', '`']],
                 handler: async () => {
+                    if ($currentPage != IPages.items) {
+                        console.log('not scrolling, not in items!')
+                        return
+                    }
                     console.log('scroll')
                     ipcRenderer.send('unhide', true)
                     if (
@@ -53,6 +57,10 @@
             {
                 combination: [[`Left Command`, 'f']],
                 handler: async () => {
+                    if ($currentPage != IPages.items) {
+                        console.log('not searching, not in items!')
+                        return
+                    }
                     console.log('searched')
                     if (!$isAppHidden) {
                         ipcRenderer.send('focus', true)
@@ -67,23 +75,40 @@
             {
                 combination: [['Left Command', '`'], ['Left Command'], []],
                 handler: () => {
+                    if ($currentPage != IPages.items) {
+                        console.log('not pasting, not in items!')
+                        return
+                    }
                     console.log('paste')
                     ipcRenderer.send('paste', $selectedClipId)
                     $currentScrollIndex = -1
                     $selectedClipId = ''
                 }
             }
-        ]
+        ],
+        // [
+        //     'paste_nr',
+        //     {
+        //         combination: [['Left Command', '`'], ['Left Command'], []],
+        //         handler: () => {
+        //             if ($currentPage != IPages.items) {
+        //                 console.log('not pasting, not in items!')
+        //                 return
+        //             }
+        //             console.log('paste')
+        //             ipcRenderer.send('paste', $selectedClipId)
+        //             $currentScrollIndex = -1
+        //             $selectedClipId = ''
+        //         }
+        //     }
+        // ]
     ]
-    let allowPull = false
 
     export const areEqual = (arr1: string[], arr2: string[]): boolean => {
         if (!arr1 || !arr2) return false
         const res = arr1.sort().join(',') === arr2.sort().join(',')
         return res
     }
-
-    let timeout: NodeJS.Timeout
 
     const checkShortcuts = async (currentlyPressed: string[][], allow = false) => {
         if (!allow) {
@@ -110,43 +135,22 @@
                 }
             }
         }
-
-        if (timeout) {
-            clearTimeout(timeout)
-        }
-        timeout = setTimeout(() => {
-            allowPull = true
-        }, 500)
     }
     pressedKeys.subscribe(async (updatedPressed) => {
-        allowPull = false
         await checkShortcuts(updatedPressed, true)
     })
-
-    setInterval(async () => {
-        await checkShortcuts($pressedKeys, allowPull)
-    }, 200)
 </script>
 
-<!-- <div
+<div
     class="h-full w-full bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
 dark:text-gray-200 
 even:dark:border-gray-800 
 even:dark:bg-slate-900"
 >
-    <h2>Event</h2>
-    <p>
-        {JSON.stringify($pressedKeys, undefined, 2)}
-        {#each combinationToActionMapping as [key, value]}
-            <div class="flex flex-row justify-between">
-                <p>
-                    {key} -> {#each value.combination as item}
-                        "{item}" {value.combination.indexOf(item) === value.combination.length - 1 ? '' : '+'}
-                    {:else}
-                        not assigned
-                    {/each}
-                </p>
-            </div>
-        {/each}
-    </p>
-</div> -->
+    <h1>Pressed keys</h1>
+    {#each $pressedKeys as key}
+        <p>
+            {key}
+        </p>
+    {/each}
+</div>
