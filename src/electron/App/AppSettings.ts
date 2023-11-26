@@ -55,7 +55,7 @@ export const AppSettings: AppSettings = {
     openDevTools: false,
     enableDevTools: false,
     enablePaste: true,
-    widthNormal: 250,
+    widthNormal: 600,
     heightNormal: 400,
     widthWithDevTools: 900,
     heightWithDevTools: 800,

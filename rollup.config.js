@@ -82,6 +82,9 @@ export default {
             dedupe: ['svelte']
         }),
         commonjs(),
+        json({
+            compact: true
+        }),
         typescript({
             tsconfig: 'src/frontend/tsconfig.json', // add and check!
             sourceMap: !production,
@@ -99,7 +102,6 @@ export default {
         // If we're building for production (npm run build
         // instead of npm run dev), minify
         production && terser(),
-        json()
     ],
     watch: {
         clearScreen: false
