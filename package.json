@@ -27,8 +27,9 @@
     },
     "scripts": {
         "nodemon": "nodemon",
+        "arch": "node -e \"console.log(process.arch)\"",
+        "postinstall": "electron-builder install-app-deps",
         "dev": "rollup -c -w",
-        "rebuild": "electron-rebuild",
         "start": "npm run compile &&  electron .",
         "start:svelte": "rollup -c & npm run compile && electron .",
         "compile": "tsc",
@@ -59,7 +60,6 @@
         "electron": "12.2.3",
         "electron-builder": "23.6.0",
         "electron-builder-notarize": "1.5.1",
-        "electron-rebuild": "3.2.9",
         "husky": "8.0.3",
         "nodemon": "2.0.19",
         "postcss": "8.4.6",
