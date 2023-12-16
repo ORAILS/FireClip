@@ -1,9 +1,16 @@
 <script lang="ts">
     import { delay, ipcRenderer } from '../KeyboardEventUtil'
-    import { isAppHidden, isFocused, currentPage } from '../stores'
+    import { isAppHidden, isFocused, currentPage, userPreferences } from '../stores'
     import { IPages, type IShortCut } from '../types'
     import { clipListFiltered, currentScrollIndex, selectedClipId, pressedKeys } from './../stores'
+    import { DateTime } from 'luxon'
 
+    interface IExecutedShortcut {
+        key: string
+        timestamp: DateTime<boolean>
+    }
+    // mutable so that we can clean it to not get big enought
+    let executedShortcutsHistory: IExecutedShortcut[] = []
     // const recordShortcut = async (key: string) => {
     //     console.log(key)
     //     let combination = combinationToActionMapping.find((i) => i[0] === key)
@@ -28,17 +35,32 @@
         })
     }
 
+    const shortcutAllowed = async (key: string, delayMsBetweenTriggers: number): Promise<boolean> => {
+        console.log(key)
+        const maxSaved = 20
+        const now = DateTime.now()
+        const latest = executedShortcutsHistory.find((i) => i.key == key)
+        if (latest) {
+            const earliestRetrigger = latest.timestamp.plus({ milliseconds: delayMsBetweenTriggers })
+            if (now < earliestRetrigger) {
+                return false
+            }
+        }
+        executedShortcutsHistory.unshift({ key, timestamp: DateTime.now() })
+        executedShortcutsHistory = executedShortcutsHistory.slice(0, maxSaved)
+        return true
+    }
+
     export let combinationToActionMapping: [string, IShortCut][] = [
         [
             'scroll',
             {
                 combination: [['Left Command', '`']],
+                delayMsBetweenTriggers: 100,
                 handler: async () => {
                     if ($currentPage != IPages.items) {
-                        console.log('not scrolling, not in items!')
                         return
                     }
-                    console.log('scroll')
                     ipcRenderer.send('unhide', true)
                     if (
                         $clipListFiltered &&
@@ -55,13 +77,12 @@
         [
             'search',
             {
+                delayMsBetweenTriggers: 100,
                 combination: [[`Left Command`, 'f']],
                 handler: async () => {
                     if ($currentPage != IPages.items) {
-                        console.log('not searching, not in items!')
                         return
                     }
-                    console.log('searched')
                     if (!$isAppHidden) {
                         ipcRenderer.send('focus', true)
                         await delay(100)
@@ -73,35 +94,118 @@
         [
             'paste',
             {
+                delayMsBetweenTriggers: 100,
                 combination: [['Left Command', '`'], ['Left Command'], []],
                 handler: () => {
                     if ($currentPage != IPages.items) {
-                        console.log('not pasting, not in items!')
                         return
                     }
-                    console.log('paste')
                     ipcRenderer.send('paste', $selectedClipId)
                     $currentScrollIndex = -1
                     $selectedClipId = ''
                 }
             }
+        ],
+        [
+            'paste_1',
+            {
+                delayMsBetweenTriggers: 100,
+                combination: [['Left Command', '1']],
+                handler: async () => {
+                    ipcRenderer.send('paste', $clipListFiltered[0][1].contentHash)
+                }
+            }
+        ],
+        [
+            'paste_2',
+            {
+                delayMsBetweenTriggers: 100,
+                combination: [['Left Command', '2']],
+                handler: async () => {
+                    ipcRenderer.send('paste', $clipListFiltered[1][1].contentHash)
+                }
+            }
+        ],
+        [
+            'paste_3',
+            {
+                delayMsBetweenTriggers: 100,
+                combination: [['Left Command', '3']],
+                handler: async () => {
+                    ipcRenderer.send('paste', $clipListFiltered[2][1].contentHash)
+                }
+            }
+        ],
+        [
+            'paste_4',
+            {
+                delayMsBetweenTriggers: 100,
+                combination: [['Left Command', '4']],
+                handler: async () => {
+                    ipcRenderer.send('paste', $clipListFiltered[3][1].contentHash)
+                }
+            }
+        ],
+        [
+            'paste_5',
+            {
+                delayMsBetweenTriggers: 100,
+                combination: [['Left Command', '5']],
+                handler: async () => {
+                    ipcRenderer.send('paste', $clipListFiltered[4][1].contentHash)
+                }
+            }
+        ],
+        [
+            'paste_6',
+            {
+                delayMsBetweenTriggers: 100,
+                combination: [['Left Command', '6']],
+                handler: async () => {
+                    ipcRenderer.send('paste', $clipListFiltered[5][1].contentHash)
+                }
+            }
+        ],
+        [
+            'paste_7',
+            {
+                delayMsBetweenTriggers: 100,
+                combination: [['Left Command', '7']],
+                handler: async () => {
+                    ipcRenderer.send('paste', $clipListFiltered[6][1].contentHash)
+                }
+            }
+        ],
+        [
+            'paste_8',
+            {
+                delayMsBetweenTriggers: 100,
+                combination: [['Left Command', '8']],
+                handler: async () => {
+                    ipcRenderer.send('paste', $clipListFiltered[7][1].contentHash)
+                }
+            }
+        ],
+        [
+            'paste_9',
+            {
+                delayMsBetweenTriggers: 100,
+                combination: [['Left Command', '9']],
+                handler: async () => {
+                    ipcRenderer.send('paste', $clipListFiltered[8][1].contentHash)
+                }
+            }
+        ],
+        [
+            'paste_10',
+            {
+                delayMsBetweenTriggers: 100,
+                combination: [['Left Command', '0']],
+                handler: async () => {
+                    ipcRenderer.send('paste', $clipListFiltered[9][1].contentHash)
+                }
+            }
         ]
-        // [
-        //     'paste_nr',
-        //     {
-        //         combination: [['Left Command', '`'], ['Left Command'], []],
-        //         handler: () => {
-        //             if ($currentPage != IPages.items) {
-        //                 console.log('not pasting, not in items!')
-        //                 return
-        //             }
-        //             console.log('paste')
-        //             ipcRenderer.send('paste', $selectedClipId)
-        //             $currentScrollIndex = -1
-        //             $selectedClipId = ''
-        //         }
-        //     }
-        // ]
     ]
 
     export const areEqual = (arr1: string[], arr2: string[]): boolean => {
@@ -110,9 +214,8 @@
         return res
     }
 
-    const checkShortcuts = async (currentlyPressed: string[][], allow = false) => {
-        if (!allow) {
-            console.log('not allowed to check shortcuts')
+    const checkShortcuts = async (currentlyPressed: string[][]) => {
+        if (!$userPreferences || !$userPreferences.enableKeyboardShortcuts.value) {
             return
         }
         for (const shortcut of combinationToActionMapping) {
@@ -120,7 +223,10 @@
             if (combination.length == 0) continue
             if (combination.length == 1) {
                 if (areEqual(combination[0], currentlyPressed[currentlyPressed.length - 1])) {
-                    await shortcut[1].handler()
+                    const allowed = await shortcutAllowed(shortcut[0], shortcut[1].delayMsBetweenTriggers)
+                    if (allowed) {
+                        await shortcut[1].handler()
+                    }
                 }
             } else {
                 let matched = true
@@ -131,12 +237,15 @@
                     }
                 }
                 if (matched) {
-                    await shortcut[1].handler()
+                    const allowed = await shortcutAllowed(shortcut[0], shortcut[1].delayMsBetweenTriggers)
+                    if (allowed) {
+                        await shortcut[1].handler()
+                    }
                 }
             }
         }
     }
-    pressedKeys.subscribe(async (updatedPressed) => {
-        await checkShortcuts(updatedPressed, true)
+    pressedKeys.subscribe(async (pressedKeysArray) => {
+        await checkShortcuts(pressedKeysArray)
     })
 </script>

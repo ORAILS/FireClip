@@ -43,7 +43,7 @@ const exists = (itemHash: string): boolean => {
     return get(itemHash) !== undefined
 }
 
-const checkForOldItems = (maxAgeInSeconds: number): boolean => {
+const removeOldUnfavored = (maxAgeInSeconds: number): boolean => {
     let changed = false
     const maxAge = new Date(new Date().getTime() - maxAgeInSeconds * 1000)
     for (const [hash, item] of items) {
@@ -75,7 +75,7 @@ function limitMapSize(maxSize: number): boolean {
 
 export const cleanUp = (maxAgeInSeconds: number, maxNumberTotal: number): boolean => {
     let changed = false
-    changed = changed || checkForOldItems(maxAgeInSeconds)
+    changed = changed || removeOldUnfavored(maxAgeInSeconds)
     changed = changed || limitMapSize(maxNumberTotal)
     return changed
 }

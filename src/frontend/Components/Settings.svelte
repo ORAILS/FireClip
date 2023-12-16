@@ -1,8 +1,8 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte'
-    import { appName, clipListFiltered, currentPage, userSettings } from '../stores'
-    import { IPages } from '../types'
     import { ipcRenderer } from '../KeyboardEventUtil'
+    import { appName, clipListFiltered, currentPage, userPreferences } from '../stores'
+    import { IPages } from '../types'
     import Switch from './Switch.svelte'
 
     let initialName: string
@@ -41,8 +41,8 @@
         <p on:click={() => currentPage.set(IPages.shortcuts)}>Shortcuts ></p>
     </div>
 
-    {#if $userSettings}
-        {#each Object.entries($userSettings) as [key, item]}
+    {#if $userPreferences}
+        {#each Object.entries($userPreferences) as [key, item]}
             <div
                 class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
             dark:text-gray-200 

@@ -10,7 +10,7 @@
         isPasswordIncorrect,
         pressedKeys,
         pressedKeysSizeLimit,
-        userSettings
+        userPreferences
     } from '../stores'
     import type { IClipboardItem, IHookKeyboardEvent, IHookMouseEvent, IReceiveChannel } from '../types'
     import { IPages } from '../types'
@@ -88,7 +88,7 @@
         {
             name: 'to.renderer.set.settings',
             handler: (e, value) => {
-                $userSettings = JSON.parse(value)
+                $userPreferences = JSON.parse(value)
             }
         },
 
@@ -119,10 +119,10 @@
 
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
         // the settings are send from the back
-        if (!$userSettings) {
+        if (!$userPreferences) {
             return
         }
-        const key = getKeyName(e.keycode, e.rawcode, $userSettings.keyboardLayout.value)
+        const key = getKeyName(e.keycode, e.rawcode, $userPreferences.keyboardLayout.value)
         const exists = $pressedKeys[$pressedKeys.length - 1].find((k) => k === key)
         if (!exists) {
             const temp: string[] = JSON.parse(JSON.stringify($pressedKeys[$pressedKeys.length - 1]))
@@ -138,10 +138,10 @@
 
     ioHook.on('keyup', (e: IHookKeyboardEvent) => {
         // the settings are send from the back
-        if (!$userSettings) {
+        if (!$userPreferences) {
             return
         }
-        const key = getKeyName(e.keycode, e.rawcode, $userSettings.keyboardLayout.value)
+        const key = getKeyName(e.keycode, e.rawcode, $userPreferences.keyboardLayout.value)
         const temp: string[] = JSON.parse(JSON.stringify($pressedKeys[$pressedKeys.length - 1])).filter((k) => k != key)
         const val = $pressedKeys
         val.push(temp)
