@@ -15,7 +15,7 @@
 {#if visible}
     <div
         on:click={handleClick}
-        class="min-w-20 m-1 flex flex-row justify-center bg-gray-300 p-1 align-middle dark:bg-slate-700 {extraClasses}"
+        class="m-1 flex min-w-20 flex-row justify-center bg-gray-300 p-1 align-middle dark:bg-slate-700 {extraClasses}"
     >
         <p style="font-size: {fontSize * 1.3}px">
             {label}

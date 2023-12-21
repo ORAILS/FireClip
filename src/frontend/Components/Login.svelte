@@ -77,7 +77,7 @@
                             bind:value={userPassword}
                             on:input={resetPasswordCorrect}
                             on:keypress={onKeyEnter}
-                            class="border-1 w-full appearance-none border-gray-300 bg-gray-100 py-3 px-3 pr-16 font-mono  leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 focus:outline-none  dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-gray-800"
+                            class="border-1 w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono  leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 focus:outline-none  dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-gray-800"
                             type="text"
                             autocomplete="off"
                         />
@@ -86,7 +86,7 @@
                             bind:value={userPassword}
                             on:input={resetPasswordCorrect}
                             on:keypress={onKeyEnter}
-                            class="border-1 dark:focus:bg-gray-800focus:outline-none w-full appearance-none border-gray-300 bg-gray-100 py-3 px-3 pr-16 font-mono leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-slate-700"
+                            class="border-1 dark:focus:bg-gray-800focus:outline-none w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-slate-700"
                             type="password"
                             autocomplete="off"
                         />

@@ -7,7 +7,7 @@ export interface IShortCut {
     // maxTriggersPressed: number
     handler: () => Promise<void> | void
     editVisible: boolean
-    combinationChangeHandler: (newValue: string[][][])=> Promise<void> | void
+    combinationChangeHandler: (newValue: string[][][]) => Promise<void> | void
 }
 
 export interface AppState {
