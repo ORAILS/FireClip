@@ -2,10 +2,12 @@ import type { IpcMainEvent } from 'electron'
 import type { Writable } from 'svelte/store'
 
 export interface IShortCut {
-    combination: string[][]
+    combinations: string[][][]
     delayMsBetweenTriggers: number
     // maxTriggersPressed: number
     handler: () => Promise<void> | void
+    editVisible: boolean
+    combinationChangeHandler: (newValue: string[][][])=> Promise<void> | void
 }
 
 export interface AppState {

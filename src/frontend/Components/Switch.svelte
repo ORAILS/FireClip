@@ -8,7 +8,7 @@
 
     export let selectOptions: undefined | string[] = undefined
     export let type: string
-    let value: any
+    export let value: any
 
     onMount(() => {
         value = defaultValue

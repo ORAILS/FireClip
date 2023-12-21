@@ -21,22 +21,20 @@
 
 <EventHandler />
 <PageHandler title={$appName}>
-    <section class="h-full space-y-6 bg-white dark:bg-slate-900">
+    <section class="h-full space-y-6">
         {#if $currentPage === IPages.login}
             <Login />
         {:else if $currentPage === IPages.items}
             <Clips />
         {:else if $currentPage === IPages.settings}
             <Settings />
-        {:else if $currentPage === IPages.shortcuts}
-            <Shortcuts />
         {:else if $currentPage === IPages.notifications}
             <Notifications />
         {:else if $currentPage === IPages.info}
             <Info />
         {/if}
+        <ShortcutsHandler />
     </section>
-    <ShortcutsHandler />
 </PageHandler>
 
 <style lang="postcss">

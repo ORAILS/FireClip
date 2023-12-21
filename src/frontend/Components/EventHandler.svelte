@@ -28,6 +28,7 @@
         {
             name: 'loadItems',
             handler: function (event, store: any[]) {
+                console.log('load')
                 $clipListFiltered = sort([...store]).desc((i) => i[1].lastModified)
                 $clipList = $clipListFiltered
             }
@@ -49,7 +50,7 @@
             name: 'unhide',
             handler: function (event, store) {
                 $isAppHidden = false
-                console.log(store)
+                // console.log(store)
             }
         },
         {
@@ -62,6 +63,7 @@
         {
             name: 'askPassword',
             handler: function (event, store) {
+                console.log('ask')
                 $isPasswordAsked = true
                 $currentPage = IPages.login
             }
