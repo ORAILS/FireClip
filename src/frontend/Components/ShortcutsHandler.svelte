@@ -57,7 +57,6 @@
         scroll: {
             combinations: [[['Left Command', '`']], [['Left Command', 'j']]],
             editVisible: false,
-            // combinationsWritable: scrollCombinations,
             delayMsBetweenTriggers: 100,
             handler: async () => {
                 if ($currentPage != IPages.items) {
@@ -74,16 +73,12 @@
                     scrollIntoView($selectedClipId)
                 }
             },
-            combinationChangeHandler: (newCombination: string[][][]) => {
-                console.log('clicked scroll')
-                shortcuts.close_and_paste.combinations = [[['Left Command', '`'], ['Left Command'], []]]
-            }
+            combinationChangeHandler: (newCombination: string[][][]) => {}
         },
 
         close_and_paste: {
-            combinations: [[['Left Command', 'j'], ['Left Command'], []]],
+            combinations: [[['Left Command', '`'], ['Left Command'], []]],
             editVisible: false,
-            // combinationsWritable: pasteCombinations,
             delayMsBetweenTriggers: 100,
             handler: () => {
                 if ($currentPage != IPages.items) {
@@ -93,10 +88,7 @@
                 $currentScrollIndex = -1
                 $selectedClipId = ''
             },
-            combinationChangeHandler: (newCombination: string[][][]) => {
-                console.log('clicked paste')
-                shortcuts.close_and_paste.combinations = [[['Left Command', 'j'], ['Left Command'], []]]
-            }
+            combinationChangeHandler: (newCombination: string[][][]) => {}
         },
         search: {
             delayMsBetweenTriggers: 100,
