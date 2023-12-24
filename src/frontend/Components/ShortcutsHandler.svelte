@@ -52,6 +52,8 @@
         paste9: IShortCut
         paste10: IShortCut
     }
+    const shortcutSimpleName = 'simple'
+    const shortcutSequenceName = 'sequence'
 
     export let shortcuts: IShortcuts = {
         scroll: {
@@ -206,22 +208,32 @@
         }
     }
 
-    export const areEqual = (arr1: string[], arr2: string[]): boolean => {
+    export const arr1dSameValues = (arr1: string[], arr2: string[]): boolean => {
         if (!arr1 || !arr2) return false
         const res = arr1.sort().join(',') === arr2.sort().join(',')
         return res
     }
+    export const arr2dIdentical = (arr1: string[][], arr2: string[][]): boolean => {
+        if (!arr1 || !arr2) return false
+        if (arr1.length != arr2.length) return false
+        for (let index = 0; index < arr1.length; index++) {
+            if (!arr1dSameValues(arr1[index], arr2[index])) {
+                return false
+            }
+        }
+        return true
+    }
 
-    let simpleMode = false
+    let type = shortcutSimpleName
 
-    let recordedShortcuts: string[][] = [[]]
+    let recordedShortcut: string[][] = [[]]
     let simplestShortcut: string[] = []
     pressedKeys.subscribe((value) => {
         if ($currentPage != IPages.shortcuts) {
             return
         }
         console.log('Pressed keys changed!')
-        recordedShortcuts = value
+        recordedShortcut = value
         const lastPressed = value[value.length - 1]
         if (lastPressed.length >= simplestShortcut.length) {
             simplestShortcut = lastPressed
@@ -238,7 +250,7 @@
             for (const combination of combinations) {
                 if (combination.length == 0) continue
                 if (combination.length == 1) {
-                    if (areEqual(combination[0], currentlyPressed[currentlyPressed.length - 1])) {
+                    if (arr1dSameValues(combination[0], currentlyPressed[currentlyPressed.length - 1])) {
                         const allowed = await shortcutAllowed(shortcut[0], shortcut[1].delayMsBetweenTriggers)
                         if (allowed) {
                             console.log(`running handler for ${shortcut[0]}`)
@@ -248,7 +260,12 @@
                 } else {
                     let matched = true
                     combinLoop: for (let index = 0; index < combination.length; index++) {
-                        if (!areEqual(combination[combination.length - index - 1], currentlyPressed[currentlyPressed.length - index - 1])) {
+                        if (
+                            !arr1dSameValues(
+                                combination[combination.length - index - 1],
+                                currentlyPressed[currentlyPressed.length - index - 1]
+                            )
+                        ) {
                             matched = false
                             break combinLoop
                         }
@@ -263,6 +280,19 @@
                 }
             }
         }
+    }
+    export const shortcutExists = (shortcut: string[][]): { exists: boolean; name: string } => {
+        for (const s of entries(shortcuts)) {
+            for (const combination of s[1].combinations) {
+                if (arr2dIdentical(shortcut, combination)) {
+                    return { exists: true, name: s[0] }
+                }
+            }
+        }
+        return { exists: false, name: '' }
+    }
+    export const getNameFromKey = (key: string): string => {
+        return key.toUpperCase().replaceAll('_', ' ')
     }
     export const resetRecorded = () => {
         console.log('reseted!')
@@ -292,10 +322,10 @@ even:dark:bg-slate-900"
             <div class=" my-6 flex flex-col">
                 <div class="flex flex-row justify-between">
                     <h4>
-                        {shortcut[0].toUpperCase().replaceAll('_', ' ')}
+                        {getNameFromKey(shortcut[0])}
                     </h4>
                     <Button
-                        label={shortcut[1].editVisible ? 'Close' : 'Edit'}
+                        label={shortcut[1].editVisible ? 'Save' : 'Edit'}
                         on:click={() => {
                             resetRecorded()
                             shortcut[1].editVisible = !shortcut[1].editVisible
@@ -317,7 +347,7 @@ even:dark:bg-slate-900"
                             visible={shortcut[1].editVisible}
                             on:click={() => {
                                 console.log(index)
-                                const yes = confirm('Delete shortcut combination ?')
+                                const yes = confirm('Delete shortcut ?')
                                 if (yes) {
                                     shortcut[1].combinations.splice(index, 1)
                                     shortcut[1].combinations = shortcut[1].combinations
@@ -329,32 +359,34 @@ even:dark:bg-slate-900"
                 {#if shortcut[1].editVisible}
                     <div class="div my-2">
                         <Switch
-                            type="toggle"
-                            label="Simple shortcut"
+                            type="select"
+                            label="Type"
+                            title="If set to '{shortcutSimpleName}' a key combination will be recorded and can be used to trigger the action. If '{shortcutSequenceName}' is selected, the exact sequence of the buttons needs to be pressed for the shortcut to trigger."
                             fontSize={12}
-                            defaultValue={simpleMode}
-                            bind:value={simpleMode}
+                            selectOptions={[shortcutSimpleName, shortcutSequenceName]}
+                            bind:value={type}
                             on:change={(e) => {
-                                simpleMode = e.detail
+                                type = e.detail
                             }}
                         />
                     </div>
                     <h3>
-                        Recorded shortcut:
-                        {#if simpleMode}
+                        {#if type === shortcutSimpleName}
+                            Recorded combination:
                             <!-- content here -->
                             {JSON.stringify(simplestShortcut)}
                         {:else}
+                            Recorded sequence:
                             <!-- else content here -->
-                            {#each recordedShortcuts as keys, index}
+                            {#each recordedShortcut as keys, index}
                                 <div class="flex flex-row justify-between">
                                     <p>{JSON.stringify(keys)}</p>
-                                    {#if recordedShortcuts.length > 1}
+                                    {#if recordedShortcut.length > 1}
                                         <Button
                                             label="Delete"
                                             on:click={() => {
-                                                recordedShortcuts.splice(index, 1)
-                                                recordedShortcuts = recordedShortcuts
+                                                recordedShortcut.splice(index, 1)
+                                                recordedShortcut = recordedShortcut
                                             }}
                                         />
                                     {/if}
@@ -362,16 +394,30 @@ even:dark:bg-slate-900"
                             {/each}
                         {/if}
                     </h3>
-                    <Button label="Reset" on:click={resetRecorded} />
+                    <Button extraClasses="mt-4" label="Reset recorded" on:click={resetRecorded} />
                 {/if}
                 <Button
-                    label="Save"
+                    label="Add"
                     visible={shortcut[1].editVisible}
                     on:click={() => {
-                        if (simpleMode) {
+                        if (simplestShortcut.length === 0) {
+                            alert('Combination is empty!')
+                            return
+                        }
+                        if (type === shortcutSimpleName) {
+                            const recorded = shortcutExists([simplestShortcut])
+                            if (recorded.exists) {
+                                alert(`Shortcut already exists! Recorded for '${getNameFromKey(recorded.name)}'`)
+                                return
+                            }
                             shortcut[1].combinations.push([simplestShortcut])
                         } else {
-                            shortcut[1].combinations.push(recordedShortcuts)
+                            const recorded = shortcutExists(recordedShortcut)
+                            if (recorded.exists) {
+                                alert(`Shortcut already exists! Recorded for '${getNameFromKey(recorded.name)}'`)
+                                return
+                            }
+                            shortcut[1].combinations.push(recordedShortcut)
                         }
                         shortcut[1].combinations = shortcut[1].combinations
                         resetRecorded()
