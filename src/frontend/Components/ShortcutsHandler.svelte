@@ -22,6 +22,26 @@
         })
     }
 
+    const get1dString = (combination: string[]): string => {
+        let representation = `[${combination.join('+')}]`
+        if (combination.length === 0) {
+            representation = '[nothing pressed]'
+        }
+        return representation
+    }
+
+    const get2dString = (shortcut: string[][]): string => {
+        let result = ''
+        for (const combination of shortcut) {
+            const representation = get1dString(combination)
+            if (result.length > 0) {
+                result = result + ' -> '
+            }
+            result = result + representation
+        }
+        return result
+    }
+
     const shortcutAllowed = async (key: string, delayMsBetweenTriggers: number): Promise<boolean> => {
         const now = DateTime.now()
         const latest = executedShortcutsHistory.find((i) => i.key == key)
@@ -225,13 +245,13 @@
 
     let type = shortcutSimpleName
 
-    let recordedShortcut: string[][] = [[]]
+    let recordedSequence: string[][] = [[]]
     let simplestShortcut: string[] = []
     pressedKeys.subscribe((value) => {
         if ($currentPage != IPages.shortcuts) {
             return
         }
-        recordedShortcut = value
+        recordedSequence = value
         const lastPressed = value[value.length - 1]
         if (lastPressed.length >= simplestShortcut.length) {
             simplestShortcut = lastPressed
@@ -247,10 +267,8 @@
             for (const combination of combinations) {
                 const relevantPressed = currentlyPressed.slice(currentlyPressed.length - combination.length)
                 if (arr2dIdentical(combination, relevantPressed)) {
-                    console.log(`${shortcut[0]}`)
                     const allowed = await shortcutAllowed(shortcut[0], shortcut[1].delayMsBetweenTriggers)
                     if (allowed) {
-                        console.log(`running handler for ${shortcut[0]}`)
                         await shortcut[1].handler()
                     }
                 }
@@ -317,13 +335,12 @@ even:dark:bg-slate-900"
                 <h5>Shortcuts:</h5>
                 {#each shortcut[1].combinations as combination, index}
                     <div class="flex flex-row justify-between">
-                        <p>{JSON.stringify(combination)}</p>
+                        <p>{get2dString(combination)}</p>
                         <Button
                             label="Delete"
                             visible={shortcut[1].editVisible}
                             on:click={() => {
-                                console.log(index)
-                                const yes = confirm('Delete shortcut ?')
+                                const yes = confirm(`Delete '${get2dString(shortcut[1].combinations[index])}' shortcut ?`)
                                 if (yes) {
                                     shortcut[1].combinations.splice(index, 1)
                                     shortcut[1].combinations = shortcut[1].combinations
@@ -354,15 +371,15 @@ even:dark:bg-slate-900"
                         {:else}
                             Recorded sequence:
                             <!-- else content here -->
-                            {#each recordedShortcut as keys, index}
+                            {#each recordedSequence as recordedCombination, index}
                                 <div class="flex flex-row justify-between">
-                                    <p>{JSON.stringify(keys)}</p>
-                                    {#if recordedShortcut.length > 1}
+                                    <p>{get1dString(recordedCombination)}</p>
+                                    {#if recordedSequence.length > 1}
                                         <Button
                                             label="Delete"
                                             on:click={() => {
-                                                recordedShortcut.splice(index, 1)
-                                                recordedShortcut = recordedShortcut
+                                                recordedSequence.splice(index, 1)
+                                                recordedSequence = recordedSequence
                                             }}
                                         />
                                     {/if}
@@ -388,12 +405,12 @@ even:dark:bg-slate-900"
                             }
                             shortcut[1].combinations.push([simplestShortcut])
                         } else {
-                            const recorded = shortcutExists(recordedShortcut)
+                            const recorded = shortcutExists(recordedSequence)
                             if (recorded.exists) {
                                 alert(`Shortcut already exists! Recorded for '${getNameFromKey(recorded.name)}'`)
                                 return
                             }
-                            shortcut[1].combinations.push(recordedShortcut)
+                            shortcut[1].combinations.push(recordedSequence)
                         }
                         shortcut[1].combinations = shortcut[1].combinations
                         resetRecorded()
