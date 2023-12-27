@@ -23,7 +23,6 @@
     }
 
     const shortcutAllowed = async (key: string, delayMsBetweenTriggers: number): Promise<boolean> => {
-        // console.log(key)
         const now = DateTime.now()
         const latest = executedShortcutsHistory.find((i) => i.key == key)
         if (latest) {
@@ -232,7 +231,6 @@
         if ($currentPage != IPages.shortcuts) {
             return
         }
-        console.log('Pressed keys changed!')
         recordedShortcut = value
         const lastPressed = value[value.length - 1]
         if (lastPressed.length >= simplestShortcut.length) {
@@ -241,41 +239,19 @@
     })
 
     const checkShortcuts = async (currentlyPressed: string[][]) => {
-        console.log('checking!')
         if (!$userPreferences || !$userPreferences.enableKeyboardShortcuts.value) {
             return
         }
         for (const shortcut of entries(shortcuts)) {
             const combinations = shortcut[1].combinations
             for (const combination of combinations) {
-                if (combination.length == 0) continue
-                if (combination.length == 1) {
-                    if (arr1dSameValues(combination[0], currentlyPressed[currentlyPressed.length - 1])) {
-                        const allowed = await shortcutAllowed(shortcut[0], shortcut[1].delayMsBetweenTriggers)
-                        if (allowed) {
-                            console.log(`running handler for ${shortcut[0]}`)
-                            await shortcut[1].handler()
-                        }
-                    }
-                } else {
-                    let matched = true
-                    combinLoop: for (let index = 0; index < combination.length; index++) {
-                        if (
-                            !arr1dSameValues(
-                                combination[combination.length - index - 1],
-                                currentlyPressed[currentlyPressed.length - index - 1]
-                            )
-                        ) {
-                            matched = false
-                            break combinLoop
-                        }
-                    }
-                    if (matched) {
-                        const allowed = await shortcutAllowed(shortcut[0], shortcut[1].delayMsBetweenTriggers)
-                        if (allowed) {
-                            console.log(`running handler for ${shortcut[0]}`)
-                            await shortcut[1].handler()
-                        }
+                const relevantPressed = currentlyPressed.slice(currentlyPressed.length - combination.length)
+                if (arr2dIdentical(combination, relevantPressed)) {
+                    console.log(`${shortcut[0]}`)
+                    const allowed = await shortcutAllowed(shortcut[0], shortcut[1].delayMsBetweenTriggers)
+                    if (allowed) {
+                        console.log(`running handler for ${shortcut[0]}`)
+                        await shortcut[1].handler()
                     }
                 }
             }
