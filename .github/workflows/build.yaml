@@ -28,8 +28,6 @@ jobs:
 
       - run: npm i
 
-      - run: npm rebuild
-
       - name: Prepare for app notarization
         # Import Apple API key for app notarization on macOS
         run: |
