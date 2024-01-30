@@ -1,10 +1,9 @@
-name: Build/release MAC OS.
+name: Test build.
 
 on:
-  push:
-   branches:
-     - "main"
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   release:
@@ -38,7 +37,7 @@ jobs:
           # GitHub token, automatically provided to the action
           # (No need to define this secret in the repo settings)
           github_token: ${{ secrets.github_token }}
-          release: true
+          release: false
           mac_certs: ${{ secrets.MAC_CERTS }}
           mac_certs_password: ${{ secrets.MAC_CERTS_PASSWORD }}
         env:
