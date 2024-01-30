@@ -29,7 +29,6 @@
         {
             name: 'loadItems',
             handler: function (event, store: any[]) {
-                console.log('load')
                 $clipListFiltered = sort([...store]).desc((i) => i[1].lastModified)
                 $clipList = $clipListFiltered
             }
@@ -38,7 +37,6 @@
             name: 'hide',
             handler: function (event, store) {
                 $isAppHidden = true
-                console.log(store)
             }
         },
         {
@@ -51,25 +49,15 @@
             name: 'unhide',
             handler: function (event, store) {
                 $isAppHidden = false
-                // console.log(store)
             }
         },
-        {
-            name: 'incrementIndex',
-            handler: function (event, store) {
-                console.log('increment')
-            }
-        },
-
         {
             name: 'askPassword',
             handler: function (event, store) {
-                console.log('ask')
                 $isPasswordAsked = true
                 $currentPage = IPages.login
             }
         },
-
         {
             name: 'passwordIncorrect',
             handler: function (event, store) {
@@ -87,14 +75,12 @@
                 $currentPage = IPages.items
             }
         },
-
         {
             name: 'to.renderer.set.settings',
             handler: (e, value) => {
                 $userPreferences = JSON.parse(value)
             }
         },
-
         {
             name: 'to.renderer.open.window',
             handler: (e, value) => {
