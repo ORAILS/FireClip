@@ -156,7 +156,5 @@
         }
     })
 
-    pressedKeys.subscribe((v) => {})
-
     ioHook.start()
 </script>
