@@ -10,7 +10,6 @@ import { JsUtil } from '../Utils/JsUtil'
 import { AppSettings } from './AppSettings'
 import { InitUserSettings, IUserPreferences, store, userPreferences } from './UserPreferences'
 
-
 const shortcutsKey = `fileclip.shortcuts`
 
 const state: IAppState = {
@@ -302,7 +301,7 @@ const channelsToRender = {
      */
     unhide: 'unhide',
     setSettings: 'to.renderer.set.settings',
-    setShortcuts: 'to.renderer.set.shortcuts',
+    setShortcuts: 'to.renderer.set.shortcuts'
 }
 
 let localClipboard: Clipboard
