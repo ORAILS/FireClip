@@ -7,7 +7,7 @@ on:
 
 jobs:
   release:
-    environment: PROD
+    environment: CI.TEST.BUILD
     runs-on: macos-latest
 
     steps:
