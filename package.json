@@ -33,7 +33,7 @@
         "start": "npm run compile &&  electron .",
         "start:svelte": "rollup -c & npm run compile && electron .",
         "compile": "tsc",
-        "build": "yarn rebuild && rollup -c && tsc",
+        "build": "rollup -c && tsc",
         "out:win": "ts-node validate_arch && rollup -c && tsc && electron-builder build --win --publish never",
         "out:mac": "ts-node validate_arch && rollup -c && tsc  && electron-builder build --mac --publish never",
         "check-updates": "npx npm-check-updates",
