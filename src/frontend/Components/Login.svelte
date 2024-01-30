@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte'
-    import { appName, currentPage, isPasswordIncorrect, passwordButtonText, showPassword } from '../stores'
     import { ipcRenderer } from '../KeyboardEventUtil'
+    import { appName, isPasswordIncorrect, passwordButtonText, showPassword } from '../stores'
 
     function togglePasswordInput() {
         $passwordButtonText === 'show' ? ($passwordButtonText = 'hide') : ($passwordButtonText = 'show')
@@ -42,6 +42,7 @@
     }
     const sendLoginRequest = () => {
         if (validatePassword(userPassword)) {
+            // TODO remove when we have the server working.
             ipcRenderer.send('loginUser', {
                 name: 'me',
                 email: 'email',

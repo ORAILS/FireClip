@@ -8,7 +8,10 @@ import { IAppState, IKeyboardEvent, ILocalUser, IMouseEvent, IReceiveChannel } f
 import { CryptoService } from '../Utils/CryptoService'
 import { JsUtil } from '../Utils/JsUtil'
 import { AppSettings } from './AppSettings'
-import { InitUserSettings, IUserPreferences, userPreferences } from './UserPreferences'
+import { InitUserSettings, IUserPreferences, store, userPreferences } from './UserPreferences'
+
+
+const shortcutsKey = `fileclip.shortcuts`
 
 const state: IAppState = {
     pullInterval: undefined,
@@ -65,6 +68,7 @@ const items = () => {
 export const action = {
     askPassword: async () => localMainWindow.webContents.send(channelsToRender.askPassword, true),
     sendSettings: (settings: IUserPreferences) => localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(settings)),
+    sendShortcuts: () => localMainWindow.webContents.send(channelsToRender.setShortcuts, store.get(shortcutsKey)),
     hideWindow: () => {
         localMainWindow.hide()
         localMainWindow.webContents.send(channelsToRender.hide, true)
@@ -225,20 +229,18 @@ const channelsFromRender: IReceiveChannel[] = [
         }
     },
     {
-        name: 'getItems',
-        handler: () => action.loadItems()
-    },
-    {
         name: 'loginUser',
         handler: async (event: IpcMainEvent, user: ILocalUser) => {
             try {
                 const hashed = CryptoService.HashUserLocal(user)
                 state.user = hashed
                 console.log(state.user)
+                // TODO shady stuff here.
                 if (state.user.masterKey === '4f0a1743088714e60c5f0ada7d6a3717fa5aa5f195a9b121fc929151b8fb06da') {
                     action.startClipboardPooling()
                     action.loadItems()
                     action.sendSettings(userPreferences)
+                    action.sendShortcuts()
                     localMainWindow.webContents.send(channelsToRender.passwordConfirmed, true)
                 }
             } catch (e) {
@@ -267,6 +269,13 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'textSearched',
         handler: async (event: IpcMainEvent, text: string) => localMainWindow.webContents.send(channelsToRender.textSearched, text)
+    },
+    {
+        name: 'to.backend.set.shortcuts',
+        handler: async (event: IpcMainEvent, shortcuts: string) => {
+            // console.log(shortcuts)
+            store.set(shortcutsKey, shortcuts)
+        }
     }
 ]
 
@@ -292,7 +301,8 @@ const channelsToRender = {
      * used to set a state in the front end
      */
     unhide: 'unhide',
-    setSettings: 'to.renderer.set.settings'
+    setSettings: 'to.renderer.set.settings',
+    setShortcuts: 'to.renderer.set.shortcuts',
 }
 
 let localClipboard: Clipboard

@@ -1,7 +1,8 @@
 <script lang="ts">
     import { DateTime } from 'luxon'
     import { delay, ipcRenderer } from '../KeyboardEventUtil'
-    import { currentPage, isAppHidden, isFocused, pressedKeysSizeLimit, userPreferences } from '../stores'
+    import { sendShortcuts } from '../backendActions'
+    import { currentPage, isAppHidden, isFocused, pressedKeysSizeLimit, shortcutsJson, userPreferences } from '../stores'
     import { IPages, type IShortCut } from '../types'
     import { clipListFiltered, currentScrollIndex, pressedKeys, selectedClipId } from './../stores'
     import Button from './Button.svelte'
@@ -74,9 +75,21 @@
     const shortcutSimpleName = 'simple'
     const shortcutSequenceName = 'sequence'
 
+    // when shortcuts are received from the backend.
+    shortcutsJson.subscribe((v) => {
+        if (!v || v.length === 0) return
+        const savedShortcuts: Record<string, string[][][]> = JSON.parse(v)
+        for (const key of Object.keys(shortcuts)) {
+            if (savedShortcuts[key]) {
+                shortcuts[key].combinations = savedShortcuts[key]
+            }
+        }
+    })
+
+    // all existing shortcuts along with defaul combinations
     export let shortcuts: IShortcuts = {
         scroll: {
-            combinations: [[['Left Command', '`']], [['Left Command', 'j']]],
+            combinations: [[['Left Command', '`']]],
             editVisible: false,
             delayMsBetweenTriggers: 100,
             handler: async () => {
@@ -323,6 +336,13 @@ even:dark:bg-slate-900"
                         on:click={() => {
                             resetRecorded()
                             shortcut[1].editVisible = !shortcut[1].editVisible
+                            if (!shortcut[1].editVisible) {
+                                const some = {}
+                                for (const key of Object.keys(shortcuts)) {
+                                    some[key] = shortcuts[key].combinations
+                                }
+                                sendShortcuts(JSON.stringify(some))
+                            }
                             // closing other edits
                             for (const s of entries(shortcuts)) {
                                 if (s[0] != shortcut[0]) {

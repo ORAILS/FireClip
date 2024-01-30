@@ -10,6 +10,7 @@
         isPasswordIncorrect,
         pressedKeys,
         pressedKeysSizeLimit,
+        shortcutsJson,
         userPreferences
     } from '../stores'
     import type { IClipboardItem, IHookKeyboardEvent, IHookMouseEvent, IReceiveChannel } from '../types'
@@ -105,6 +106,12 @@
                     currentPage.set(Object.values(IPages).indexOf(value))
                 }
             }
+        },
+        {
+            name: 'to.renderer.set.shortcuts',
+            handler: (e, value) => {
+                shortcutsJson.set(value)
+            }
         }
     ]
 
@@ -112,12 +119,8 @@
         ipcRenderer.on(event.name, event.handler as never)
     }
 
+    // do nothing now
     ioHook.on('mouseclick', (event: IHookMouseEvent) => {})
-
-    const getPastedNumber = (e: IHookKeyboardEvent) => {
-        if (e.keycode === 11) return 0
-        return e.keycode - 1
-    }
 
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
         // the settings are send from the back
@@ -151,17 +154,6 @@
         if ($pressedKeys.length > pressedKeysSizeLimit) {
             $pressedKeys.shift()
         }
-        // if (isNumberPasted(e)) {
-        //     let pastedIndex = getPastedNumber(e)
-        //     pastedIndex = pastedIndex - 1
-        //     if (pastedIndex === -1) pastedIndex = 9
-
-        //     if ($clipListFiltered[pastedIndex]) {
-        //         ipcRenderer.send('paste', $clipListFiltered[pastedIndex][1].contentHash)
-        //         $currentScrollIndex = -1
-        //         $selectedClipId = ''
-        //     }
-        // }
     })
 
     pressedKeys.subscribe((v) => {})

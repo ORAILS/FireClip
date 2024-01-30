@@ -35,7 +35,7 @@ export interface IUserPreferences {
     maxNumberOfClips: IUserPreference<number>
 }
 
-const store = new Store()
+export const store = new Store()
 
 /**
  * Used to generate the key for the electron-storage preference saving
