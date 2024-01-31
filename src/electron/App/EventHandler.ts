@@ -1,5 +1,4 @@
-import { BrowserWindow, Clipboard, dialog, globalShortcut, IpcMain, nativeImage } from 'electron'
-import Store from 'electron-store'
+import { BrowserWindow, Clipboard, dialog, IpcMain, nativeImage } from 'electron'
 import { IpcMainEvent } from 'electron/main'
 import * as fs from 'fs'
 import robot from 'robotjs'
@@ -8,9 +7,10 @@ import { IClipboardItem, isImageContent, isRTFContent, isTextContent } from '../
 import { IAppState, IKeyboardEvent, ILocalUser, IMouseEvent, IReceiveChannel } from '../DataModels/LocalTypes'
 import { CryptoService } from '../Utils/CryptoService'
 import { JsUtil } from '../Utils/JsUtil'
-import { AppSettings, IUserSettings } from './AppSettings'
+import { AppSettings } from './AppSettings'
+import { InitUserSettings, IUserPreferences, store, userPreferences } from './UserPreferences'
 
-const store = new Store()
+const shortcutsKey = `fileclip.shortcuts`
 
 const state: IAppState = {
     pullInterval: undefined,
@@ -21,19 +21,6 @@ const state: IAppState = {
     last3: 0,
     user: undefined,
     lastHash: ''
-}
-/**
- * Used to generate the key for the electron-storage preference saving
- */
-const getPreferenceKey = (key: string) => `${AppSettings.name}.preferences.${key}`
-/**
- * Default handler for the preference changes event
- */
-const defaultHandler = async (e: IpcMainEvent, event: any) => {
-    store.set(`${getPreferenceKey(event.key)}`, event.value)
-    // so that the front end can also react to this change
-    await JsUtil.waitforme(50)
-    action.sendSettings()
 }
 
 async function saveJSONFile(data: object) {
@@ -53,112 +40,15 @@ async function saveJSONFile(data: object) {
     }
 }
 
-/**
- * User settings along with the default values if not already existing in the store.
- */
-export const userSettings: IUserSettings = {
-    darkMode: {
-        description: 'Controls dark mode behaviour.',
-        value: 'system',
-        type: 'select',
-        selectableOptions: ['off', 'on', 'system'],
-        changeHandler: (e, event) => {
-            userSettings.darkMode.value = event.value
-            defaultHandler(e, event)
-        }
-    },
-    regiserCommandNumberShortcuts: {
-        description: 'If enabled, will register the shortcuts cmd/ctrl+number from 0 to 9',
-        value: true,
-        type: 'toggle',
-        selectableOptions: undefined,
-        changeHandler: (e, event) => {
-            userSettings.regiserCommandNumberShortcuts.value = event.value
-            defaultHandler(e, event)
-            for (const command of shortcutList) {
-                if (userSettings.regiserCommandNumberShortcuts) {
-                    globalShortcut.register(command, () => null)
-                    console.log(`shortcut registered`)
-                } else {
-                    globalShortcut.unregister(command)
-                    console.log(`shortcuts unregistered`)
-                }
-            }
-        }
-    },
-    showCommandNumberIcons: {
-        description: 'If enabled, will show command and number icon at the start of the first 10 icons',
-        value: true,
-        type: 'toggle',
-        selectableOptions: undefined,
-        changeHandler: (e, event) => {
-            userSettings.showCommandNumberIcons.value = event.value
-            defaultHandler(e, event)
-        }
-    },
-    autoRestartOnUpdateAvailable: {
-        description: 'If enabled, the app will restart as soon as an update was downloaded, if off, will update on restart.',
-        value: true,
-        type: 'toggle',
-        selectableOptions: undefined,
-        changeHandler: (e, event) => {
-            userSettings.autoRestartOnUpdateAvailable.value = event.value
-            defaultHandler(e, event)
-        }
-    },
-    minimizeAfterPaste: {
-        description: 'If enabled, the app will minimize after pasting the item.',
-        value: true,
-        type: 'toggle',
-        selectableOptions: undefined,
-        changeHandler: (e, event) => {
-            userSettings.minimizeAfterPaste.value = event.value
-            defaultHandler(e, event)
-        }
-    },
-    enableAutoPaste: {
-        description: 'If enabled, the app will paste the selected item, if not, it will only be written to the clipboard',
-        value: true,
-        type: 'toggle',
-        selectableOptions: undefined,
-        changeHandler: (e, event) => {
-            userSettings.enableAutoPaste.value = event.value
-            defaultHandler(e, event)
-        }
-    },
-    maxClipAgeInHours: {
-        description: 'Items older than this value in hours will get deleted. Supports fractional numbers',
-        value: 48,
-        type: 'number',
-        selectableOptions: undefined,
-        changeHandler: (e, event) => {
-            userSettings.maxClipAgeInHours.value = event.value
-            defaultHandler(e, event)
-            handleCleanUpParameterChange()
-        }
-    },
-    maxNumberOfClips: {
-        description: 'Any items over this value will get deleted, starting with the oldest',
-        value: 1000,
-        type: 'number',
-        selectableOptions: undefined,
-        changeHandler: (e, event) => {
-            userSettings.maxNumberOfClips.value = event.value
-            defaultHandler(e, event)
-            handleCleanUpParameterChange()
-        }
-    }
-}
-
 let cleanUpInterval: NodeJS.Timer | undefined = undefined
 
-const handleCleanUpParameterChange = () => {
+export const handleCleanUpParameterChange = () => {
     if (cleanUpInterval) {
         clearInterval(cleanUpInterval)
     }
     cleanUpInterval = setInterval(() => {
         console.log('Cleaning started')
-        const wasCleaned = items()?.cleanUp(userSettings.maxClipAgeInHours.value * 60 * 60, userSettings.maxNumberOfClips.value)
+        const wasCleaned = items()?.cleanUp(userPreferences.maxClipAgeInHours.value * 60 * 60, userPreferences.maxNumberOfClips.value)
         if (wasCleaned) {
             console.log('Was cleaned!')
             action.loadItems()
@@ -174,14 +64,15 @@ const items = () => {
     return ItemRepo
 }
 
-const action = {
+export const action = {
     askPassword: async () => localMainWindow.webContents.send(channelsToRender.askPassword, true),
-    sendSettings: () => localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(userSettings)),
+    sendSettings: (settings: IUserPreferences) => localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(settings)),
+    sendShortcuts: () => localMainWindow.webContents.send(channelsToRender.setShortcuts, store.get(shortcutsKey)),
     hideWindow: () => {
         localMainWindow.hide()
         localMainWindow.webContents.send(channelsToRender.hide, true)
     },
-    handleShortcut: () => {
+    unhide: () => {
         localMainWindow.showInactive()
         localMainWindow.webContents.send(channelsToRender.unhide, true)
     },
@@ -216,7 +107,7 @@ const action = {
         if (isRTFContent(result)) localClipboard.writeRTF(result.content)
         if (isImageContent(result)) localClipboard.writeImage(nativeImage.createFromDataURL(result.content))
 
-        if (userSettings.enableAutoPaste.value) {
+        if (userPreferences.enableAutoPaste.value) {
             await action.pasteItem()
         }
     },
@@ -228,7 +119,7 @@ const action = {
 
             state.ctrlA = false
         }
-        if (userSettings.minimizeAfterPaste.value) action.hideWindow()
+        if (userPreferences.minimizeAfterPaste.value) action.hideWindow()
 
         if (AppSettings.isWin) robot.keyTap('v', 'control')
         if (AppSettings.isMac) robot.keyTap('v', 'command')
@@ -259,19 +150,20 @@ const action = {
             return newItem
         }
 
-        const rtf = localClipboard.readRTF()
-        if (rtf.length > 0) {
-            const hash = CryptoService.ContentHash(rtf, state.user.masterKey)
-            if (hash === state.lastHash) return undefined
-            newItem.content = rtf
-            newItem.contentHash = hash
-            newItem.type = 1
-            return newItem
-        }
+        // TODO REVISIT RTF SUPPORT IN FUTURE.
+        // const rtf = localClipboard.readRTF()
+        // if (rtf.length > 0) {
+        //     const hash = CryptoService.ContentHash(rtf, state.user.masterKey)
+        //     if (hash === state.lastHash) return undefined
+        //     newItem.content = rtf
+        //     newItem.contentHash = hash
+        //     newItem.type = 1
+        //     return newItem
+        // }
 
         const text = localClipboard.readText()
         const hash = CryptoService.ContentHash(text, state.user.masterKey)
-        if (hash === state.lastHash) return undefined
+        if (hash === state.lastHash || !text || text === '') return undefined
         newItem.content = text
         newItem.contentHash = hash
         newItem.type = 2
@@ -326,7 +218,7 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'get_settings',
         handler: () => {
-            action.sendSettings()
+            action.sendSettings(userPreferences)
         }
     },
     {
@@ -336,20 +228,18 @@ const channelsFromRender: IReceiveChannel[] = [
         }
     },
     {
-        name: 'getItems',
-        handler: () => action.loadItems()
-    },
-    {
         name: 'loginUser',
         handler: async (event: IpcMainEvent, user: ILocalUser) => {
             try {
                 const hashed = CryptoService.HashUserLocal(user)
                 state.user = hashed
                 console.log(state.user)
+                // TODO shady stuff here.
                 if (state.user.masterKey === '4f0a1743088714e60c5f0ada7d6a3717fa5aa5f195a9b121fc929151b8fb06da') {
                     action.startClipboardPooling()
                     action.loadItems()
-                    action.sendSettings()
+                    action.sendSettings(userPreferences)
+                    action.sendShortcuts()
                     localMainWindow.webContents.send(channelsToRender.passwordConfirmed, true)
                 }
             } catch (e) {
@@ -369,12 +259,22 @@ const channelsFromRender: IReceiveChannel[] = [
         name: 'focus',
         handler: async (event: IpcMainEvent, value: boolean) => {
             localMainWindow.show()
-            console.log('focus')
         }
+    },
+    {
+        name: 'unhide',
+        handler: async (event: IpcMainEvent, value: boolean) => await action.unhide()
     },
     {
         name: 'textSearched',
         handler: async (event: IpcMainEvent, text: string) => localMainWindow.webContents.send(channelsToRender.textSearched, text)
+    },
+    {
+        name: 'to.backend.set.shortcuts',
+        handler: async (event: IpcMainEvent, shortcuts: string) => {
+            // console.log(shortcuts)
+            store.set(shortcutsKey, shortcuts)
+        }
     }
 ]
 
@@ -400,74 +300,20 @@ const channelsToRender = {
      * used to set a state in the front end
      */
     unhide: 'unhide',
-    setSettings: 'to.renderer.set.settings'
+    setSettings: 'to.renderer.set.settings',
+    setShortcuts: 'to.renderer.set.shortcuts'
 }
 
 let localClipboard: Clipboard
 let localMainWindow: BrowserWindow
-let messageFromRenderer: IpcMain
-
-/**
- * Shortcuts that will be registered if user selected to do so (enabled by default)
- */
-const shortcutList = [
-    'CommandOrControl+1',
-    'CommandOrControl+2',
-    'CommandOrControl+3',
-    'CommandOrControl+4',
-    'CommandOrControl+5',
-    'CommandOrControl+6',
-    'CommandOrControl+7',
-    'CommandOrControl+8',
-    'CommandOrControl+9',
-    'CommandOrControl+0'
-]
+export let messageFromRenderer: IpcMain
 
 async function InitIOHook(ipcMain: IpcMain, clipboard: Clipboard, mainWindow: BrowserWindow) {
     localClipboard = clipboard
     localMainWindow = mainWindow
     messageFromRenderer = ipcMain
 
-    /**
-     * Used to return a typed object when using the method below
-     */
-    type Entries<T> = {
-        [K in keyof T]: [K, T[K]]
-    }[keyof T][]
-    /**
-     * A typed overload of Object.entries() returning the typed key and value based on object input.
-     */
-    function depictEntriesKeyType<T>(object: T): Entries<T> {
-        return Object.entries(object as unknown as object) as never
-    }
-
-    /**
-     * Going over all enabled user settings (which can be turned on/off)
-     */
-    for (const [key, val] of depictEntriesKeyType(userSettings)) {
-        // getting key from the store
-        const existin = store.get(getPreferenceKey(key))
-        // if key not exist (is undefined) update the user setting
-        if (existin !== undefined) {
-            val.value = existin as typeof val.value
-            userSettings[key] = val as never
-        }
-        // Enabling all the event handlers by receiving the even called by the same name from the frontend
-        messageFromRenderer.on(key, val.changeHandler as never)
-    }
-
-    // if registering shortcuts is enabled
-    if (userSettings.regiserCommandNumberShortcuts) {
-        for (const command of shortcutList) {
-            globalShortcut.register(command, () => null)
-        }
-        console.log(`shortcuts registered`)
-    }
-
-    // default triggering shortcut, always enabled (most likely also a user settings in the future)
-    globalShortcut.register('CommandOrControl+`', () => {
-        action.handleShortcut()
-    })
+    await InitUserSettings()
 
     for (const event of channelsFromRender) {
         messageFromRenderer.on(event.name, event.handler as never)

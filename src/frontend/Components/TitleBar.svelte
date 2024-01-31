@@ -4,7 +4,6 @@
     import IconMinimize from './icons/_IconMinimize.svelte'
 
     export let title: string = 'Title'
-    export const isMaximized: boolean = false
 
     import { currentPage } from '../stores'
     import { IPages } from '../types'

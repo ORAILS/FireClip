@@ -1,34 +1,20 @@
 <script lang="ts">
+    import { arrayToArrayMap, getKeyName, ioHook, ipcRenderer, itemMatchesText, sort } from '../KeyboardEventUtil'
     import {
         clipList,
         clipListFiltered,
         currentPage,
-        currentScrollIndex,
         currentSearchedText,
         isAppHidden,
-        isFocused,
         isPasswordAsked,
         isPasswordIncorrect,
-        previousEvent,
-        selectedClipId,
-        userSettings
+        pressedKeys,
+        pressedKeysSizeLimit,
+        shortcutsJson,
+        userPreferences
     } from '../stores'
     import type { IClipboardItem, IHookKeyboardEvent, IHookMouseEvent, IReceiveChannel } from '../types'
     import { IPages } from '../types'
-    import {
-        arrayToArrayMap,
-        delay,
-        ioHook,
-        ipcRenderer,
-        isMacShortcutEnd,
-        isMacShortcutStart,
-        isNumberPasted,
-        isSearchShortcut,
-        isWinShortcutEnd,
-        isWinShortcutStart,
-        itemMatchesText,
-        sort
-    } from '../util'
 
     currentSearchedText.subscribe((text: string) => {
         if (text.length == 0) {
@@ -51,7 +37,6 @@
             name: 'hide',
             handler: function (event, store) {
                 $isAppHidden = true
-                console.log(store)
             }
         },
         {
@@ -64,16 +49,8 @@
             name: 'unhide',
             handler: function (event, store) {
                 $isAppHidden = false
-                console.log(store)
             }
         },
-        {
-            name: 'incrementIndex',
-            handler: function (event, store) {
-                console.log('increment')
-            }
-        },
-
         {
             name: 'askPassword',
             handler: function (event, store) {
@@ -81,7 +58,6 @@
                 $currentPage = IPages.login
             }
         },
-
         {
             name: 'passwordIncorrect',
             handler: function (event, store) {
@@ -99,14 +75,12 @@
                 $currentPage = IPages.items
             }
         },
-
         {
             name: 'to.renderer.set.settings',
             handler: (e, value) => {
-                $userSettings = JSON.parse(value)
+                $userPreferences = JSON.parse(value)
             }
         },
-
         {
             name: 'to.renderer.open.window',
             handler: (e, value) => {
@@ -118,6 +92,12 @@
                     currentPage.set(Object.values(IPages).indexOf(value))
                 }
             }
+        },
+        {
+            name: 'to.renderer.set.shortcuts',
+            handler: (e, value) => {
+                shortcutsJson.set(value)
+            }
         }
     ]
 
@@ -125,60 +105,41 @@
         ipcRenderer.on(event.name, event.handler as never)
     }
 
+    // do nothing now
     ioHook.on('mouseclick', (event: IHookMouseEvent) => {})
 
-    const getPastedNumber = (e: IHookKeyboardEvent) => {
-        if (e.keycode === 11) return 0
-        return e.keycode - 1
-    }
-
-    function scrollIntoView(element: string) {
-        const el = document.getElementById(element)
-        if (!el) return
-        el.scrollIntoView({
-            block: 'nearest'
-        })
-    }
-
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
-        if (isWinShortcutStart(e) || isMacShortcutStart(e)) {
-            if ($clipListFiltered && $currentScrollIndex + 1 < $clipListFiltered.length && $clipListFiltered[$currentScrollIndex + 1][0]) {
-                $currentScrollIndex++
-                $selectedClipId = $clipListFiltered[$currentScrollIndex][0]
-                scrollIntoView($selectedClipId)
-            }
+        // the settings are send from the back
+        if (!$userPreferences) {
+            return
         }
-        $previousEvent = e
-
-        if (!$isAppHidden && isSearchShortcut(e)) {
-            ipcRenderer.send('focus', true)
-            await delay(100)
-            isFocused.set($isFocused + 1)
+        const key = getKeyName(e.keycode, e.rawcode, $userPreferences.keyboardLayout.value)
+        const exists = $pressedKeys[$pressedKeys.length - 1].find((k) => k === key)
+        if (!exists) {
+            const temp: string[] = JSON.parse(JSON.stringify($pressedKeys[$pressedKeys.length - 1]))
+            temp.push(key)
+            const val = $pressedKeys
+            val.push(temp)
+            pressedKeys.set(val)
+            if ($pressedKeys.length > pressedKeysSizeLimit) {
+                $pressedKeys.shift()
+            }
         }
     })
 
     ioHook.on('keyup', (e: IHookKeyboardEvent) => {
-        // scrolled items, wants and released ctrl
-        if (
-            $previousEvent &&
-            ((isWinShortcutStart($previousEvent) && isWinShortcutEnd(e)) || (isMacShortcutStart($previousEvent) && isMacShortcutEnd(e)))
-        ) {
-            ipcRenderer.send('paste', $selectedClipId)
-            $currentScrollIndex = -1
-            $selectedClipId = ''
+        // the settings are send from the back
+        if (!$userPreferences) {
+            return
         }
-        if (isNumberPasted(e)) {
-            let pastedIndex = getPastedNumber(e)
-            pastedIndex = pastedIndex - 1
-            if (pastedIndex === -1) pastedIndex = 9
-
-            if ($clipListFiltered[pastedIndex]) {
-                ipcRenderer.send('paste', $clipListFiltered[pastedIndex][1].contentHash)
-                $currentScrollIndex = -1
-                $selectedClipId = ''
-            }
+        const key = getKeyName(e.keycode, e.rawcode, $userPreferences.keyboardLayout.value)
+        const temp: string[] = JSON.parse(JSON.stringify($pressedKeys[$pressedKeys.length - 1])).filter((k) => k != key)
+        const val = $pressedKeys
+        val.push(temp)
+        pressedKeys.set(val)
+        if ($pressedKeys.length > pressedKeysSizeLimit) {
+            $pressedKeys.shift()
         }
-        $previousEvent = e
     })
 
     ioHook.start()

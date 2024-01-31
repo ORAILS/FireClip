@@ -4,14 +4,17 @@
 
     export let label: string
     export let fontSize = 16
-    export let defaultValue: any
 
     export let selectOptions: undefined | string[] = undefined
     export let type: string
-    let value: any
+    export let value: any = undefined
+    export let defaultValue: any = undefined
+    export let title: string | undefined = undefined
 
     onMount(() => {
-        value = defaultValue
+        if (!value && defaultValue) {
+            value = defaultValue
+        }
     })
 
     function handleClick(event) {
@@ -33,8 +36,8 @@
     }
 </script>
 
-{#if type === 'select'}
-    <div class="slider" style="font-size:{fontSize}px">
+<div class="slider" style="font-size:{fontSize}px" title={title ? title : ''}>
+    {#if type === 'select'}
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
         <select class="cursor-pointer bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange}>
             {#each selectOptions as option}
@@ -45,14 +48,10 @@
                 {/if}
             {/each}
         </select>
-    </div>
-{:else if type === 'toggle'}
-    <div class="slider" style="font-size:{fontSize}px">
+    {:else if type === 'toggle'}
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
         <button role="switch" aria-checked={value} on:click={handleClick} />
-    </div>
-{:else if type === 'number'}
-    <div class="slider" style="font-size:{fontSize}px">
+    {:else if type === 'number'}
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
         <input
             type="number"
@@ -60,13 +59,11 @@
             bind:value
             on:change={handleSelectChange}
         />
-    </div>
-{:else if type === 'string'}
-    <div class="slider" style="font-size:{fontSize}px">
+    {:else if type === 'string'}
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
         <input type="text" class="w-16 cursor-pointer bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange} />
-    </div>
-{/if}
+    {/if}
+</div>
 
 <style lang="postcss">
     input::-webkit-outer-spin-button,

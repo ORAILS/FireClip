@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { clipListFiltered, currentScrollIndex, selectedClipId, userSettings } from '../stores'
+    import { getTitle, ipcRenderer } from '../KeyboardEventUtil'
+    import { clipListFiltered, currentScrollIndex, selectedClipId, userPreferences } from '../stores'
     import type { IClipboardItem } from '../types'
     import { isImageContent, isRTFContent, isTextContent } from '../types'
-    import { getTitle, ipcRenderer } from '../util'
     import viewport from '../viewPortAction'
     import IconCommand from './icons/_IconCommand.svelte'
 
@@ -58,7 +58,7 @@
                     on:click|preventDefault={() => handleClick(item)}
                 >
                     <div class="flex">
-                        {#if $userSettings.showCommandNumberIcons.value}
+                        {#if $userPreferences.showCommandNumberIcons.value}
                             {#if $clipListFiltered.indexOf($clipListFiltered.filter((i) => i[0] === key)[0]) + 1 < 10}
                                 <IconCommand number={$clipListFiltered.indexOf($clipListFiltered.filter((i) => i[0] === key)[0]) + 1} />
                             {:else if $clipListFiltered.indexOf($clipListFiltered.filter((i) => i[0] === key)[0]) + 1 === 10}
@@ -88,7 +88,7 @@
         line-height: 15px;
     }
     img {
-        max-height: 60px;
+        max-height: 75px;
     }
 
     ::selection {

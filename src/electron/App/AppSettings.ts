@@ -14,36 +14,6 @@ interface AppSettings {
     isWin: boolean
 }
 
-/**
- * Used to store user settings. Naming the values is important as they are used for displaying to the user.
- */
-
-export interface IUserSettings {
-    darkMode: IUserSetting<'system' | 'on' | 'off'>
-    regiserCommandNumberShortcuts: IUserSetting<boolean>
-    showCommandNumberIcons: IUserSetting<boolean>
-    autoRestartOnUpdateAvailable: IUserSetting<boolean>
-    minimizeAfterPaste: IUserSetting<boolean>
-    enableAutoPaste: IUserSetting<boolean>
-    maxClipAgeInHours: IUserSetting<number>
-    maxNumberOfClips: IUserSetting<number>
-}
-
-/**
- * User preference object, the property name is used as key for saving the preference
- */
-
-export interface IUserSetting<T> {
-    description: string
-    /**
-     * default value for the setting
-     */
-    value: T
-    type: 'toggle' | 'select' | 'number' | 'string'
-    selectableOptions: T[] | undefined
-    changeHandler: (event: IpcMainEvent, data: any) => Promise<void> | void
-}
-
 const linuxPlatform = ['freebsd', 'linux', 'openbsd']
 const macPlatform = ['darwin']
 const winPlatform = ['win32']
@@ -53,7 +23,7 @@ export const AppSettings: AppSettings = {
     openDevTools: false,
     enableDevTools: false,
     enablePaste: true,
-    widthNormal: 250,
+    widthNormal: 600,
     heightNormal: 400,
     widthWithDevTools: 900,
     heightWithDevTools: 800,

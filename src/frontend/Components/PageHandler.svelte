@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { userSettings } from '../stores'
-    import { ipcRenderer } from '../util'
+    import { ipcRenderer } from '../KeyboardEventUtil'
+    import { userPreferences } from '../stores'
     import SearchBar from './SearchBar.svelte'
     import TitleBar from './TitleBar.svelte'
     export let title: string = 'Title'
@@ -14,7 +14,7 @@
         isMaximized = outerW >= globalThis.screen.availWidth
     }
 
-    userSettings.subscribe((v) => {
+    userPreferences.subscribe((v) => {
         if (!v) return
         const darkSetting = v.darkMode.value
         const isDarkSystem = window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -43,15 +43,8 @@
 <svelte:window bind:outerWidth={outerW} />
 
 <main class={appClasses}>
-    <TitleBar
-        {title}
-        {isMaximized}
-        on:clickMinimize={minimize}
-        on:clickUnmaximize={unmaximize}
-        on:clickMaximize={maximize}
-        on:clickClose={close}
-    />
-    <div class="nosbar page">
+    <TitleBar {title} on:clickMinimize={minimize} on:clickUnmaximize={unmaximize} on:clickMaximize={maximize} on:clickClose={close} />
+    <div class="nosbar page bg-white dark:bg-rock">
         <slot />
     </div>
     <SearchBar />
@@ -71,9 +64,9 @@
     }
 
     .page::-webkit-scrollbar-track {
-        @apply border-l border-none border-gray-600 bg-gray-50 dark:bg-slate-600;
+        @apply w-2 border-l border-none border-gray-600 bg-gray-50 dark:bg-slate-600;
     }
     .page::-webkit-scrollbar-thumb {
-        @apply bg-gray-300 dark:bg-gray-800;
+        @apply w-2 bg-gray-300 dark:bg-gray-800;
     }
 </style>

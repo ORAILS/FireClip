@@ -3,9 +3,10 @@ import { autoUpdater } from 'electron-updater'
 import path from 'path'
 import { AppSettings } from './App/AppSettings'
 import CustomWindow from './App/CustomWindow'
-import { ioHookHandler, userSettings } from './App/EventHandler'
+import { ioHookHandler } from './App/EventHandler'
+import { userPreferences } from './App/UserPreferences'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-require('electron-reload')(__dirname)
+require('electron-reload')('./src/**')
 
 let mainWindow: CustomWindow
 
@@ -65,6 +66,7 @@ app.on('ready', async () => {
 
 setInterval(() => {
     mainWindow.window.webContents.send('log', `Ping each 30s from index.ts. Current version ${autoUpdater.currentVersion}`)
+    // mainWindow.window.reload()
 }, 30000)
 
 autoUpdater.on('checking-for-update', () => {
@@ -90,7 +92,7 @@ autoUpdater.on('download-progress', (progressObj) => {
  */
 autoUpdater.on('update-downloaded', (info) => {
     mainWindow.window.webContents.send('log', 'Update downloaded, restarting in 5 sec')
-    if (userSettings.autoRestartOnUpdateAvailable) {
+    if (userPreferences.autoRestartOnUpdateAvailable) {
         setTimeout(() => autoUpdater.quitAndInstall(), 5000)
     }
 })
@@ -99,8 +101,10 @@ app.on('window-all-closed', () => {
     app.quit()
 })
 
-app.allowRendererProcessReuse = false
-
+app.on('ready', () => {
+    console.log('no more reuse!')
+    app.allowRendererProcessReuse = false
+})
 async function createMainWindow() {
     mainWindow = new CustomWindow()
     const urlPage = path.join(__dirname, 'www', 'index.html')

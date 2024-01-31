@@ -1,6 +1,15 @@
 import type { IpcMainEvent } from 'electron'
 import type { Writable } from 'svelte/store'
 
+export interface IShortCut {
+    combinations: string[][][]
+    delayMsBetweenTriggers: number
+    // maxTriggersPressed: number
+    handler: () => Promise<void> | void
+    editVisible: boolean
+    combinationChangeHandler: (newValue: string[][][]) => Promise<void> | void
+}
+
 export interface AppState {
     previous: Writable<IHookKeyboardEvent | undefined>
     isAsked: Writable<boolean>
@@ -13,7 +22,7 @@ export interface AppState {
     showPassword: Writable<boolean>
     passwordButtonText: Writable<string>
     hidden: Writable<boolean>
-    defaultUserSettings: Writable<IUserSettings | undefined>
+    defaultUserSettings: Writable<IUserPreferences | undefined>
     searchedText: Writable<string>
 }
 
@@ -29,21 +38,26 @@ export interface IClipboardItemEncrypted {
     serverId: number
 }
 
-export interface IUserSettings {
-    darkMode: IUserSetting<'system' | 'on' | 'off'>
-    regiserCommandNumberShortcuts: IUserSetting<boolean>
-    showCommandNumberIcons: IUserSetting<boolean>
-    autoRestartOnUpdateAvailable: IUserSetting<boolean>
-    minimizeAfterPaste: IUserSetting<boolean>
-    enableAutoPaste: IUserSetting<boolean>
-    maxClipAgeInSeconds: IUserSetting<number>
-    maxNumberOfClips: IUserSetting<number>
-}
-
-export interface IUserSetting<T> {
+export interface IUserPreference<T> {
+    displayName: string
     description: string
     value: T
-    changeHandler: (newValue: T) => void | null
+    type: 'toggle' | 'select' | 'number' | 'string'
+    selectableOptions: T[] | undefined
+    changeHandler: (event: IpcMainEvent, data: any) => Promise<void> | void
+}
+
+export interface IUserPreferences {
+    darkMode: IUserPreference<'system' | 'on' | 'off'>
+    keyboardLayout: IUserPreference<'qwerty' | 'dvorak'>
+    enableKeyboardShortcuts: IUserPreference<boolean>
+    regiserCommandNumberShortcuts: IUserPreference<boolean>
+    showCommandNumberIcons: IUserPreference<boolean>
+    autoRestartOnUpdateAvailable: IUserPreference<boolean>
+    minimizeAfterPaste: IUserPreference<boolean>
+    enableAutoPaste: IUserPreference<boolean>
+    maxClipAgeInHours: IUserPreference<number>
+    maxNumberOfClips: IUserPreference<number>
 }
 
 export interface IClipboardItem {
@@ -69,7 +83,9 @@ export enum IPages {
     settings,
     items,
     notifications,
-    login
+    login,
+    shortcuts,
+    info
 }
 
 export function isTextContent(obj: IClipboardItem) {

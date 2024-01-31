@@ -1,7 +1,8 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte'
-    import { appName, clipListFiltered, userSettings } from '../stores'
-    import { ipcRenderer } from '../util'
+    import { ipcRenderer } from '../KeyboardEventUtil'
+    import { appName, clipListFiltered, currentPage, userPreferences } from '../stores'
+    import { IPages } from '../types'
     import Switch from './Switch.svelte'
 
     let initialName: string
@@ -19,20 +20,6 @@
         appName.set(initialName)
     })
 
-    /**
-     * Used to transform something like "aSentenceThatWork"s to "A sentence that Works".
-     */
-    function camelToSentence(s: string) {
-        let result = s[0].toUpperCase()
-        var i = 1
-        while (i < s.length) {
-            if (s[i].charCodeAt(0) >= 'A'.charCodeAt(0) && s[i].charCodeAt(0) <= 'Z'.charCodeAt(0)) result += '  ' + s[i].toLowerCase()
-            else result += s[i]
-            i++
-        }
-        return result
-    }
-
     const typeSizes = {
         undefined: () => 0,
         boolean: () => 4,
@@ -45,8 +32,17 @@
 </script>
 
 <div class="settings flex flex-col justify-items-start">
-    {#if $userSettings}
-        {#each Object.entries($userSettings) as [key, item]}
+    <div
+        class=" bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
+    dark:text-gray-200 
+    even:dark:border-gray-800 
+    even:dark:bg-slate-900"
+    >
+        <p on:click={() => currentPage.set(IPages.shortcuts)}>Shortcuts ></p>
+    </div>
+
+    {#if $userPreferences}
+        {#each Object.entries($userPreferences) as [key, item]}
             <div
                 class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
             dark:text-gray-200 
@@ -56,7 +52,7 @@
             >
                 <Switch
                     type={item.type}
-                    label={camelToSentence(key)}
+                    label={item.displayName}
                     fontSize={12}
                     defaultValue={item.value}
                     selectOptions={item.selectableOptions}
@@ -67,7 +63,7 @@
             </div>
         {/each}
         <div
-            class="bg-gray-100 py-2 px-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
+            class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
         dark:text-gray-200 
         even:dark:border-gray-800 
         even:dark:bg-slate-900"
@@ -101,4 +97,12 @@
             </p>
         </div>
     {/if}
+    <div
+        class=" bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
+    dark:text-gray-200 
+    even:dark:border-gray-800 
+    even:dark:bg-slate-900"
+    >
+        <p on:click={() => currentPage.set(IPages.info)}>Info ></p>
+    </div>
 </div>

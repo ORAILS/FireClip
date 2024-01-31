@@ -10,6 +10,9 @@
     import EventHandler from './Components/EventHandler.svelte'
     import { currentPage } from './stores'
     import { IPages } from './types'
+    import Shortcuts from './Components/Shortcuts.svelte'
+    import Info from './Components/Info.svelte'
+    import ShortcutsHandler from './Components/ShortcutsHandler.svelte'
 </script>
 
 <svelte:head>
@@ -18,7 +21,7 @@
 
 <EventHandler />
 <PageHandler title={$appName}>
-    <section class="h-full space-y-6 bg-white dark:bg-slate-900">
+    <section class="h-full space-y-6">
         {#if $currentPage === IPages.login}
             <Login />
         {:else if $currentPage === IPages.items}
@@ -27,7 +30,10 @@
             <Settings />
         {:else if $currentPage === IPages.notifications}
             <Notifications />
+        {:else if $currentPage === IPages.info}
+            <Info />
         {/if}
+        <ShortcutsHandler />
     </section>
 </PageHandler>
 
