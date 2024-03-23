@@ -61,7 +61,9 @@ app.on('ready', async () => {
     appIcon.setToolTip(AppSettings.name)
 
     AppSettings.openDevTools ? mainWindow.window.webContents.openDevTools() : null
-    app.dock.hide()
+    if (AppSettings.isMac) {
+        app.dock.hide()
+    }
 })
 
 setInterval(() => {
@@ -101,13 +103,18 @@ app.on('window-all-closed', () => {
     app.quit()
 })
 
-app.on('ready', () => {
+function stopProcessReuse() {
     console.log('no more reuse!')
     app.allowRendererProcessReuse = false
+}
+
+app.on('ready', () => {
+    stopProcessReuse()
 })
 async function createMainWindow() {
     mainWindow = new CustomWindow()
     const urlPage = path.join(__dirname, 'www', 'index.html')
+    stopProcessReuse()
     mainWindow.createWindow(urlPage)
     ioHookHandler.InitIOHook(ipcMain, clipboard, mainWindow.window)
 }

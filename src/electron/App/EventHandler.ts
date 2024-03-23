@@ -1,7 +1,6 @@
 import { BrowserWindow, Clipboard, dialog, IpcMain, nativeImage } from 'electron'
 import { IpcMainEvent } from 'electron/main'
 import * as fs from 'fs'
-import robot from 'robotjs'
 import { ItemRepo } from '../Data/ItemRepository'
 import { IClipboardItem, isImageContent, isRTFContent, isTextContent } from '../DataModels/DataTypes'
 import { IAppState, IKeyboardEvent, ILocalUser, IMouseEvent, IReceiveChannel } from '../DataModels/LocalTypes'
@@ -113,17 +112,7 @@ export const action = {
     },
     async pasteItem() {
         if (!AppSettings.enablePaste) return
-
-        if (state.ctrlA) {
-            await robot.keyTap('backspace')
-
-            state.ctrlA = false
-        }
         if (userPreferences.minimizeAfterPaste.value) action.hideWindow()
-
-        if (AppSettings.isWin) robot.keyTap('v', 'control')
-        if (AppSettings.isMac) robot.keyTap('v', 'command')
-        if (AppSettings.isLinux) robot.keyTap('v', 'command')
     },
     getClipboardItem: async (): Promise<IClipboardItem | undefined> => {
         if (state.user === undefined) {
