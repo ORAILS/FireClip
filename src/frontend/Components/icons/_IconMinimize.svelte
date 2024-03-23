@@ -4,8 +4,10 @@
 <svg
     class="mx-0 my-auto h-5 w-5 rounded bg-gray-50 fill-black stroke-gray-800 p-1 hover:bg-green-600 hover:fill-white hover:p-1 
 dark:bg-slate-900 
-dark:fill-white 
-hover:dark:bg-green-700"
+dark:fill-white
+hover:dark:bg-green-700
+hover:cursor-pointer
+"
     aria-hidden="true"
     focusable="false"
     data-icon="arrows-minimize"

@@ -1,6 +1,8 @@
 <script lang="ts">
-    import { currentSearchedText, isFocused } from '../stores'
     import { ipcRenderer } from '../KeyboardEventUtil'
+    import { currentPage, currentSearchedText, isFocused } from '../stores'
+    import { IPages } from '../types'
+    import IconSettings from './icons/_IconSettings.svelte'
 
     let element: HTMLElement
     let text: string = ''
@@ -30,4 +32,9 @@
         bind:value={text}
         on:input={handleChange}
     />
+    <div class="ml-1 flex" on:click={()=> {
+            currentPage.set(IPages.settings)
+    }}>
+        <IconSettings />
+    </div>
 </footer>
