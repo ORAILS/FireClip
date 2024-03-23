@@ -12,7 +12,7 @@
     }
     onMount(() => {
         initialName = $appName
-        appName.set('< Settings')
+        appName.set(`${$appName} Settings`)
         ipcRenderer.send('get_settings')
     })
 
@@ -38,7 +38,7 @@
     even:dark:border-gray-800 
     even:dark:bg-slate-900"
     >
-        <p on:click={() => currentPage.set(IPages.items)}>  &gt; Back to items</p>
+        <p on:click={() => currentPage.set(IPages.items)}>  &lt; Back to items</p>
     </div>
     <div
         class=" bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
@@ -46,7 +46,7 @@
     even:dark:border-gray-800 
     even:dark:bg-slate-900"
     >
-        <p on:click={() => currentPage.set(IPages.shortcuts)}>Shortcuts &lt; </p>
+        <p on:click={() => currentPage.set(IPages.shortcuts)}>Shortcuts &gt; </p>
     </div>
 
     {#if $userPreferences}

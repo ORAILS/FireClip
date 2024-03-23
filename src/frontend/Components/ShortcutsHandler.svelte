@@ -72,7 +72,7 @@
         paste9: IShortCut
         paste10: IShortCut
     }
-    const shortcutSimpleName = 'simple'
+    const shortcutSimpleName = 'single'
     const shortcutSequenceName = 'sequence'
 
     // when shortcuts are received from the backend.
