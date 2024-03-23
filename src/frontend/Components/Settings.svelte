@@ -12,7 +12,7 @@
     }
     onMount(() => {
         initialName = $appName
-        appName.set(`${$appName} Settings`)
+        appName.set(`Settings`)
         ipcRenderer.send('get_settings')
     })
 
