@@ -1,5 +1,5 @@
 import { Writable, writable } from 'svelte/store'
-import { IClipboardItem, IPages, IUserPreferences } from './types'
+import { IClipboardItem, IClipboardItemFrontend, IPages, IUserPreferences } from './types'
 
 /**
  * Wether the app is focused (used for seaching function), as it's only triggered when focused
@@ -21,8 +21,8 @@ export const isPasswordAsked: Writable<boolean> = writable(false)
 export const isPasswordIncorrect: Writable<boolean> = writable(false)
 export const selectedClipId: Writable<string> = writable('')
 export const currentScrollIndex: Writable<number> = writable(-1)
-export const clipList: Writable<[string, IClipboardItem][]> = writable([])
-export const clipListFiltered: Writable<[string, IClipboardItem][]> = writable([])
+export const clipList: Writable<[string, IClipboardItemFrontend][]> = writable([])
+export const clipListFiltered: Writable<[string, IClipboardItemFrontend][]> = writable([])
 export const visibleClipsHashes: Writable<string[]> = writable([])
 export const showPassword: Writable<boolean> = writable(false)
 export const passwordButtonText: Writable<string> = writable('show')

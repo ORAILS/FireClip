@@ -1,6 +1,6 @@
-import { ILocalUser, IRemoteUser } from '../DataModels/LocalTypes'
-import { IClipboardItem, IClipboardItemEncrypted } from '../DataModels/DataTypes'
 import CryptoJS from 'crypto-js'
+import { IClipboardItem, IClipboardItemEncrypted, RemoteItemStatus } from '../DataModels/DataTypes'
+import { ILocalUser } from '../DataModels/LocalTypes'
 
 const EncryptText = (text: string, password: string): string => {
     return CryptoJS.AES.encrypt(text, password, {
@@ -20,7 +20,10 @@ const EncryptItem = (item: IClipboardItem, password: string): IClipboardItemEncr
     const encrypted = EncryptText(item.content, password)
     const result = {
         ...item,
-        encryptedContent: encrypted
+        content: undefined,
+        encryptedContent: encrypted,
+        created: item.created.toISOString(),
+        modified: item.modified.toISOString()
     }
     return result
 }
@@ -29,43 +32,45 @@ const DecryptItem = (item: IClipboardItemEncrypted, password: string): IClipboar
     const decrypted = DecryptText(item.encryptedContent, password)
     const result = {
         ...item,
-        content: decrypted
+        encryptedContent: undefined,
+        content: decrypted,
+        remoteStatus: RemoteItemStatus.fetchedFromRemote,
+        created: new Date(item.created),
+        modified: new Date(item.modified)
     }
+    // console.log(JSON.stringify(item, undefined, 2))
     return result
 }
 
-const ContentHash = (content: string, password: string) =>
-    CryptoJS.SHA256(CryptoJS.SHA256(password) + content).toString(CryptoJS.enc.Base64url)
+const ContentHash = (content: string, password: string) => CryptoJS.SHA256(CryptoJS.SHA256(password) + content).toString(CryptoJS.enc.Hex)
 
-const HashUserLocal = (user: ILocalUser): ILocalUser => {
+const HashUserLocal = (user: { name: string; password: string }): ILocalUser => {
     // generating salt from email
-    const salt = CryptoJS.SHA512(user.email).toString(CryptoJS.enc.Hex)
+    const salt = CryptoJS.SHA512(user.name).toString(CryptoJS.enc.Hex)
     // salting and hashing user password
     const masterKey = CryptoJS.PBKDF2(user.password, salt, {
         iterations: 10001,
         keySize: 256 / 32
     }).toString(CryptoJS.enc.Hex)
 
-    const hashed = {
+    const hashed: ILocalUser = {
         name: user.name,
-        email: user.email,
-        password: '',
-        masterKey
+        masterKey: masterKey
     }
     return hashed
 }
 
-const HashUserRemote = (user: ILocalUser): IRemoteUser => {
-    if (user.password.length > 0) user = HashUserLocal(user)
-    // hashing master password, used for authenticating.
-    const masterPasswordHash = CryptoJS.SHA256(user.masterKey + CryptoJS.SHA256(user.password).toString(CryptoJS.enc.Hex)).toString(
-        CryptoJS.enc.Base64url
-    )
-    return {
-        ...user,
-        masterPasswordHash
-    }
-}
+// const HashUserRemote = (user: ILocalUser): IRemoteUser => {
+//     if (user.password.length > 0) user = HashUserLocal(user)
+//     // hashing master password, used for authenticating.
+//     const masterPasswordHash = CryptoJS.SHA256(user.masterKey + CryptoJS.SHA256(user.password).toString(CryptoJS.enc.Hex)).toString(
+//         CryptoJS.enc.Base64url
+//     )
+//     return {
+//         ...user,
+//         masterPasswordHash
+//     }
+// }
 
 export const CryptoService = {
     EncryptText,
@@ -73,6 +78,6 @@ export const CryptoService = {
     EncryptItem,
     DecryptItem,
     HashUserLocal,
-    HashUserRemote,
+    // HashUserRemote,
     ContentHash
 }

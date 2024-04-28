@@ -29,7 +29,7 @@
         {
             name: 'loadItems',
             handler: function (event, store: any[]) {
-                $clipListFiltered = sort([...store]).desc((i) => i[1].lastModified)
+                $clipListFiltered = sort([...store]).desc((i) => i[1].modified)
                 $clipList = $clipListFiltered
             }
         },

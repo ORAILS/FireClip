@@ -1,15 +1,16 @@
 <script lang="ts">
     import { getTitle, ipcRenderer } from '../KeyboardEventUtil'
     import { clipListFiltered, currentScrollIndex, selectedClipId, userPreferences } from '../stores'
-    import type { IClipboardItem } from '../types'
-    import { isImageContent, isRTFContent, isTextContent } from '../types'
+    import type { IClipboardItemFrontend } from '../types'
+    import { isImageContent, isTextContent } from '../types'
     import viewport from '../viewPortAction'
+    import ItemInfo from './icons/ItemInfo.svelte'
     import IconCommand from './icons/_IconCommand.svelte'
 
     let visibleHashes: string[] = []
 
-    function handleClick(item: IClipboardItem) {
-        ipcRenderer.send('paste', item.contentHash)
+    function handleClick(item: IClipboardItemFrontend) {
+        ipcRenderer.send('paste', item.hash)
         $currentScrollIndex = -1
         $selectedClipId = ''
     }
@@ -51,10 +52,10 @@
                     on:enterViewport={() => handleEnter(key, item.content)}
                     on:exitViewport={() => handleExit(key, item.content)}
                     title={getTitle(item)}
-                    class="clipboard-item border-slate-800 {$selectedClipId === item.contentHash
+                    class="clipboard-item border-slate-800 {$selectedClipId === item.hash
                         ? 'bg-gray-300 even:bg-gray-300 dark:bg-slate-700 even:dark:bg-slate-700'
                         : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-700'} dark:text-gray-100 dark:even:border-y"
-                    id={item.contentHash}
+                    id={item.hash}
                     on:click|preventDefault={() => handleClick(item)}
                 >
                     <div class="flex">
@@ -66,12 +67,14 @@
                             {/if}
                         {/if}
                         {#if isTextContent(item)}
-                            <p>{item.content}</p>
-                        {:else if isRTFContent(item)}
-                            <p>{item.content}</p>
+                            <p class="h-full w-full overflow-hidden py-2">{item.content}</p>
+                            <!-- {:else if isRTFContent(item)}
+                            <p>{item.content}</p> -->
                         {:else if isImageContent(item)}
                             <img src={item.content} alt="Base64png" />
                         {/if}
+
+                        <ItemInfo {item} extraClassDiv="justify-self-end" />
                     </div>
                 </item>
             {/if}
@@ -83,7 +86,7 @@
 
 <style lang="postcss">
     .clipboard-item {
-        @apply mx-0 my-auto cursor-pointer overflow-hidden text-clip whitespace-nowrap py-2 pl-2 text-left;
+        @apply mx-0 my-auto cursor-pointer overflow-hidden text-clip whitespace-nowrap p-2 pr-1 text-left;
         /* border-bottom: 0.3px solid lightgray; */
         line-height: 15px;
     }

@@ -20,3 +20,8 @@ Following <https://samuelmeuli.com/blog/2019-12-28-notarizing-your-electron-app/
 Creating a new api key.
 
 Next step: <https://github.com/marketplace/actions/electron-builder-action>
+
+
+## ideas
+
+- if favourites over -> select behaviour --> deny adding new, unfavourite oldest --> offer subscription

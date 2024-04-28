@@ -145,7 +145,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '1']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[0][1].contentHash)
+                ipcRenderer.send('paste', $clipListFiltered[0][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -155,7 +155,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '2']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[1][1].contentHash)
+                ipcRenderer.send('paste', $clipListFiltered[1][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -164,7 +164,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '3']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[2][1].contentHash)
+                ipcRenderer.send('paste', $clipListFiltered[2][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -174,7 +174,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '4']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[3][1].contentHash)
+                ipcRenderer.send('paste', $clipListFiltered[3][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -184,7 +184,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '5']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[4][1].contentHash)
+                ipcRenderer.send('paste', $clipListFiltered[4][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -194,7 +194,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '6']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[5][1].contentHash)
+                ipcRenderer.send('paste', $clipListFiltered[5][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -204,7 +204,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '7']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[6][1].contentHash)
+                ipcRenderer.send('paste', $clipListFiltered[6][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -214,7 +214,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '8']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[7][1].contentHash)
+                ipcRenderer.send('paste', $clipListFiltered[7][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -224,7 +224,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '9']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[8][1].contentHash)
+                ipcRenderer.send('paste', $clipListFiltered[8][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -234,7 +234,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '0']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[9][1].contentHash)
+                ipcRenderer.send('paste', $clipListFiltered[9][1].hash)
             },
             combinationChangeHandler: () => {}
         }

@@ -61,7 +61,7 @@
         />
     {:else if type === 'string'}
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
-        <input type="text" class="w-16 cursor-pointer bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange} />
+        <input type="text" class="w-64 cursor-pointer bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange} />
     {/if}
 </div>
 

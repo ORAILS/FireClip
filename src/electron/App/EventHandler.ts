@@ -1,9 +1,11 @@
 import { BrowserWindow, Clipboard, dialog, IpcMain, nativeImage } from 'electron'
 import { IpcMainEvent } from 'electron/main'
 import * as fs from 'fs'
+import { DateTime } from 'luxon'
 import { ItemRepo } from '../Data/ItemRepository'
-import { IClipboardItem, isImageContent, isRTFContent, isTextContent } from '../DataModels/DataTypes'
-import { IAppState, IKeyboardEvent, ILocalUser, IMouseEvent, IReceiveChannel } from '../DataModels/LocalTypes'
+import { login } from '../Data/Requests'
+import { IClipboardItem, isImageContent, isRTFContent, isTextContent, RemoteItemStatus } from '../DataModels/DataTypes'
+import { IAppState, IKeyboardEvent, IMouseEvent, IReceiveChannel } from '../DataModels/LocalTypes'
 import { CryptoService } from '../Utils/CryptoService'
 import { JsUtil } from '../Utils/JsUtil'
 import { AppSettings } from './AppSettings'
@@ -11,9 +13,10 @@ import { InitUserSettings, IUserPreferences, store, userPreferences } from './Us
 
 const shortcutsKey = `fileclip.shortcuts`
 
-const state: IAppState = {
+export const state: IAppState = {
     pullInterval: undefined,
-    index: 0,
+    remoteSyncInterval: undefined,
+    // index: 0,
     ctrlA: false,
     last: 0,
     last2: 0,
@@ -41,18 +44,21 @@ async function saveJSONFile(data: object) {
 
 let cleanUpInterval: NodeJS.Timer | undefined = undefined
 
-export const handleCleanUpParameterChange = () => {
+export const handleCleanUpParameterChange = async () => {
+    console.log("CLEANUP CALLED")
     if (cleanUpInterval) {
         clearInterval(cleanUpInterval)
     }
-    cleanUpInterval = setInterval(() => {
+    const cleanUp = async () => {
         console.log('Cleaning started')
-        const wasCleaned = items()?.cleanUp(userPreferences.maxClipAgeInHours.value * 60 * 60, userPreferences.maxNumberOfClips.value)
+        const wasCleaned = await items()?.cleanUp(userPreferences.maxClipAgeInHours.value * 60 * 60, userPreferences.maxNumberOfClips.value)
         if (wasCleaned) {
             console.log('Was cleaned!')
             action.loadItems()
         }
-    }, 5 * 60 * 1000)
+    }
+    cleanUpInterval = setInterval(cleanUp, 5 * 60 * 1000)
+    await cleanUp()
 }
 
 const items = () => {
@@ -75,21 +81,21 @@ export const action = {
         localMainWindow.showInactive()
         localMainWindow.webContents.send(channelsToRender.unhide, true)
     },
-    resetIndex: () => {
-        state.index = items()?.getAll.length as number
-        localMainWindow.webContents.send(channelsToRender.indexChange, -1)
-    },
+    // resetIndex: async() => {
+    //     // state.index = await items()?.getAll.length as number
+    //     localMainWindow.webContents.send(channelsToRender.indexChange, -1)
+    // },
     resetSearch() {
         localMainWindow.webContents.send(channelsToRender.searchReset, true)
     },
     sendItems(itemList: Map<string, IClipboardItem> | undefined, resetItemIndex?: boolean, resetSearchField?: boolean) {
         localMainWindow.webContents.send(channelsToRender.loadItems, itemList)
-        resetItemIndex ? action.resetIndex() : null
+        // resetItemIndex ? action.resetIndex() : null
         resetSearchField ? action.resetSearch() : null
     },
-    loadItems() {
+    loadItems: async () => {
         try {
-            action.sendItems(items()?.getAll(), true, true)
+            action.sendItems(await items()?.getAll(), true, true)
         } catch (error) {
             console.log(error)
         }
@@ -97,6 +103,20 @@ export const action = {
     async startClipboardPooling() {
         if (state.pullInterval) return
         state.pullInterval = setInterval(async () => await action.TrySaveClipboard(10), 200)
+    },
+    async startRemoteSync(interval: number) {
+        if (state.remoteSyncInterval) return
+        if (!state.user || !state.user.masterKey) {
+            return
+        }
+        const sync = async () => {
+            const now = DateTime.now().toUnixInteger()
+            console.log(`Started syncing`)
+            await ItemRepo.syncWithRemote(state.user?.masterKey as string)
+            console.log(`Sync took ${DateTime.now().toUnixInteger() - now} seconds`)
+        }
+        await sync()
+        state.remoteSyncInterval = setInterval(sync, interval)
     },
     async writeToClipboard(hash: string) {
         const result = items()?.get(hash)
@@ -121,13 +141,14 @@ export const action = {
         }
 
         const newItem: IClipboardItem = {
-            type: 0,
-            remoteId: -1,
-            isFavourite: false,
+            contentType: 0,
+            // remoteId: -1,
+            isFavorite: false,
             created: new Date(),
-            lastModified: new Date(),
-            contentHash: '',
-            content: ''
+            modified: new Date(),
+            hash: '',
+            content: '',
+            remoteStatus: RemoteItemStatus.existsOnlyLocally
         }
 
         const base64Png = localClipboard.readImage().toDataURL()
@@ -135,7 +156,7 @@ export const action = {
             const hash = CryptoService.ContentHash(base64Png, state.user.masterKey)
             if (hash === state.lastHash) return undefined
             newItem.content = base64Png
-            newItem.contentHash = hash
+            newItem.hash = hash
             return newItem
         }
 
@@ -154,19 +175,19 @@ export const action = {
         const hash = CryptoService.ContentHash(text, state.user.masterKey)
         if (hash === state.lastHash || !text || text === '') return undefined
         newItem.content = text
-        newItem.contentHash = hash
-        newItem.type = 2
+        newItem.hash = hash
+        newItem.contentType = 2
         return newItem
     },
 
     TrySaveClipboard: async (delayMs: number) => {
-        // check if was inited
+        // TODO check if was inited
         await JsUtil.waitforme(delayMs)
 
         const item = await action.getClipboardItem()
         if (!item) return
-        state.lastHash = item.contentHash
-        items()?.add(item, state.user?.masterKey as string)
+        state.lastHash = item.hash
+        await items()?.add(item, state.user?.masterKey as string)
         action.loadItems()
     }
 }
@@ -218,14 +239,21 @@ const channelsFromRender: IReceiveChannel[] = [
     },
     {
         name: 'loginUser',
-        handler: async (event: IpcMainEvent, user: ILocalUser) => {
+        handler: async (event: IpcMainEvent, user: { name: string; password: string }) => {
             try {
+                console.log(user)
                 const hashed = CryptoService.HashUserLocal(user)
                 state.user = hashed
+                console.log('hashed')
                 console.log(state.user)
                 // TODO shady stuff here.
-                if (state.user.masterKey === '4f0a1743088714e60c5f0ada7d6a3717fa5aa5f195a9b121fc929151b8fb06da') {
+                const ok = await login()
+                console.log(ok)
+                if (ok) {
                     action.startClipboardPooling()
+                    if (userPreferences.enableRemoteSync.value) {
+                        action.startRemoteSync(userPreferences.remoteSyncInterval.value)
+                    }
                     action.loadItems()
                     action.sendSettings(userPreferences)
                     action.sendShortcuts()
@@ -312,9 +340,9 @@ async function InitIOHook(ipcMain: IpcMain, clipboard: Clipboard, mainWindow: Br
         messageFromRenderer.on(event.name, event.handler as never)
     }
 
-    action.resetIndex()
+    // action.resetIndex()
 
-    handleCleanUpParameterChange()
+    await handleCleanUpParameterChange()
 }
 
 export const ioHookHandler = {

@@ -11,10 +11,9 @@ const printPart = (value: object) => {
     console.log(`\n${JSON.stringify(value, null, 2)}`)
 }
 
-function sortItemsByDate(a: IClipboardItem, b: IClipboardItem, ascending = false): number {
-    if (ascending) new Date(a.lastModified).getTime() - new Date(b.lastModified).getTime()
-    return new Date(b.lastModified).getTime() - new Date(a.lastModified).getTime()
-}
+// function sortItemsByDate(a: IClipboardItem, b: IClipboardItem, ascending = false): number {
+//     return a.modified.toUnixInteger() - b.modified.toUnixInteger()
+// }
 
 function diff(num1: number, num2: number) {
     if (num1 > num2) {
@@ -26,6 +25,6 @@ function diff(num1: number, num2: number) {
 export const JsUtil = {
     waitforme,
     printPart,
-    sortItemsByDate,
+    // sortItemsByDate,
     diff
 }

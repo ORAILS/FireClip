@@ -31,13 +31,6 @@ export interface IReceiveChannel {
     handler: (event: IpcMainEvent, data: never) => Promise<void> | void
 }
 
-export interface IClipboardItemEncrypted {
-    encrypted: string
-    hash: string
-    localId: number
-    serverId: number
-}
-
 export interface IUserPreference<T> {
     displayName: string
     description: string
@@ -60,20 +53,37 @@ export interface IUserPreferences {
     maxNumberOfClips: IUserPreference<number>
 }
 
-export interface IClipboardItem {
+interface ItemBase {
     /**
      * 0 - image
      * 1 - rtf
      * 2 - text
      */
-    type: 0 | 1 | 2
-    remoteId: number
-    isFavourite: boolean
+    contentType: 0 | 1 | 2
+    // remoteId: number
+    isFavorite: boolean
+    /**
+     * hash(hash(encryption key)+content)
+     */
+    hash: string
+}
+
+export enum RemoteItemStatus {
+    fetchedFromRemote = 0,
+    pushedToRemote = 1,
+    existsOnlyLocally = 2,
+    needsUpdateOnRemote = 3
+}
+
+export interface IClipboardItem extends ItemBase {
+    content: string;
     created: Date
-    lastModified: Date
-    contentHash: string
+    modified: Date
+    remoteStatus: RemoteItemStatus,
+}
+
+export interface IClipboardItemFrontend extends IClipboardItem {
     isVisible: boolean
-    content: string
 }
 
 /**
@@ -89,18 +99,17 @@ export enum IPages {
 }
 
 export function isTextContent(obj: IClipboardItem) {
-    return obj.type === 2
+    return obj.contentType === 2
 }
 export function isRTFContent(obj: IClipboardItem) {
-    return obj.type === 1
+    return obj.contentType === 1
 }
 export function isImageContent(obj: IClipboardItem) {
-    return obj.type === 0
+    return obj.contentType === 0
 }
 
 export function sortItemsByDate(a: [string, IClipboardItem], b: [string, IClipboardItem], ascending = false): number {
-    if (ascending) new Date(a[1].lastModified).getTime() - new Date(b[1].lastModified).getTime()
-    return new Date(b[1].lastModified).getTime() - new Date(a[1].lastModified).getTime()
+    return new Date(b[1].modified).getTime() - new Date(a[1].modified).getTime()
 }
 
 export interface DbData {

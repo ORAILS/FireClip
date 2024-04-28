@@ -1,5 +1,3 @@
-import { IpcMainEvent } from 'electron/main'
-
 interface AppSettings {
     name: string
     openDevTools: boolean
@@ -20,8 +18,8 @@ const winPlatform = ['win32']
 
 export const AppSettings: AppSettings = {
     name: 'FireClip',
-    openDevTools: false,
-    enableDevTools: false,
+    openDevTools: true,
+    enableDevTools: true,
     enablePaste: true,
     widthNormal: 600,
     heightNormal: 400,
@@ -42,14 +40,4 @@ export const WindowSettings = {
 
 function contains(array: string[], item: string) {
     return array.find((i) => i === item) != undefined
-}
-
-export interface INetworkSettings {
-    authServerUrl: string
-    dataServerUrl: string
-}
-
-export const NetworkSettings: INetworkSettings = {
-    authServerUrl: 'http://localhost:3006',
-    dataServerUrl: 'http://localhost:3007'
 }

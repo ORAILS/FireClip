@@ -25,6 +25,10 @@ export interface IUserPreference<T> {
 export interface IUserPreferences {
     darkMode: IUserPreference<'system' | 'on' | 'off'>
     keyboardLayout: IUserPreference<'qwerty' | 'dvorak'>
+    authUrl: IUserPreference<string>
+    storeUrl: IUserPreference<string>
+    remoteSyncInterval: IUserPreference<number>
+    enableRemoteSync: IUserPreference<boolean>
     enableKeyboardShortcuts: IUserPreference<boolean>
     regiserCommandNumberShortcuts: IUserPreference<boolean>
     showCommandNumberIcons: IUserPreference<boolean>
@@ -175,7 +179,54 @@ export const userPreferences: IUserPreferences = {
             defaultHandler(e, event)
             handleCleanUpParameterChange()
         }
-    }
+    },
+    authUrl: {
+        displayName: 'Auth server URL',
+        description: 'the server used for authentication',
+        value: "https://fireclip-auth.cap.danr.cc",
+        type: 'string',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userPreferences.authUrl.value = event.value
+            defaultHandler(e, event)
+            handleCleanUpParameterChange()
+        }
+    },
+    storeUrl: {
+        displayName: 'Store server URL',
+        description: 'server used for clips storage',
+        value: "https://fireclip-clips-dev.cap.danr.cc",
+        type: 'string',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userPreferences.storeUrl.value = event.value
+            defaultHandler(e, event)
+            handleCleanUpParameterChange()
+        }
+    },
+    remoteSyncInterval: {
+        displayName: 'Interval in seconds to perform a remote sync',
+        description: 'Every time an amount of seconds equal to this value passes, the app will sync to the remote storage.',
+        value: 15000,
+        type: 'number',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userPreferences.remoteSyncInterval.value = event.value * 1000
+            defaultHandler(e, event)
+            handleCleanUpParameterChange()
+        }
+    },
+    enableRemoteSync: {
+        displayName: 'Enable remote sync',
+        description: 'If enabled, the items will be pushed to the "cloud" to sync on other devices',
+        value: true,
+        type: 'toggle',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userPreferences.enableRemoteSync.value = event.value
+            defaultHandler(e, event)
+        }
+    },
 }
 
 /**

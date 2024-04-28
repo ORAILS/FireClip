@@ -13,7 +13,8 @@ export interface IKeyboardEvent {
 export interface IAppState {
     user: ILocalUser | undefined
     pullInterval: NodeJS.Timer | undefined
-    index: number
+    remoteSyncInterval: NodeJS.Timer | undefined
+    // index: number
     ctrlA: boolean
     last: number
     last2: number
@@ -36,8 +37,6 @@ export interface IMouseEvent {
 
 export interface ILocalUser {
     name: string
-    email: string
-    password: string
     masterKey: string
 }
 

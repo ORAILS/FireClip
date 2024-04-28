@@ -1,35 +1,54 @@
-import { IClipboardItem } from '../DataModels/DataTypes'
+import { DateTime } from 'luxon'
+import { action, state } from '../App/EventHandler'
+import { IClipboardItem, RemoteItemStatus } from '../DataModels/DataTypes'
 import { CryptoService } from '../Utils/CryptoService'
+import { RequestService } from './Requests'
 
 const items: Map<string, IClipboardItem> = new Map()
 
-const getAll = (): Map<string, IClipboardItem> => items
+const getAll = (): Map<string, IClipboardItem> => {
+    return items
+}
 
-const add = (item: IClipboardItem, password: string): IClipboardItem => {
-    item.contentHash = CryptoService.ContentHash(item.content, password)
-    const exists = get(item.contentHash)
+const add = async (item: IClipboardItem, password: string): Promise<IClipboardItem> => {
+    item.hash = CryptoService.ContentHash(item.content, password)
+    console.log(items.size)
+    const exists = get(item.hash)
     if (exists) {
-        exists.lastModified = item.created
-        items.set(item.contentHash, exists)
+        exists.modified = item.created
+        exists.remoteStatus = RemoteItemStatus.needsUpdateOnRemote
+        items.set(item.hash, exists)
         return exists
     }
-    items.set(item.contentHash, item)
+    items.set(item.hash, item)
+    console.log(items.size)
+    ItemRepo.syncWithRemote(password)
     return item
 }
 
 const update = (item: IClipboardItem): boolean => {
-    const exists = get(item.contentHash)
+    const exists = get(item.hash)
     if (exists) {
-        items.set(item.contentHash, item)
+        items.set(item.hash, item)
         return true
     }
     return false
 }
 
-const remove = (item: IClipboardItem): boolean => {
-    const exists = get(item.contentHash)
+const removeByHash = async (hash: string): Promise<boolean> => {
+    const exists = get(hash)
     if (exists) {
-        items.delete(item.contentHash)
+        return await remove(exists)
+    }
+    return false
+}
+
+
+const remove = async (item: IClipboardItem): Promise<boolean> => {
+    const exists = get(item.hash)
+    if (exists) {
+        items.delete(item.hash)
+        await RequestService.clips.delete(item.hash)
         return true
     }
     return false
@@ -43,12 +62,12 @@ const exists = (itemHash: string): boolean => {
     return get(itemHash) !== undefined
 }
 
-const removeOldUnfavored = (maxAgeInSeconds: number): boolean => {
+const removeOldUnfavored = async (maxAgeInSeconds: number): Promise<boolean> => {
     let changed = false
-    const maxAge = new Date(new Date().getTime() - maxAgeInSeconds * 1000)
+    const maxAge = DateTime.now().toUTC().minus({ seconds: maxAgeInSeconds })
     for (const [hash, item] of items) {
-        if (item.lastModified.getTime() < maxAge.getTime()) {
-            if (item.isFavourite) continue
+        if (item.modified.getTime() < maxAge.toMillis()) {
+            if (item.isFavorite) continue
             remove(item)
             changed = true
         }
@@ -56,11 +75,11 @@ const removeOldUnfavored = (maxAgeInSeconds: number): boolean => {
     return changed
 }
 
-function limitMapSize(maxSize: number): boolean {
+const limitMapSize = async (maxSize: number): Promise<boolean> => {
     const toDelete = []
     let i = 0
     for (const [key, value] of items.entries()) {
-        if (!value.isFavourite) {
+        if (!value.isFavorite) {
             toDelete[i++] = key
         }
     }
@@ -68,17 +87,16 @@ function limitMapSize(maxSize: number): boolean {
     toDelete.sort((a, b) => items.get(a)!.created.getTime() - items.get(b)!.created?.getTime())
     while (items.size > maxSize && toDelete.length > 0) {
         changed = true
-        items.delete(toDelete.shift() ?? '')
+        const hash = toDelete.shift()
+        if (!hash) {
+            continue
+        }
+        await removeByHash(hash)
     }
     return changed
 }
 
-export const cleanUp = (maxAgeInSeconds: number, maxNumberTotal: number): boolean => {
-    let changed = false
-    changed = changed || removeOldUnfavored(maxAgeInSeconds)
-    changed = changed || limitMapSize(maxNumberTotal)
-    return changed
-}
+let oldestPull = DateTime.now().minus({ months: 2 })
 
 export const ItemRepo = {
     add,
@@ -87,5 +105,51 @@ export const ItemRepo = {
     remove,
     exists,
     getAll,
-    cleanUp
+    cleanUp: async (maxAgeInSeconds: number, maxNumberTotal: number): Promise<boolean> => {
+        let changed = false
+        changed = changed || await removeOldUnfavored(maxAgeInSeconds)
+        changed = changed || await limitMapSize(maxNumberTotal)
+        return changed
+    },
+    syncWithRemote: async (password: string) => {
+        const res = await RequestService.clips.getSince(oldestPull)
+        oldestPull = DateTime.now().minus({ seconds: 10 })
+        if (!state.user) {
+            throw new Error("user not found")
+        }
+        for (const clip of res.clips) {
+            try {
+                const decrypted = CryptoService.DecryptItem(clip, state.user?.masterKey)
+                items.set(clip.hash, decrypted)
+            } catch (error) {
+                console.log(clip)
+                console.log(error)
+            }
+        }
+
+        for (const item of items) {
+            if (item[1].remoteStatus == RemoteItemStatus.existsOnlyLocally) {
+                const encrypted = CryptoService.EncryptItem(item[1], password)
+                const res = await RequestService.clips.add(encrypted)
+                if (res.status == 200) {
+                    item[1].remoteStatus = RemoteItemStatus.pushedToRemote
+                } else if (res.status == 409) {
+                    item[1].remoteStatus = RemoteItemStatus.needsUpdateOnRemote
+                }
+                else {
+                    console.log(await res.text())
+                }
+            }
+            if (item[1].remoteStatus == RemoteItemStatus.needsUpdateOnRemote) {
+                const encrypted = CryptoService.EncryptItem(item[1], password)
+                const res = await RequestService.clips.update(encrypted)
+                if (res.status == 200) {
+                    item[1].remoteStatus = RemoteItemStatus.pushedToRemote
+                } else {
+                    console.log(await res.text())
+                }
+            }
+        }
+        action.loadItems()
+    }
 }

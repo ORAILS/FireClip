@@ -2,7 +2,7 @@
     import { ipcRenderer } from '../KeyboardEventUtil'
     import { currentPage, currentSearchedText, isFocused } from '../stores'
     import { IPages } from '../types'
-    import IconSettings from './icons/_IconSettings.svelte'
+    import Icons from './icons/Icons.svelte'
 
     let element: HTMLElement
     let text: string = ''
@@ -32,9 +32,12 @@
         bind:value={text}
         on:input={handleChange}
     />
-    <div class="ml-1 flex" on:click={()=> {
+    <div
+        class="ml-1 flex"
+        on:click={() => {
             currentPage.set(IPages.settings)
-    }}>
-        <IconSettings />
+        }}
+    >
+        <Icons icon="gear" size={6} />
     </div>
 </footer>
