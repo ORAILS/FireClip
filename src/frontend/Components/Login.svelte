@@ -7,21 +7,16 @@
         $passwordButtonText === 'show' ? ($passwordButtonText = 'hide') : ($passwordButtonText = 'show')
         $showPassword === true ? ($showPassword = false) : ($showPassword = true)
     }
-    let userPassword = 'password'
-
-    onMount(async () => {
-        ipcRenderer.send('RendererInit', true)
-        setTimeout(() => {
-            ipcRenderer.send('loginUser', {
-                name: 'me',
-                email: 'email',
-                password: userPassword
-            })
-        }, 400)
-    })
+    let userPassword: string = ''
+    let username: string = ''
 
     export const validatePassword = (pass: string, isRegisterPass = false): boolean => {
-        if (!pass || pass.length < 0) {
+        if (username.length < 1) {
+            error = 'username cannot be empty'
+            return false
+        }
+        if (!pass || pass.length < 1) {
+            error = 'password cannot be empty'
             return false
         }
         if (!isRegisterPass) return true
@@ -30,6 +25,7 @@
     }
 
     function resetPasswordCorrect() {
+        error = ''
         $isPasswordIncorrect = false
     }
     const onKeyEnter = async (e: KeyboardEvent) => {
@@ -43,13 +39,11 @@
     const sendLoginRequest = () => {
         if (validatePassword(userPassword)) {
             // TODO remove when we have the server working.
-            ipcRenderer.send('loginUser', {
-                name: 'me',
-                email: 'email',
-                password: userPassword
-            })
+            ipcRenderer.send('loginUser', { name: username, password: userPassword })
         }
     }
+
+    let error = ''
 </script>
 
 <div class="container mx-auto flex justify-center">
@@ -64,6 +58,16 @@
             </div>
             <div class="mt-2">
                 <p class="text-center text-sm">Use password to decrypt data</p>
+                <div class="relative my-3 w-full ">
+                    <input
+                        bind:value={username}
+                        on:input={resetPasswordCorrect}
+                        class="border-1 w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono  leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 focus:outline-none  dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-gray-800"
+                        type="text"
+                        autocomplete="off"
+                        placeholder="username"
+                    />
+                </div>
                 <div class="relative my-3 w-full ">
                     <div class="absolute inset-y-0 right-0 flex items-center px-2">
                         <input class="js-$password-toggle hidden" id="toggle" type="checkbox" />
@@ -80,6 +84,7 @@
                             on:keypress={onKeyEnter}
                             class="border-1 w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono  leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 focus:outline-none  dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-gray-800"
                             type="text"
+                            placeholder="password"
                             autocomplete="off"
                         />
                     {:else}
@@ -89,9 +94,13 @@
                             on:keypress={onKeyEnter}
                             class="border-1 dark:focus:bg-gray-800focus:outline-none w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-slate-700"
                             type="password"
+                            placeholder="password"
                             autocomplete="off"
                         />
                     {/if}
+                </div>
+                <div class="m-1 h-6">
+                    <p class="text-red text-sm">{error}</p>
                 </div>
                 {#if $isPasswordIncorrect}
                     <button
