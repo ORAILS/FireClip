@@ -5,8 +5,7 @@ import { AppSettings } from './App/AppSettings'
 import CustomWindow from './App/CustomWindow'
 import { ioHookHandler } from './App/EventHandler'
 import { userPreferences } from './App/UserPreferences'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require('electron-reload')('./src/**')
+
 
 let mainWindow: CustomWindow
 

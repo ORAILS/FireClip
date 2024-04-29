@@ -46,11 +46,11 @@ import stringify from 'json-stable-stringify'
 
 interface ItemBase {
     /**
-     * 0 - image
      * 1 - rtf
      * 2 - text
+     * 3 - image
      */
-    contentType: 0 | 1 | 2
+    contentType: 1 | 2 | 3
     // remoteId: number
     isFavorite: boolean
     /**
@@ -86,7 +86,7 @@ export function isRTFContent(obj: ItemBase) {
     return obj.contentType === 1
 }
 export function isImageContent(obj: ItemBase) {
-    return obj.contentType === 0
+    return obj.contentType === 3
 }
 
 export const ObjectsAreEqual = <T>(item1: T, item2: T) => {

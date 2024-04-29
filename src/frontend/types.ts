@@ -55,11 +55,11 @@ export interface IUserPreferences {
 
 interface ItemBase {
     /**
-     * 0 - image
      * 1 - rtf
      * 2 - text
+     * 3 - image
      */
-    contentType: 0 | 1 | 2
+    contentType: 1 | 2 | 3
     // remoteId: number
     isFavorite: boolean
     /**
@@ -105,7 +105,7 @@ export function isRTFContent(obj: IClipboardItem) {
     return obj.contentType === 1
 }
 export function isImageContent(obj: IClipboardItem) {
-    return obj.contentType === 0
+    return obj.contentType === 3
 }
 
 export function sortItemsByDate(a: [string, IClipboardItem], b: [string, IClipboardItem], ascending = false): number {

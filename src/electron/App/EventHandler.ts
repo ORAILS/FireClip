@@ -141,7 +141,7 @@ export const action = {
         }
 
         const newItem: IClipboardItem = {
-            contentType: 0,
+            contentType: 1,
             // remoteId: -1,
             isFavorite: false,
             created: new Date(),
@@ -157,6 +157,7 @@ export const action = {
             if (hash === state.lastHash) return undefined
             newItem.content = base64Png
             newItem.hash = hash
+            newItem.contentType = 3
             return newItem
         }
 
