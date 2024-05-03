@@ -115,10 +115,12 @@ export const ItemRepo = {
         console.log("syncing")
         const res = await RequestService.clips.getSince(oldestPull)
         oldestPull = DateTime.now().minus({ seconds: 10 })
+        let needsLoading = false
         if (!state.user) {
             throw new Error("user not found")
         }
         for (const clip of res.clips) {
+            needsLoading = true
             try {
                 const decrypted = CryptoService.DecryptItem(clip, state.user?.masterKey)
                 items.set(clip.hash, decrypted)
@@ -140,6 +142,7 @@ export const ItemRepo = {
                 else {
                     console.log(await res.text())
                 }
+                needsLoading = true
             }
             if (item[1].remoteStatus == RemoteItemStatus.needsUpdateOnRemote) {
                 const encrypted = CryptoService.EncryptItem(item[1], password)
@@ -149,9 +152,12 @@ export const ItemRepo = {
                 } else {
                     console.log(await res.text())
                 }
+                needsLoading = true
             }
         }
-        action.loadItems()
         console.log('done syncing')
+        if (needsLoading) {
+            action.loadItems()
+        }
     }
 }

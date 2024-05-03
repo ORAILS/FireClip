@@ -13,7 +13,7 @@ export const getTitle = (item: IClipboardItem) => {
     if (isTextContent(item))
         return item.content + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.modified)
     if (isImageContent(item))
-        return 'PNG Image' + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.modified)
+        return `size: ${Math.round(item.content.length / 1024 / 1024 * 100) / 100} MB\n PNG Image` + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.modified)
     if (isRTFContent(item))
         return item.content + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.modified)
 }

@@ -38,8 +38,8 @@ async function requestWithResponseBody<T>(url: string, method: string = "GET", b
     if (res.ok) {
         return await res.json() as T
     }
-    console.log(`${method} ${url}`)
-    console.log(headers)
+    // console.log(`${method} ${url}`)
+    // console.log(headers)
     throw new Error(await res.text())
 }
 
@@ -65,9 +65,9 @@ export async function login() {
 }
 
 async function requestToken(url: string, method: string = "GET", body?: object) {
-    console.log(`${method} ${url}`)
-    console.log(JSON.stringify(body, undefined, 2))
-    console.log(await getToken())
+    // console.log(`${method} ${url}`)
+    // console.log(JSON.stringify(body, undefined, 2))
+    // console.log(await getToken())
     return await request(url, method, body, { 'authorization': `Bearer ${await getToken()}` })
 }
 
