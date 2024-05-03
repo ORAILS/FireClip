@@ -65,8 +65,9 @@ export async function login() {
 }
 
 async function requestToken(url: string, method: string = "GET", body?: object) {
-    // console.log(JSON.stringify(body, undefined, 2))
-    // console.log(await getToken())
+    console.log(`${method} ${url}`)
+    console.log(JSON.stringify(body, undefined, 2))
+    console.log(await getToken())
     return await request(url, method, body, { 'authorization': `Bearer ${await getToken()}` })
 }
 

@@ -112,6 +112,7 @@ export const ItemRepo = {
         return changed
     },
     syncWithRemote: async (password: string) => {
+        console.log("syncing")
         const res = await RequestService.clips.getSince(oldestPull)
         oldestPull = DateTime.now().minus({ seconds: 10 })
         if (!state.user) {
@@ -151,5 +152,6 @@ export const ItemRepo = {
             }
         }
         action.loadItems()
+        console.log('done syncing')
     }
 }
