@@ -6,6 +6,7 @@
 
     let element: HTMLElement
     let text: string = ''
+    export let height = 10
 
     isFocused.subscribe((v) => {
         if (element) {
@@ -25,7 +26,7 @@
 
 {#if $currentPage == IPages.items}
     <footer
-        class="flex h-10 w-full items-center border-t border-t-gray-300 bg-white p-1  font-bold dark:border-t-gray-800 dark:bg-slate-900"
+        class="flex h-{height} w-full items-center border-t border-t-gray-300 bg-white p-1  font-bold dark:border-t-gray-800 dark:bg-slate-900"
     >
         <input
             bind:this={element}
@@ -38,10 +39,11 @@
         <div
             class="ml-1 flex"
             on:click={() => {
+                console.log("clicked")
                 currentPage.set(IPages.settings)
             }}
         >
-            <Icons icon="gear" size={6} />
+            <Icons icon="gear" title="settings" stopPropagation={false} size={6} />
         </div>
     </footer>
 {/if}

@@ -12,24 +12,31 @@
     export let extraClass = ''
     export let extraClassDiv = ''
 
+    export let stopPropagation = true
+    export let filled = false
+
     export let icon: 'sync' | 'check' | 'up' | 'gear' | 'heart' | 'trash-bin' | undefined
 
     function handleClick(event) {
+        if (stopPropagation) {
+            event.stopPropagation()
+        }
         dispatch('click')
     }
+
+    export let title = ''
 </script>
 
-<div class="h-{size} w-{size} {extraClassDiv} mx-auto my-auto" on:click|stopPropagation={handleClick}>
+<div {title} class="h-{size} w-{size} {extraClassDiv} mx-auto my-auto" on:click={handleClick}>
     <!-- items offered under MIT license -->
     <!-- https://github.com/gorango/glyphs/blob/main/license -->
     <svg
         class="mx-0 my-auto h-{size} w-{size}
 rounded 
-stroke-gray-800 hover:cursor-pointer
-dark:stroke-white
+stroke-gray-800 hover:cursor-pointer dark:stroke-gray-200
+{filled ? 'fill-gray-800 dark:fill-gray-200' : ''}
 {extraClass}
 "
-        on:click|preventDefault={() => {}}
         focusable="false"
         fill="none"
         viewBox="0 0 80 80"

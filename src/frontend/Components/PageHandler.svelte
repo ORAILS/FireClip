@@ -42,12 +42,12 @@
 
 <svelte:window bind:outerWidth={outerW} />
 
-<main class={appClasses}>
+<main class="flex flex-col {appClasses}">
     <TitleBar {title} on:clickMinimize={minimize} on:clickUnmaximize={unmaximize} on:clickMaximize={maximize} on:clickClose={close} />
     <div class="nosbar page bg-white dark:bg-rock">
         <slot />
     </div>
-    <SearchBar />
+    <SearchBar height={10} />
 </main>
 
 <style lang="postcss">
@@ -55,8 +55,7 @@
         @apply w-full;
     }
     .page {
-        @apply w-full overflow-y-auto p-0;
-        height: calc(100% - theme('spacing.8') - theme('spacing.10'));
+        @apply h-full w-full overflow-y-auto p-0;
     }
 
     .page::-webkit-scrollbar {

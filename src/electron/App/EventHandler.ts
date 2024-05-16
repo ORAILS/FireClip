@@ -281,6 +281,16 @@ const channelsFromRender: IReceiveChannel[] = [
         }
     },
     {
+        name: 'add_favorite',
+        handler: async (event: IpcMainEvent, hash: string) => {
+            const item = await ItemRepo.get(hash)
+            item!.isFavorite = !item?.isFavorite
+            item!.remoteStatus = RemoteItemStatus.needsUpdateOnRemote
+            await ItemRepo.update(item!)
+            await action.loadItems()
+        }
+    },
+    {
         name: 'focus',
         handler: async (event: IpcMainEvent, value: boolean) => {
             localMainWindow.show()
