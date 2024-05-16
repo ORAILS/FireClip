@@ -3,7 +3,7 @@
 </script>
 
 <div
-    class="mx-0 my-0 mr-1 flex h-full max-w-[25px] cursor-pointer flex-row items-center self-center rounded-sm border-0 bg-gray-50 fill-black stroke-slate-800 p-[2px] text-[14px] dark:bg-slate-800 dark:fill-white"
+    class="mx-0 my-0 mr-1 flex h-full max-w-[25px] cursor-pointer flex-row items-center self-center rounded-sm border-0 bg-gray-50 fill-black stroke-slate-800 p-[2px] text-[14px] shadow-lg dark:bg-slate-800 dark:fill-white"
 >
     <svg
         xmlns="http://www.w3.org/2000/svg"

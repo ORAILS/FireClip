@@ -103,6 +103,7 @@ export const ItemRepo = {
     get,
     update,
     remove,
+    removeByHash,
     exists,
     getAll,
     cleanUp: async (maxAgeInSeconds: number, maxNumberTotal: number): Promise<boolean> => {

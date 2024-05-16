@@ -7,8 +7,15 @@
         $passwordButtonText === 'show' ? ($passwordButtonText = 'hide') : ($passwordButtonText = 'show')
         $showPassword === true ? ($showPassword = false) : ($showPassword = true)
     }
-    let userPassword: string = ''
-    let username: string = ''
+    let userPassword: string = 'tests'
+    let username: string = 'ddlele'
+
+    onMount(async () => {
+        ipcRenderer.send('RendererInit', true)
+        setTimeout(() => {
+            ipcRenderer.send('loginUser', { name: username, password: userPassword })
+        }, 400)
+    })
 
     export const validatePassword = (pass: string, isRegisterPass = false): boolean => {
         if (username.length < 1) {

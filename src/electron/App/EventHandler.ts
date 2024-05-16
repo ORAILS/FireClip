@@ -88,14 +88,14 @@ export const action = {
     resetSearch() {
         localMainWindow.webContents.send(channelsToRender.searchReset, true)
     },
-    sendItems(itemList: Map<string, IClipboardItem> | undefined, resetItemIndex?: boolean, resetSearchField?: boolean) {
+    sendItems(itemList: Map<string, IClipboardItem> | undefined, resetSearchField?: boolean) {
         localMainWindow.webContents.send(channelsToRender.loadItems, itemList)
         // resetItemIndex ? action.resetIndex() : null
         resetSearchField ? action.resetSearch() : null
     },
     loadItems: async () => {
         try {
-            action.sendItems(await items()?.getAll(), true, true)
+            action.sendItems(await items()?.getAll(), true)
         } catch (error) {
             console.log(error)
         }
@@ -271,7 +271,14 @@ const channelsFromRender: IReceiveChannel[] = [
     },
     {
         name: 'paste',
-        handler: async (event: IpcMainEvent, id: string) => await action.writeToClipboard(id)
+        handler: async (event: IpcMainEvent, hash: string) => await action.writeToClipboard(hash)
+    },
+    {
+        name: 'delete',
+        handler: async (event: IpcMainEvent, hash: string) => {
+            await ItemRepo.removeByHash(hash)
+            await action.loadItems()
+        }
     },
     {
         name: 'focus',

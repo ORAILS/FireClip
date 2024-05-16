@@ -10,12 +10,12 @@ export const delay = (delayInms: number) => {
 }
 
 export const getTitle = (item: IClipboardItem) => {
+    let returned = `Created at: ${getDateFormat(item.created)}\nUsed at:  ${getDateFormat(item.modified)}\nSize: ${Math.round(item.content.length / 1024 / 1024 * 100) / 100} MB\n\n`
     if (isTextContent(item))
-        return item.content + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.modified)
+        returned += item.content
     if (isImageContent(item))
-        return `size: ${Math.round(item.content.length / 1024 / 1024 * 100) / 100} MB\n PNG Image` + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.modified)
-    if (isRTFContent(item))
-        return item.content + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.modified)
+        returned += 'Base64 PNG Image'
+    return returned
 }
 
 /**

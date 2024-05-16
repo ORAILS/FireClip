@@ -10,6 +10,7 @@
     let visibleHashes: string[] = []
 
     function handleClick(item: IClipboardItemFrontend) {
+        console.log('paste triggered')
         ipcRenderer.send('paste', item.hash)
         $currentScrollIndex = -1
         $selectedClipId = ''
@@ -66,13 +67,14 @@
                                 <IconCommand number={0} />
                             {/if}
                         {/if}
-                        {#if isTextContent(item)}
-                            <p class="h-full w-full overflow-hidden py-2">{item.content}</p>
-                            <!-- {:else if isRTFContent(item)}
-                            <p>{item.content}</p> -->
-                        {:else if isImageContent(item)}
-                            <img src={item.content} alt="Base64png" />
-                        {/if}
+                        <div class="my-auto h-full w-full overflow-hidden py-2">
+                            {#if isTextContent(item)}
+                                <p>{item.content}</p>
+                            {:else if isImageContent(item)}
+                                <img src={item.content} alt="Base64png" />
+                                <!-- TODO RTF CONTENT -->
+                            {/if}
+                        </div>
 
                         <ItemInfo {item} extraClassDiv="justify-self-end" />
                     </div>
@@ -86,7 +88,7 @@
 
 <style lang="postcss">
     .clipboard-item {
-        @apply mx-0 my-auto cursor-pointer overflow-hidden text-clip whitespace-nowrap p-2 pr-1 text-left;
+        @apply cursor-pointer overflow-hidden text-clip whitespace-nowrap p-1 pl-2 text-left;
         /* border-bottom: 0.3px solid lightgray; */
         line-height: 15px;
     }

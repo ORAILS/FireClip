@@ -284,6 +284,5 @@ export const InitUserSettings = async () => {
 
     // default triggering shortcut, always enabled (most likely also a user settings in the future)
     globalShortcut.register('CommandOrControl+`', () => {
-        // action.handleShortcut()
     })
 }
