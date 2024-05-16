@@ -96,7 +96,7 @@ const limitMapSize = async (maxSize: number): Promise<boolean> => {
     return changed
 }
 
-let oldestPull = DateTime.now().minus({ months: 2 })
+let oldestPull = DateTime.now().minus({ hours: 6 })
 
 export const ItemRepo = {
     add,
@@ -106,6 +106,24 @@ export const ItemRepo = {
     removeByHash,
     exists,
     getAll,
+    loadItemsBeforeHash: async (hash: string, password: string, hours = 6) => {
+        console.log(`loading ${hours}hours before ${hash}`)
+        // no sync before this time, basically should be inexistent
+        if (oldestPull.minus({ hours }) < DateTime.fromObject({ year: 2024, month: 1 })) {
+            console.log("requested a sync with a time before sync was added!")
+            return
+        }
+        const item = items.get(hash)
+        if (!item) {
+            throw new Error(`hash does not exist ${hash}`)
+        }
+        oldestPull = DateTime.fromMillis(item.modified.getTime()).minus({ hours }) as DateTime<true>
+        const number = items.size
+        await ItemRepo.syncWithRemote(password)
+        if (items.size == number) {
+            await ItemRepo.loadItemsBeforeHash(hash, password, hours * 2)
+        }
+    },
     cleanUp: async (maxAgeInSeconds: number, maxNumberTotal: number): Promise<boolean> => {
         let changed = false
         changed = changed || await removeOldUnfavored(maxAgeInSeconds)

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { DateTime } from 'luxon'
     import { getTitle, ipcRenderer } from '../KeyboardEventUtil'
     import { clipListFiltered, currentScrollIndex, selectedClipId, userPreferences } from '../stores'
     import type { IClipboardItemFrontend } from '../types'
@@ -9,8 +10,25 @@
 
     let visibleHashes: string[] = []
 
+    let lastFire = ""
+    let resetFire: NodeJS.Timeout | undefined
+    function loadMoreItemsBefore(hash: string) {
+        if (lastFire != hash) {
+            lastFire = hash
+            ipcRenderer.send('load_before', hash)
+            // console.log('loading items')
+            if(resetFire!=undefined)
+            {
+                clearTimeout(resetFire)
+            }
+            resetFire = setTimeout(() => {
+                lastFire = ""
+            }, 5000);
+        }
+        
+    }
+
     function handleClick(item: IClipboardItemFrontend) {
-        console.log('paste triggered')
         ipcRenderer.send('paste', item.hash)
         $currentScrollIndex = -1
         $selectedClipId = ''
@@ -23,11 +41,15 @@
         }
     })
 
-    const handleEnter = (hash: string, content: string) => {
+    const handleEnter = (hash: string) => {
         visibleHashes.push(hash)
         visibleHashes = visibleHashes
+        if (visibleHashes.includes($clipListFiltered[$clipListFiltered.length - 6][1].hash)) {
+            loadMoreItemsBefore($clipListFiltered[$clipListFiltered.length - 1][1].hash)
+            // console.log('5th at the end is visible')
+        }
     }
-    const handleExit = (hash: string, content: string) => {
+    const handleExit = (hash: string) => {
         const newArr = visibleHashes.filter((i) => i != hash)
         if (newArr.length < 2) {
             return
@@ -44,14 +66,14 @@
     }
 </script>
 
-<div class="nosbar flex flex-col">
+<div class="nosbar flex flex-col pb-8 pt-1">
     {#if $clipListFiltered}
         {#each $clipListFiltered as [key, item]}
-            {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1)) || visibleHashes.includes(getPreviousHash(key, -2)) || visibleHashes.includes(getPreviousHash(key, 2))}
+            {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1)) || visibleHashes.includes(getPreviousHash(key, -2)) || visibleHashes.includes(getPreviousHash(key, 2)) || visibleHashes.includes(getPreviousHash(key, -3)) || visibleHashes.includes(getPreviousHash(key, 3))}
                 <item
                     use:viewport
-                    on:enterViewport={() => handleEnter(key, item.content)}
-                    on:exitViewport={() => handleExit(key, item.content)}
+                    on:enterViewport={() => handleEnter(key)}
+                    on:exitViewport={() => handleExit(key)}
                     title={getTitle(item)}
                     class="clipboard-item border-slate-800 {$selectedClipId === item.hash
                         ? 'bg-gray-300 even:bg-gray-300 dark:bg-slate-700 even:dark:bg-slate-700'

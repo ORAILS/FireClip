@@ -291,6 +291,13 @@ const channelsFromRender: IReceiveChannel[] = [
         }
     },
     {
+        name: 'load_before',
+        handler: async (event: IpcMainEvent, hash: string) => {
+            console.log(`requested load before ${hash}`)
+            await ItemRepo.loadItemsBeforeHash(hash, state.user?.masterKey as string)
+        }
+    },
+    {
         name: 'focus',
         handler: async (event: IpcMainEvent, value: boolean) => {
             localMainWindow.show()
