@@ -7,8 +7,8 @@
         $passwordButtonText === 'show' ? ($passwordButtonText = 'hide') : ($passwordButtonText = 'show')
         $showPassword === true ? ($showPassword = false) : ($showPassword = true)
     }
-    let userPassword: string = 'tests'
-    let username: string = 'ddlele'
+    let userPassword: string = ''
+    let username: string = ''
 
     onMount(async () => {
         ipcRenderer.send('RendererInit', true)

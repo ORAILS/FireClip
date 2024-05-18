@@ -102,6 +102,7 @@ app.on('window-all-closed', () => {
     app.quit()
 })
 
+app.commandLine.appendSwitch('disable-gpu-sandbox');
 function stopProcessReuse() {
     console.log('no more reuse!')
     app.allowRendererProcessReuse = false
