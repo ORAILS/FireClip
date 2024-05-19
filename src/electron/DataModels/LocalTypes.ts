@@ -38,6 +38,7 @@ export interface IMouseEvent {
 export interface ILocalUser {
     name: string
     masterKey: string
+    remotePassword: string
 }
 
 export interface IRemoteUser {

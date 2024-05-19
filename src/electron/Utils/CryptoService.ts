@@ -53,9 +53,17 @@ const HashUserLocal = (user: { name: string; password: string }): ILocalUser => 
         keySize: 256 / 32
     }).toString(CryptoJS.enc.Hex)
 
+    const masterKeyHashedSalted = CryptoJS.PBKDF2(masterKey, salt, {
+        iterations: 10001,
+        keySize: 256 / 32
+    }).toString(CryptoJS.enc.Hex)
+
     const hashed: ILocalUser = {
         name: user.name,
-        masterKey: masterKey
+        // used only locally for encryption
+        masterKey: masterKey,
+        // used to auth on remote server
+        remotePassword: masterKeyHashedSalted
     }
     return hashed
 }

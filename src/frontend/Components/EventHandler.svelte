@@ -98,6 +98,12 @@
             handler: (e, value) => {
                 shortcutsJson.set(value)
             }
+        },
+        {
+            name: 'registerOk',
+            handler: (e) => {
+                console.log("registered successfully")
+            }
         }
     ]
 

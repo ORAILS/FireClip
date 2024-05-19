@@ -215,6 +215,46 @@ const ioHookChannels: IReceiveChannel[] = [
     }
 ]
 
+async function loginUser(user: { name: string, password: string }) {
+    try {
+        console.log(user)
+        const hashed = CryptoService.HashUserLocal(user)
+        state.user = hashed
+        console.log('hashed')
+        console.log(state.user)
+        // TODO shady stuff here.
+        const ok = await login()
+        console.log(ok)
+        if (ok) {
+            action.startClipboardPooling()
+            if (userPreferences.enableRemoteSync.value) {
+                action.startRemoteSync(userPreferences.remoteSyncInterval.value)
+            }
+            action.loadItems()
+            action.sendSettings(userPreferences)
+            action.sendShortcuts()
+            localMainWindow.webContents.send(channelsToRender.passwordConfirmed, true)
+        }
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+async function registerUser(user: { name: string, password: string }) {
+    try {
+        console.log(user)
+        const hashed = CryptoService.HashUserLocal(user)
+        state.user = hashed
+        const ok = await RequestService.account.register(hashed.name, hashed.remotePassword)
+        console.log(ok)
+        if (ok) {
+            localMainWindow.webContents.send(channelsToRender.registerOk)
+        }
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 /**
  * Events send by the front-end, not Iohook specific
  */
@@ -241,28 +281,13 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'loginUser',
         handler: async (event: IpcMainEvent, user: { name: string; password: string }) => {
-            try {
-                console.log(user)
-                const hashed = CryptoService.HashUserLocal(user)
-                state.user = hashed
-                console.log('hashed')
-                console.log(state.user)
-                // TODO shady stuff here.
-                const ok = await login()
-                console.log(ok)
-                if (ok) {
-                    action.startClipboardPooling()
-                    if (userPreferences.enableRemoteSync.value) {
-                        action.startRemoteSync(userPreferences.remoteSyncInterval.value)
-                    }
-                    action.loadItems()
-                    action.sendSettings(userPreferences)
-                    action.sendShortcuts()
-                    localMainWindow.webContents.send(channelsToRender.passwordConfirmed, true)
-                }
-            } catch (e) {
-                console.log(e)
-            }
+            await loginUser(user)
+        }
+    },
+    {
+        name: 'registerUser',
+        handler: async (event: IpcMainEvent, user: { name: string; password: string }) => {
+            await registerUser(user)
         }
     },
     {
@@ -338,6 +363,7 @@ const channelsToRender = {
      * used to set a state in the front end
      */
     hide: 'hide',
+    registerOk: 'registerOk',
     /**
      * used to set a state in the front end
      */

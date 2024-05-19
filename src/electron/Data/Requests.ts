@@ -48,7 +48,7 @@ async function getToken(): Promise<string> {
         if (!state.user) {
             throw new Error("user not set")
         }
-        const token = await RequestService.account.login(state.user.name, state.user.masterKey)
+        const token = await RequestService.account.login(state.user.name, state.user.remotePassword)
         tokens.access_expires = DateTime.now().plus({ minutes: 55 })
         tokens.acess = token.access_token
         tokens.refresh = token.refresh_token
