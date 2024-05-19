@@ -35,6 +35,7 @@
         "compile": "tsc",
         "build": "rollup -c && tsc",
         "out:win": "rollup -c && tsc && electron-builder build --win --publish never",
+        "out:linux": "rollup -c && tsc && electron-builder build --linux --publish never",
         "out:mac": "ts-node validate_arch && rollup -c && tsc && electron-builder build --mac --publish never",
         "check-updates": "npx npm-check-updates",
         "check-updates:minor": "npx npm-check-updates --target minor",
