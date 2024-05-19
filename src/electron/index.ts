@@ -59,7 +59,10 @@ app.on('ready', async () => {
     })
     appIcon.setToolTip(AppSettings.name)
 
-    AppSettings.openDevTools ? mainWindow.window.webContents.openDevTools() : null
+    if (AppSettings.openDevTools) {
+        console.log("open dev tools!")
+        mainWindow.window.webContents.openDevTools()
+    }
     if (AppSettings.isMac) {
         app.dock.hide()
     }
@@ -103,6 +106,13 @@ app.on('window-all-closed', () => {
 })
 
 app.commandLine.appendSwitch('disable-gpu-sandbox');
+if (AppSettings.isLinux) {
+    const port = '8315'
+    console.log(`starting debugging on port: ${port}`)
+    app.commandLine.appendSwitch('remote-debugging-port', port);
+    app.commandLine.appendSwitch('host-rules', 'MAP * 127.0.0.1');
+}
+
 function stopProcessReuse() {
     console.log('no more reuse!')
     app.allowRendererProcessReuse = false
