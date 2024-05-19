@@ -119,6 +119,12 @@
         "dmg": {
             "sign": false
         },
+        "linux": {
+            "target": [
+                "deb",
+                "snap"
+            ]
+        },
         "afterSign": "electron-builder-notarize",
         "win": {
             "target": [
