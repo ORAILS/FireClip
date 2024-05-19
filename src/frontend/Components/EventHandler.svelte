@@ -8,6 +8,7 @@
         isAppHidden,
         isPasswordAsked,
         isPasswordIncorrect,
+        loginPageMessage,
         pressedKeys,
         pressedKeysSizeLimit,
         shortcutsJson,
@@ -102,7 +103,8 @@
         {
             name: 'registerOk',
             handler: (e) => {
-                console.log("registered successfully")
+                console.log('registered successfully')
+                loginPageMessage.set('successfully registered! try to login now')
             }
         }
     ]

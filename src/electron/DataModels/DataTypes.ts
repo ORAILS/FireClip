@@ -46,11 +46,12 @@ import stringify from 'json-stable-stringify'
 
 interface ItemBase {
     /**
+     * -1 - deleted - content is '' (empty)
      * 1 - rtf
      * 2 - text
      * 3 - image
      */
-    contentType: 1 | 2 | 3
+    contentType: -1 | 1 | 2 | 3
     // remoteId: number
     isFavorite: boolean
     /**

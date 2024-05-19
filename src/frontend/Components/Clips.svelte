@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { DateTime } from 'luxon'
     import { getTitle, ipcRenderer } from '../KeyboardEventUtil'
     import { clipListFiltered, currentScrollIndex, selectedClipId, userPreferences } from '../stores'
     import type { IClipboardItemFrontend } from '../types'
@@ -10,22 +9,20 @@
 
     let visibleHashes: string[] = []
 
-    let lastFire = ""
+    let lastFire = ''
     let resetFire: NodeJS.Timeout | undefined
     function loadMoreItemsBefore(hash: string) {
         if (lastFire != hash) {
             lastFire = hash
             ipcRenderer.send('load_before', hash)
             // console.log('loading items')
-            if(resetFire!=undefined)
-            {
+            if (resetFire != undefined) {
                 clearTimeout(resetFire)
             }
             resetFire = setTimeout(() => {
-                lastFire = ""
-            }, 5000);
+                lastFire = ''
+            }, 5000)
         }
-        
     }
 
     function handleClick(item: IClipboardItemFrontend) {
@@ -76,7 +73,7 @@
                     on:exitViewport={() => handleExit(key)}
                     title={getTitle(item)}
                     class="clipboard-item border-slate-800 {$selectedClipId === item.hash
-                        ? 'bg-gray-300 even:bg-gray-300 dark:bg-slate-700 even:dark:bg-slate-700'
+                        ? 'bg-gray-300 even:bg-gray-300 hover:bg-gray-100 dark:bg-slate-700 even:dark:bg-slate-700 dark:hover:bg-slate-500'
                         : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-700'} dark:text-gray-100 dark:even:border-y"
                     id={item.hash}
                     on:click|preventDefault={() => handleClick(item)}

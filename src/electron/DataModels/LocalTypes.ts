@@ -15,10 +15,10 @@ export interface IAppState {
     pullInterval: NodeJS.Timer | undefined
     remoteSyncInterval: NodeJS.Timer | undefined
     // index: number
-    ctrlA: boolean
-    last: number
-    last2: number
-    last3: number
+    // ctrlA: boolean
+    // last: number
+    // last2: number
+    // last3: number
     lastHash: string
 }
 

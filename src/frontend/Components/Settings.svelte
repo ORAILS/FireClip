@@ -3,6 +3,7 @@
     import { ipcRenderer } from '../KeyboardEventUtil'
     import { appName, clipListFiltered, currentPage, userPreferences } from '../stores'
     import { IPages } from '../types'
+    import MenuItem from './MenuItem.svelte'
     import Switch from './Switch.svelte'
 
     let initialName: string
@@ -38,7 +39,7 @@
     even:dark:border-gray-800 
     even:dark:bg-slate-900"
     >
-        <p on:click={() => currentPage.set(IPages.items)}>  &lt; Back to items</p>
+        <p on:click={() => currentPage.set(IPages.items)}>&lt; Back to items</p>
     </div>
     <div
         class=" bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
@@ -46,7 +47,7 @@
     even:dark:border-gray-800 
     even:dark:bg-slate-900"
     >
-        <p on:click={() => currentPage.set(IPages.shortcuts)}>Shortcuts &gt; </p>
+        <p on:click={() => currentPage.set(IPages.shortcuts)}>Shortcuts &gt;</p>
     </div>
 
     {#if $userPreferences}
@@ -105,12 +106,12 @@
             </p>
         </div>
     {/if}
-    <div
-        class=" bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
-    dark:text-gray-200 
-    even:dark:border-gray-800 
-    even:dark:bg-slate-900"
-    >
+    <MenuItem>
         <p on:click={() => currentPage.set(IPages.info)}>Info ></p>
-    </div>
+    </MenuItem>
+    <MenuItem>
+        <p on:click={() => 
+            ipcRenderer.send('to.backend.user.logout')
+        }>Logout ></p>
+    </MenuItem>
 </div>

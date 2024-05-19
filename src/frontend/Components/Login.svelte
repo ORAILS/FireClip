@@ -1,6 +1,7 @@
 <script lang="ts">
+    import { onMount } from 'svelte'
     import { ipcRenderer } from '../KeyboardEventUtil'
-    import { appName, isPasswordIncorrect, passwordButtonText, showPassword } from '../stores'
+    import { appName, isPasswordIncorrect, loginPageMessage, passwordButtonText, showPassword } from '../stores'
 
     function togglePasswordInput() {
         $passwordButtonText === 'show' ? ($passwordButtonText = 'hide') : ($passwordButtonText = 'show')
@@ -20,11 +21,11 @@
 
     export const validatePassword = (pass: string, isRegisterPass = false): boolean => {
         if (username.length < 3) {
-            error = 'username should be at least 3 characters long'
+            loginPageMessage.set('username should be at least 3 characters long')
             return false
         }
         if (!pass || pass.length < 5) {
-            error = 'password should be at least 5 characters long'
+            loginPageMessage.set('password should be at least 5 characters long')
             return false
         }
         // if (!isRegisterPass) return true
@@ -34,13 +35,13 @@
 
     function passwordsMatch() {
         if (userPassword != userPasswordConfirm) {
-            error = "Passwords don't match!"
+            loginPageMessage.set("Passwords don't match!")
         }
         return userPasswordConfirm === userPassword
     }
 
     function resetPasswordCorrect() {
-        error = ''
+        loginPageMessage.set('')
         $isPasswordIncorrect = false
     }
     const onKeyEnter = async (e: KeyboardEvent) => {
@@ -66,8 +67,6 @@
             ipcRenderer.send('loginUser', { name: username, password: userPassword })
         }
     }
-
-    let error = ''
 </script>
 
 <div class="container mx-auto flex justify-center">
@@ -149,7 +148,7 @@
                     </div>
                 {/if}
                 <div class="m-1 h-6">
-                    <p class="text-red text-sm">{error}</p>
+                    <p class="text-red text-sm">{$loginPageMessage}</p>
                 </div>
                 {#if $isPasswordIncorrect}
                     <button

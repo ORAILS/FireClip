@@ -4,11 +4,13 @@ import { IClipboardItem, RemoteItemStatus } from '../DataModels/DataTypes'
 import { CryptoService } from '../Utils/CryptoService'
 import { RequestService } from './Requests'
 
-const items: Map<string, IClipboardItem> = new Map()
+let items: Map<string, IClipboardItem> = new Map()
 
 const getAll = (): Map<string, IClipboardItem> => {
     return items
 }
+
+let deletedHashes: string[] = []
 
 const add = async (item: IClipboardItem, password: string): Promise<IClipboardItem> => {
     item.hash = CryptoService.ContentHash(item.content, password)
@@ -35,23 +37,10 @@ const update = (item: IClipboardItem): boolean => {
     return false
 }
 
-const removeByHash = async (hash: string): Promise<boolean> => {
-    const exists = get(hash)
-    if (exists) {
-        return await remove(exists)
-    }
-    return false
-}
 
-
-const remove = async (item: IClipboardItem): Promise<boolean> => {
-    const exists = get(item.hash)
-    if (exists) {
-        items.delete(item.hash)
-        await RequestService.clips.delete(item.hash)
-        return true
-    }
-    return false
+const remove = async (hash: string)=> {
+    items.delete(hash)
+    await RequestService.clips.delete(hash)
 }
 
 const get = (itemHash: string): IClipboardItem | undefined => {
@@ -68,7 +57,7 @@ const removeOldUnfavored = async (maxAgeInSeconds: number): Promise<boolean> => 
     for (const [hash, item] of items) {
         if (item.modified.getTime() < maxAge.toMillis()) {
             if (item.isFavorite) continue
-            remove(item)
+            remove(item.hash)
             changed = true
         }
     }
@@ -91,19 +80,23 @@ const limitMapSize = async (maxSize: number): Promise<boolean> => {
         if (!hash) {
             continue
         }
-        await removeByHash(hash)
+        await remove(hash)
     }
     return changed
 }
 
-let oldestPull = DateTime.now().minus({ hours: 6 })
+let oldestPull = DateTime.now().minus({ hours: 12 })
 
 export const ItemRepo = {
+    reset: () => {
+        deletedHashes = []
+        items = new Map()
+        oldestPull = DateTime.now().minus({ hours: 12 })
+    },
     add,
     get,
     update,
     remove,
-    removeByHash,
     exists,
     getAll,
     loadItemsBeforeHash: async (hash: string, password: string, hours = 6) => {
@@ -138,12 +131,20 @@ export const ItemRepo = {
         if (!state.user) {
             throw new Error("user not found")
         }
+        console.log("received items: " + res.clips.length)
         for (const clip of res.clips) {
             needsLoading = true
             try {
+                if (clip.contentType === -1) {
+                    items.delete(clip.hash)
+                    deletedHashes.push(clip.hash)
+                    continue
+                }
                 const decrypted = CryptoService.DecryptItem(clip, state.user?.masterKey)
                 items.set(clip.hash, decrypted)
             } catch (error) {
+                const res = await remove(clip.hash)
+                console.log(`was removed: ${res}`)
                 console.log(clip)
                 console.log(error)
             }
@@ -176,6 +177,7 @@ export const ItemRepo = {
         }
         console.log('done syncing')
         if (needsLoading) {
+            console.log("needs loading")
             action.loadItems()
         }
     }

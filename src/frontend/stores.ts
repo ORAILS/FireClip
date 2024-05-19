@@ -1,5 +1,5 @@
 import { Writable, writable } from 'svelte/store'
-import { IClipboardItem, IClipboardItemFrontend, IPages, IUserPreferences } from './types'
+import { IClipboardItemFrontend, IPages, IUserPreferences } from './types'
 
 /**
  * Wether the app is focused (used for seaching function), as it's only triggered when focused
@@ -30,3 +30,5 @@ export const userPreferences: Writable<IUserPreferences | undefined> = writable(
 export const isAppHidden: Writable<boolean> = writable(true)
 export const currentSearchedText: Writable<string> = writable('')
 export const shortcutsJson: Writable<string> = writable('')
+
+export const loginPageMessage: Writable<string> = writable("")

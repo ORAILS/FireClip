@@ -17,10 +17,10 @@ export const state: IAppState = {
     pullInterval: undefined,
     remoteSyncInterval: undefined,
     // index: 0,
-    ctrlA: false,
-    last: 0,
-    last2: 0,
-    last3: 0,
+    // ctrlA: false,
+    // last: 0,
+    // last2: 0,
+    // last3: 0,
     user: undefined,
     lastHash: ''
 }
@@ -81,10 +81,6 @@ export const action = {
         localMainWindow.showInactive()
         localMainWindow.webContents.send(channelsToRender.unhide, true)
     },
-    // resetIndex: async() => {
-    //     // state.index = await items()?.getAll.length as number
-    //     localMainWindow.webContents.send(channelsToRender.indexChange, -1)
-    // },
     resetSearch() {
         localMainWindow.webContents.send(channelsToRender.searchReset, true)
     },
@@ -190,7 +186,16 @@ export const action = {
         state.lastHash = item.hash
         await items()?.add(item, state.user?.masterKey as string)
         action.loadItems()
-    }
+    },
+    logout: () => {
+        RequestService.account.logout()
+        clearInterval(state.remoteSyncInterval)
+        state.remoteSyncInterval = undefined;
+        ItemRepo.reset()
+        action.sendItems(ItemRepo.getAll())
+        state.user = undefined
+        action.askPassword()
+    },
 }
 
 // from FrontEnd , iohook specific
@@ -222,7 +227,7 @@ async function loginUser(user: { name: string, password: string }) {
         state.user = hashed
         console.log('hashed')
         console.log(state.user)
-        // TODO shady stuff here.
+
         const ok = await login()
         console.log(ok)
         if (ok) {
@@ -301,7 +306,7 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'delete',
         handler: async (event: IpcMainEvent, hash: string) => {
-            await ItemRepo.removeByHash(hash)
+            await ItemRepo.remove(hash)
             await action.loadItems()
         }
     },
@@ -310,6 +315,7 @@ const channelsFromRender: IReceiveChannel[] = [
         handler: async (event: IpcMainEvent, hash: string) => {
             const item = await ItemRepo.get(hash)
             item!.isFavorite = !item?.isFavorite
+            item!.modified = new Date()
             item!.remoteStatus = RemoteItemStatus.needsUpdateOnRemote
             await ItemRepo.update(item!)
             await action.loadItems()
@@ -341,6 +347,12 @@ const channelsFromRender: IReceiveChannel[] = [
         handler: async (event: IpcMainEvent, shortcuts: string) => {
             // console.log(shortcuts)
             store.set(shortcutsKey, shortcuts)
+        }
+    },
+    {
+        name: 'to.backend.user.logout',
+        handler: () => {
+            action.logout()
         }
     }
 ]

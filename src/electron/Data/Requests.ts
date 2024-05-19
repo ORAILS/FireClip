@@ -12,6 +12,12 @@ const tokens = {
     access_expires: DateTime.now().minus({ hour: 1 })
 }
 
+function logout() {
+    tokens.refresh = "",
+        tokens.acess = ""
+    tokens.access_expires = DateTime.now().minus({ day: 1 })
+}
+
 function request(url: string, method: string = "GET", body?: object, headers?: Record<string, string>) {
     if (!headers) {
         headers = {}
@@ -82,7 +88,8 @@ async function requestTokenBody<T>(url: string, method: string = "GET", body?: o
 export const RequestService = {
     account: {
         register: (username: string, password: string) => requestWithResponseBody<CommonRes>(UserEndpoints.Register, "POST", { username, password: sha512hex(password) }),
-        login: (username: string, password: string) => requestWithResponseBody<LoginRes>(UserEndpoints.Login, "POST", { username, password: sha512hex(password) })
+        login: (username: string, password: string) => requestWithResponseBody<LoginRes>(UserEndpoints.Login, "POST", { username, password: sha512hex(password) }),
+        logout
     },
     clips: {
         add: (clip: IClipboardItemEncrypted) => requestToken(ClipsEndpoints.CreateUpdate, "POST", clip),
