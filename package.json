@@ -1,7 +1,7 @@
 {
     "name": "fireclip",
     "productName": "FireClip",
-    "description": "Privacy focused clipboard manager built using Electron",
+    "description": "Privacy focused, cross-platform clipboard manager",
     "author": "Daniel Railean <me@ddlele.com>",
     "license": "No licence, rights reserved",
     "version": "0.8.2-20052024",
@@ -94,7 +94,7 @@
         "iohook": "0.9.3",
         "json-stable-stringify": "1.0.1",
         "luxon": "3.4.4",
-        "node-fetch": "^2.6.7"
+        "node-fetch": "2.6.7"
     },
     "build": {
         "productName": "FireClip",
