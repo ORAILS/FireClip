@@ -6,12 +6,12 @@ export interface CommonRes {
 
 
 export interface LoginRes {
-    access_token:  string;
+    access_token: string;
     refresh_token: string;
-    type:          string;
+    type: string;
 }
 
 
-export interface SinceRes {
+export interface BUlkRes {
     clips: IClipboardItemEncrypted[]
 }

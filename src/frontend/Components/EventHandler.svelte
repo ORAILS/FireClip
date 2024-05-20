@@ -106,7 +106,13 @@
                 console.log('registered successfully')
                 loginPageMessage.set('successfully registered! try to login now')
             }
-        }
+        },
+        {
+            name: 'to.renderer.success.allDeleted',
+            handler: (e, value) => {
+                alert("all data was deleted!")
+            }
+        },
     ]
 
     for (const event of channelFromBackend) {

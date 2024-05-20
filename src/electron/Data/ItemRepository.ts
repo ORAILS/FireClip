@@ -38,7 +38,7 @@ const update = (item: IClipboardItem): boolean => {
 }
 
 
-const remove = async (hash: string)=> {
+const remove = async (hash: string) => {
     items.delete(hash)
     await RequestService.clips.delete(hash)
 }
@@ -85,13 +85,40 @@ const limitMapSize = async (maxSize: number): Promise<boolean> => {
     return changed
 }
 
-let oldestPull = DateTime.now().minus({ hours: 12 })
+let oldestPull = DateTime.now()
+
+async function loadItemsBeforeDate(date: DateTime, limit: number, password: string): Promise<boolean>
+{
+    const res = await RequestService.clips.getNBefore(date, limit)
+        let needsLoading = false
+        if (!state.user) {
+            throw new Error("user not found")
+        }
+        console.log("received items: " + res.clips.length)
+        for (const clip of res.clips) {
+            needsLoading = true
+            try {
+                const decrypted = CryptoService.DecryptItem(clip, password)
+                items.set(clip.hash, decrypted)
+            } catch (error) {
+                const res = await remove(clip.hash)
+                console.log(`was removed: ${res}`)
+                console.log(clip)
+                console.log(error)
+            }
+        }
+        if (needsLoading) {
+            console.log("needs loading")
+            action.loadItems()
+        }
+        return needsLoading
+}
 
 export const ItemRepo = {
     reset: () => {
         deletedHashes = []
         items = new Map()
-        oldestPull = DateTime.now().minus({ hours: 12 })
+        oldestPull = DateTime.now()
     },
     add,
     get,
@@ -99,23 +126,15 @@ export const ItemRepo = {
     remove,
     exists,
     getAll,
-    loadItemsBeforeHash: async (hash: string, password: string, hours = 6) => {
-        console.log(`loading ${hours}hours before ${hash}`)
-        // no sync before this time, basically should be inexistent
-        if (oldestPull.minus({ hours }) < DateTime.fromObject({ year: 2024, month: 1 })) {
-            console.log("requested a sync with a time before sync was added!")
-            return
-        }
+    initialLoadItems: async (password: string, limit = 50) => {
+        loadItemsBeforeDate(DateTime.now(), limit, password)
+    },
+    loadItemsBeforeHash: async (hash: string, password: string, limit = 50) => {
         const item = items.get(hash)
         if (!item) {
-            throw new Error(`hash does not exist ${hash}`)
+            throw new Error("tried to read before unexisting hash!")
         }
-        oldestPull = DateTime.fromMillis(item.modified.getTime()).minus({ hours }) as DateTime<true>
-        const number = items.size
-        await ItemRepo.syncWithRemote(password)
-        if (items.size == number) {
-            await ItemRepo.loadItemsBeforeHash(hash, password, hours * 2)
-        }
+        return loadItemsBeforeDate(DateTime.fromJSDate(item.modified), limit, password)
     },
     cleanUp: async (maxAgeInSeconds: number, maxNumberTotal: number): Promise<boolean> => {
         let changed = false
@@ -126,7 +145,7 @@ export const ItemRepo = {
     syncWithRemote: async (password: string) => {
         console.log("syncing")
         const res = await RequestService.clips.getSince(oldestPull)
-        oldestPull = DateTime.now().minus({ seconds: 10 })
+        oldestPull = DateTime.now().minus({ minute: 1 })
         let needsLoading = false
         if (!state.user) {
             throw new Error("user not found")
@@ -140,7 +159,7 @@ export const ItemRepo = {
                     deletedHashes.push(clip.hash)
                     continue
                 }
-                const decrypted = CryptoService.DecryptItem(clip, state.user?.masterKey)
+                const decrypted = CryptoService.DecryptItem(clip, password)
                 items.set(clip.hash, decrypted)
             } catch (error) {
                 const res = await remove(clip.hash)
@@ -153,7 +172,7 @@ export const ItemRepo = {
         for (const item of items) {
             if (item[1].remoteStatus == RemoteItemStatus.existsOnlyLocally) {
                 const encrypted = CryptoService.EncryptItem(item[1], password)
-                const res = await RequestService.clips.add(encrypted)
+                const res = await RequestService.clips.upsert(encrypted)
                 if (res.status == 200) {
                     item[1].remoteStatus = RemoteItemStatus.pushedToRemote
                 } else if (res.status == 409) {

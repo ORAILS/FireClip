@@ -4,6 +4,7 @@ import * as fs from 'fs'
 import { DateTime } from 'luxon'
 import { ItemRepo } from '../Data/ItemRepository'
 import { login, RequestService } from '../Data/Requests'
+import { ClipsEndpoints } from '../Data/RequestUtils'
 import { IClipboardItem, isImageContent, isRTFContent, isTextContent, RemoteItemStatus } from '../DataModels/DataTypes'
 import { IAppState, IKeyboardEvent, IMouseEvent, IReceiveChannel } from '../DataModels/LocalTypes'
 import { CryptoService } from '../Utils/CryptoService'
@@ -111,7 +112,7 @@ export const action = {
             await ItemRepo.syncWithRemote(state.user?.masterKey as string)
             console.log(`Sync took ${DateTime.now().toUnixInteger() - now} seconds`)
         }
-        await sync()
+        await ItemRepo.initialLoadItems(state.user.masterKey as string)
         state.remoteSyncInterval = setInterval(sync, interval)
     },
     async writeToClipboard(hash: string) {
@@ -354,6 +355,22 @@ const channelsFromRender: IReceiveChannel[] = [
         handler: () => {
             action.logout()
         }
+    },
+    {
+        name: 'to.backend.delete.allData',
+        handler: async () => {
+            const res = await RequestService.clips.deleteAll()
+            console.log(res)
+            action.logout()
+            localMainWindow.webContents.send(channelsToRender.success.allDeleted)
+        }
+    },
+    {
+        name: 'to.backend.get.allData',
+        handler: async () => {
+            const url = ClipsEndpoints.GetDatabaseFile() + `?token=${await RequestService.account.accessToken()}`
+            localClipboard.writeText(url)
+        }
     }
 ]
 
@@ -381,7 +398,10 @@ const channelsToRender = {
      */
     unhide: 'unhide',
     setSettings: 'to.renderer.set.settings',
-    setShortcuts: 'to.renderer.set.shortcuts'
+    setShortcuts: 'to.renderer.set.shortcuts',
+    success: {
+        allDeleted: 'to.renderer.success.allDeleted',
+    }
 }
 
 let localClipboard: Clipboard

@@ -3,7 +3,7 @@ import { DateTime } from "luxon"
 import fetch from 'node-fetch'
 import { state } from "../App/EventHandler"
 import { IClipboardItemEncrypted } from "../DataModels/DataTypes"
-import { CommonRes, LoginRes, SinceRes } from "../DataModels/RequestTypes"
+import { BUlkRes as BulkRes, CommonRes, LoginRes } from "../DataModels/RequestTypes"
 import { ClipsEndpoints, UserEndpoints } from "./RequestUtils"
 
 const tokens = {
@@ -89,12 +89,17 @@ export const RequestService = {
     account: {
         register: (username: string, password: string) => requestWithResponseBody<CommonRes>(UserEndpoints.Register, "POST", { username, password: sha512hex(password) }),
         login: (username: string, password: string) => requestWithResponseBody<LoginRes>(UserEndpoints.Login, "POST", { username, password: sha512hex(password) }),
-        logout
+        logout,
+        accessToken: getToken
     },
     clips: {
         add: (clip: IClipboardItemEncrypted) => requestToken(ClipsEndpoints.CreateUpdate, "POST", clip),
-        update: (clip: IClipboardItemEncrypted) => requestToken(ClipsEndpoints.CreateUpdate, "PUT", clip),
+        upsert: (clip: IClipboardItemEncrypted) => requestToken(ClipsEndpoints.CreateUpdate, "PUT", clip),
+        update: (clip: { isFavorite: boolean, hash: string }) => requestToken(ClipsEndpoints.CreateUpdate, "PATCH", clip),
         delete: (hash: string) => requestToken(ClipsEndpoints.Delete(hash), "DELETE"),
-        getSince: (time: DateTime) => requestTokenBody<SinceRes>(ClipsEndpoints.GetAllSince(time), "GET")
+        getSince: (time: DateTime) => requestTokenBody<BulkRes>(ClipsEndpoints.GetAllSince(time), "GET"),
+        getBetween: (start: DateTime, end: DateTime) => requestTokenBody<BulkRes>(ClipsEndpoints.GetInBetween(start, end), "GET"),
+        getNBefore: (time: DateTime, limit: number) => requestTokenBody<BulkRes>(ClipsEndpoints.GetNBefore(time, limit), "GET"),
+        deleteAll: () => requestTokenBody<CommonRes>(ClipsEndpoints.DeletAllData(), "DELETE"),
     }
 }

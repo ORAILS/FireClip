@@ -110,8 +110,43 @@
         <p on:click={() => currentPage.set(IPages.info)}>Info ></p>
     </MenuItem>
     <MenuItem>
-        <p on:click={() => 
-            ipcRenderer.send('to.backend.user.logout')
-        }>Logout ></p>
+        <p
+            on:click={() => {
+                const c = confirm('confirm logout?')
+                if (c) {
+                    ipcRenderer.send('to.backend.user.logout')
+                }
+            }}
+        >
+            Logout >
+        </p>
+    </MenuItem>
+    <MenuItem>
+        <p
+            on:click={() => {
+                const c = confirm(
+                    'Once confirmed, a link will be written to the clipboard.\nPaste the link in any web browser and all the data (an sqlite database file) will be downloaded.\n\nAnyone with the link can retrieve the database so keep it a secret.\n\nYou can later inspect the database on a site like sqliteviewer.app'
+                )
+                if (c) {
+                    ipcRenderer.send('to.backend.get.allData')
+                }
+            }}
+        >
+            Get all my data >
+        </p>
+    </MenuItem>
+    <MenuItem>
+        <p
+            on:click={() => {
+                const c = confirm(
+                    'This will delete all your clips (deletes the database file).\nThere is no way back!\n\nMake sure to sign out on other devices as new data will be pushed to a fresh database instance after the deletion.\n\nIt will also log you out on this device.'
+                )
+                if (c) {
+                    ipcRenderer.send('to.backend.delete.allData')
+                }
+            }}
+        >
+            Delete all my data >
+        </p>
     </MenuItem>
 </div>

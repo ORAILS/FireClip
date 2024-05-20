@@ -195,7 +195,7 @@ export const userPreferences: IUserPreferences = {
     storeUrl: {
         displayName: 'Store server URL',
         description: 'server used for clips storage',
-        value: "https://fireclip-clips-dev.cap.danr.cc",
+        value: "https://fireclip-clips-dev-2.cap.danr.cc",
         type: 'string',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
