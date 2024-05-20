@@ -6,6 +6,7 @@
     import { IPages, type IShortCut } from '../types'
     import { clipListFiltered, currentScrollIndex, pressedKeys, selectedClipId } from './../stores'
     import Button from './Button.svelte'
+    import MenuItem from './MenuItem.svelte'
     import Switch from './Switch.svelte'
 
     interface IExecutedShortcut {
@@ -319,6 +320,16 @@
 </script>
 
 {#if $currentPage === IPages.shortcuts}
+    <MenuItem>
+        <p
+            class="text-xl"
+            on:click={() => {
+                currentPage.set(IPages.settings)
+            }}
+        >
+            &lt; Back to settings
+        </p></MenuItem
+    >
     {#each entries(shortcuts) as shortcut}
         <div
             class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
@@ -326,7 +337,7 @@ dark:text-gray-200
 even:dark:border-gray-800 
 even:dark:bg-slate-900"
         >
-            <div class=" my-6 flex flex-col">
+            <div class="my-6 flex flex-col">
                 <div class="flex flex-row justify-between">
                     <h4>
                         {getNameFromKey(shortcut[0])}

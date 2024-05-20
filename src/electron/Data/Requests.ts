@@ -82,7 +82,10 @@ async function requestTokenBody<T>(url: string, method: string = "GET", body?: o
     if (res.ok) {
         return await res.json() as T
     }
-    throw new Error(await res.text())
+    const errText = await res.text()
+    console.log(errText)
+    console.log(res.status)
+    throw new Error(errText)
 }
 
 export const RequestService = {
@@ -90,6 +93,7 @@ export const RequestService = {
         register: (username: string, password: string) => requestWithResponseBody<CommonRes>(UserEndpoints.Register, "POST", { username, password: sha512hex(password) }),
         login: (username: string, password: string) => requestWithResponseBody<LoginRes>(UserEndpoints.Login, "POST", { username, password: sha512hex(password) }),
         logout,
+        delete: () => requestTokenBody<CommonRes>(UserEndpoints.DeleteProfile, 'DELETE'),
         accessToken: getToken
     },
     clips: {

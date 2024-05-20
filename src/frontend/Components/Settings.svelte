@@ -33,35 +33,20 @@
 </script>
 
 <div class="settings flex flex-col justify-items-start">
-    <div
-        class=" bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
-    dark:text-gray-200 
-    even:dark:border-gray-800 
-    even:dark:bg-slate-900"
-    >
-        <p on:click={() => currentPage.set(IPages.items)}>&lt; Back to items</p>
-    </div>
-    <div
-        class=" bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
-    dark:text-gray-200 
-    even:dark:border-gray-800 
-    even:dark:bg-slate-900"
-    >
+    <MenuItem>
+        <p class="text-xl" on:click={() => currentPage.set(IPages.items)}>&lt; Back to items</p>
+    </MenuItem>
+    <MenuItem>
         <p on:click={() => currentPage.set(IPages.shortcuts)}>Shortcuts &gt;</p>
-    </div>
+    </MenuItem>
 
     {#if $userPreferences}
         {#each Object.entries($userPreferences) as [key, item]}
-            <div
-                class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
-            dark:text-gray-200 
-            even:dark:border-gray-800 
-            even:dark:bg-slate-900"
-                title={item.description}
-            >
+            <MenuItem title={item.description}>
                 <Switch
                     type={item.type}
                     label={item.displayName}
+                    title={item.description}
                     fontSize={12}
                     defaultValue={item.value}
                     selectOptions={item.selectableOptions}
@@ -69,34 +54,21 @@
                         sendChange(key, { key, value: e.detail })
                     }}
                 />
-            </div>
+            </MenuItem>
         {/each}
-        <div
-            class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
-        dark:text-gray-200 
-        even:dark:border-gray-800 
-        even:dark:bg-slate-900"
-        >
+        <MenuItem>
             <p>
                 Total items: {$clipListFiltered.length}
             </p>
-        </div>
-        <div
-            class=" bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
-        dark:text-gray-200 
-        even:dark:border-gray-800 
-        even:dark:bg-slate-900"
-        >
+        </MenuItem>
+
+        <MenuItem>
             <p>
                 Total clips size: {Math.round(sizeOf($clipListFiltered) / 1024)} kB
             </p>
-        </div>
-        <div
-            class=" bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
-        dark:text-gray-200 
-        even:dark:border-gray-800 
-        even:dark:bg-slate-900"
-        >
+        </MenuItem>
+
+        <MenuItem>
             <p>
                 <button
                     on:click={() => {
@@ -104,12 +76,13 @@
                     }}>Save state as JSON</button
                 >
             </p>
-        </div>
+        </MenuItem>
     {/if}
+    <MenuItem />
     <MenuItem>
         <p on:click={() => currentPage.set(IPages.info)}>Info ></p>
     </MenuItem>
-    <MenuItem>
+    <MenuItem title="Will logout from the app (requires confirmation).">
         <p
             on:click={() => {
                 const c = confirm('confirm logout?')
@@ -118,10 +91,10 @@
                 }
             }}
         >
-            Logout >
+            Logout &gt;
         </p>
     </MenuItem>
-    <MenuItem>
+    <MenuItem title="Will give a link where all the data can be downloaded (requires confirmation).">
         <p
             on:click={() => {
                 const c = confirm(
@@ -132,21 +105,35 @@
                 }
             }}
         >
-            Get all my data >
+            Get all my data &gt;
         </p>
     </MenuItem>
-    <MenuItem>
+    <MenuItem title="Will delete all the data (the entire database containing the clips), but not the account (requires confirmation).">
         <p
             on:click={() => {
                 const c = confirm(
-                    'This will delete all your clips (deletes the database file).\nThere is no way back!\n\nMake sure to sign out on other devices as new data will be pushed to a fresh database instance after the deletion.\n\nIt will also log you out on this device.'
+                    'This will delete all your clips (deletes the database file).\nThere is no way back!\n\nNew data from other instances will be pushed to a fresh database instance after the deletion, unless you log out on all instances.\n\nIt will also log you out on this device.\nThe user account will not be deleted!'
                 )
                 if (c) {
                     ipcRenderer.send('to.backend.delete.allData')
                 }
             }}
         >
-            Delete all my data >
+            Delete all my data &gt;
+        </p>
+    </MenuItem>
+    <MenuItem title="Will delete all the data(same as above) and also the account (requires confirmation).">
+        <p
+            on:click={() => {
+                const c = confirm(
+                    'This will delete all your clips (deletes the database file) and the account!\nThere is no way back!\n\nMake sure to sign out on other devices before proceeding as for a time of up to 1h, new data might get pushed to a fresh database instance created after this deletion (created on demand).\n\nIt will also log you out on this device.'
+                )
+                if (c) {
+                    ipcRenderer.send('to.backend.delete.allDataAndAccount')
+                }
+            }}
+        >
+            Delete account and all my data &gt;
         </p>
     </MenuItem>
 </div>

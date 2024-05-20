@@ -254,7 +254,7 @@ async function registerUser(user: { name: string, password: string }) {
         const ok = await RequestService.account.register(hashed.name, hashed.remotePassword)
         console.log(ok)
         if (ok) {
-            localMainWindow.webContents.send(channelsToRender.registerOk)
+            localMainWindow.webContents.send(channelsToRender.alert, 'Successfully registered! Try to login now!')
         }
     } catch (e) {
         console.log(e)
@@ -362,7 +362,18 @@ const channelsFromRender: IReceiveChannel[] = [
             const res = await RequestService.clips.deleteAll()
             console.log(res)
             action.logout()
-            localMainWindow.webContents.send(channelsToRender.success.allDeleted)
+            localMainWindow.webContents.send(channelsToRender.alert, `Data deletion res: ${res.message}`)
+        }
+    },
+    {
+        name: 'to.backend.delete.allDataAndAccount',
+        handler: async () => {
+            const resDeleteItems = await RequestService.clips.deleteAll()
+            const resDeleteAccount = await RequestService.account.delete()
+            action.logout()
+            console.log(resDeleteItems)
+            console.log(resDeleteAccount)
+            localMainWindow.webContents.send(channelsToRender.alert, `Data deletion res: ${resDeleteItems.message}\nAccount deletetion res: ${resDeleteAccount.message}`)
         }
     },
     {
@@ -392,15 +403,17 @@ const channelsToRender = {
      * used to set a state in the front end
      */
     hide: 'hide',
-    registerOk: 'registerOk',
+    // registerOk: 'registerOk',
     /**
      * used to set a state in the front end
      */
     unhide: 'unhide',
     setSettings: 'to.renderer.set.settings',
     setShortcuts: 'to.renderer.set.shortcuts',
+    alert: 'to.renderer.alert',
     success: {
-        allDeleted: 'to.renderer.success.allDeleted',
+        // allDeleted: 'to.renderer.success.allDeleted',
+        // itemsAccountDeleted: 'to.renderer.success.itemsAccountDeleted',
     }
 }
 

@@ -8,7 +8,6 @@
         isAppHidden,
         isPasswordAsked,
         isPasswordIncorrect,
-        loginPageMessage,
         pressedKeys,
         pressedKeysSizeLimit,
         shortcutsJson,
@@ -101,18 +100,11 @@
             }
         },
         {
-            name: 'registerOk',
-            handler: (e) => {
-                console.log('registered successfully')
-                loginPageMessage.set('successfully registered! try to login now')
-            }
-        },
-        {
-            name: 'to.renderer.success.allDeleted',
+            name: 'to.renderer.alert',
             handler: (e, value) => {
-                alert("all data was deleted!")
+                alert(value)
             }
-        },
+        }
     ]
 
     for (const event of channelFromBackend) {
