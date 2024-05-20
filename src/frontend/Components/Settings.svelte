@@ -32,11 +32,11 @@
     const sizeOf = (value) => typeSizes[typeof value](value)
 </script>
 
-<div class="settings flex flex-col justify-items-start">
-    <MenuItem>
+<div class="settings flex cursor-pointer flex-col justify-items-start">
+    <MenuItem title="Go back to the items list">
         <p class="text-xl" on:click={() => currentPage.set(IPages.items)}>&lt; Back to items</p>
     </MenuItem>
-    <MenuItem>
+    <MenuItem title="Open shortcuts configuration">
         <p on:click={() => currentPage.set(IPages.shortcuts)}>Shortcuts &gt;</p>
     </MenuItem>
 
@@ -56,30 +56,30 @@
                 />
             </MenuItem>
         {/each}
-        <MenuItem>
+        <MenuItem title="The number of clips decrypted and loaded into RAM">
             <p>
-                Total items: {$clipListFiltered.length}
+                Total clips: {$clipListFiltered.length}
             </p>
         </MenuItem>
 
-        <MenuItem>
+        <MenuItem title="An estimate of the clips size in RAM">
             <p>
                 Total clips size: {Math.round(sizeOf($clipListFiltered) / 1024)} kB
             </p>
         </MenuItem>
 
-        <MenuItem>
+        <MenuItem title="Saves the items in an unencrypted form and json format.">
             <p>
                 <button
                     on:click={() => {
                         ipcRenderer.send('save_items', $clipListFiltered)
-                    }}>Save state as JSON</button
+                    }}>Save clips as JSON</button
                 >
             </p>
         </MenuItem>
     {/if}
     <MenuItem />
-    <MenuItem>
+    <MenuItem title="Show info about the app.">
         <p on:click={() => currentPage.set(IPages.info)}>Info ></p>
     </MenuItem>
     <MenuItem title="Will logout from the app (requires confirmation).">

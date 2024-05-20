@@ -43,7 +43,7 @@
                 currentPage.set(IPages.settings)
             }}
         >
-            <Icons icon="gear" title="settings" stopPropagation={false} size={6} />
+            <Icons icon="gear" title="Open settings" stopPropagation={false} size={6} />
         </div>
     </footer>
 {/if}

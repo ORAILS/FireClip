@@ -33,7 +33,7 @@ async function saveJSONFile(data: object) {
     })
     if (res.filePath) {
         // Write the JSON data to the selected file
-        fs.writeFile(res.filePath, JSON.stringify(data), 'utf8', (err) => {
+        fs.writeFile(res.filePath, JSON.stringify(data, undefined, 2), 'utf8', (err) => {
             if (err) {
                 console.error(err)
             } else {
@@ -103,6 +103,7 @@ export const action = {
     },
     async startRemoteSync(interval: number) {
         if (state.remoteSyncInterval) return
+        console.log(`starting remote sync every ${interval} ms`)
         if (!state.user || !state.user.masterKey) {
             return
         }
@@ -188,10 +189,14 @@ export const action = {
         await items()?.add(item, state.user?.masterKey as string)
         action.loadItems()
     },
-    logout: () => {
-        RequestService.account.logout()
+    clearSyncInterval: () => {
+        console.log("remote sync stopped!")
         clearInterval(state.remoteSyncInterval)
         state.remoteSyncInterval = undefined;
+    },
+    logout: () => {
+        RequestService.account.logout()
+        action.clearSyncInterval()
         ItemRepo.reset()
         action.sendItems(ItemRepo.getAll())
         state.user = undefined
@@ -234,7 +239,7 @@ async function loginUser(user: { name: string, password: string }) {
         if (ok) {
             action.startClipboardPooling()
             if (userPreferences.enableRemoteSync.value) {
-                action.startRemoteSync(userPreferences.remoteSyncInterval.value)
+                action.startRemoteSync(userPreferences.remoteSyncInterval.value * 1000)
             }
             action.loadItems()
             action.sendSettings(userPreferences)

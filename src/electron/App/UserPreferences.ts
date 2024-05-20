@@ -207,11 +207,13 @@ export const userPreferences: IUserPreferences = {
     remoteSyncInterval: {
         displayName: 'Interval in seconds to perform a remote sync',
         description: 'Every time an amount of seconds equal to this value passes, the app will sync to the remote storage.',
-        value: 15000,
+        value: 15,
         type: 'number',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
-            userPreferences.remoteSyncInterval.value = event.value * 1000
+            userPreferences.remoteSyncInterval.value = event.value
+            action.clearSyncInterval()
+            action.startRemoteSync(event.value * 1000)
             defaultHandler(e, event)
             handleCleanUpParameterChange()
         }

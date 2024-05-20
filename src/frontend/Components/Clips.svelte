@@ -4,7 +4,7 @@
     import type { IClipboardItemFrontend } from '../types'
     import { isImageContent, isTextContent } from '../types'
     import viewport from '../viewPortAction'
-    import ItemInfo from './icons/ItemInfo.svelte'
+    import ItemInfo from './ItemInfo.svelte'
     import IconCommand from './icons/_IconCommand.svelte'
 
     let visibleHashes: string[] = []
