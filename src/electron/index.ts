@@ -18,7 +18,7 @@ app.on('ready', async () => {
         autoUpdater.checkForUpdatesAndNotify()
     }, 5 * 60 * 1000)
 
-    const iconPath = path.join(__dirname, 'www', 'icon32.png')
+    const iconPath = path.join(__dirname, 'www', 'logo_32.png')
     const icon = nativeImage.createFromPath(iconPath)
 
     const appIcon = new Tray(icon)
