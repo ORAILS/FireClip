@@ -33,17 +33,18 @@
         "start": "npm run compile &&  electron .",
         "start:svelte": "rollup -c & npm run compile && electron .",
         "compile": "tsc",
-        "build": "rollup -c && tsc",
-        "out:win": "rollup -c && tsc && electron-builder build --win --publish never",
-        "out:linux": "rollup -c && tsc && electron-builder build --linux --publish never",
-        "out:mac": "ts-node validate_arch && rollup -c && tsc && electron-builder build --mac --publish never",
+        "generate_images": "yarn electron-icon-maker -i src/frontend/www/logo_1024.png -o src/frontend/www/",
+        "build": "yarn generate_images && rollup -c && tsc",
+        "out:win": "yarn build && electron-builder build --win --publish never",
+        "out:linux": "yarn build && electron-builder build --linux --publish never",
+        "out:mac": "ts-node validate_arch && yarn build && electron-builder build --mac --publish never",
         "check-updates": "npx npm-check-updates",
         "check-updates:minor": "npx npm-check-updates --target minor",
         "check-updates:patch": "npx npm-check-updates --target patch",
         "format": "prettier --write \"src/**/*.{css,html,ts,js,svelte,json}\" --write",
         "lint": "eslint . --ext .ts",
         "lintfix": "eslint . --ext .ts --fix",
-        "deploy": "ts-node validate_arch && rollup -c && tsc && electron-builder build --mac --publish always"
+        "deploy": "ts-node validate_arch && yarn build && electron-builder build --mac --publish always"
     },
     "devDependencies": {
         "@rollup/plugin-commonjs": "21.0.1",
@@ -63,6 +64,7 @@
         "electron": "12.2.3",
         "electron-builder": "23.6.0",
         "electron-builder-notarize": "1.5.1",
+        "electron-icon-maker": "0.0.5",
         "electron-notarize": "1.2.1",
         "nodemon": "2.0.19",
         "postcss": "8.4.6",
@@ -101,7 +103,7 @@
         "appId": "com.orails.fireclip",
         "directories": {
             "output": "out",
-            "buildResources": "resources"
+            "buildResources": "src/frontend/www/icons"
         },
         "npmRebuild": false,
         "mac": {
@@ -109,7 +111,7 @@
                 "dmg",
                 "zip"
             ],
-            "icon": "logo_256.icns",
+            "icon": "mac/icon.icns",
             "category": "public.app-category.productivity",
             "hardenedRuntime": true,
             "entitlements": "entitlements.mac.plist",
@@ -130,11 +132,11 @@
             "target": [
                 "nsis"
             ],
-            "icon": "logo_256.ico"
+            "icon": "win/icon.ico"
         },
         "nsis": {
-            "installerIcon": "logo_256.ico",
-            "uninstallerIcon": "logo_256.ico",
+            "installerIcon": "win/icon.ico",
+            "uninstallerIcon": "win/icon.ico",
             "uninstallDisplayName": "FireClip",
             "license": "license.txt",
             "oneClick": true,
