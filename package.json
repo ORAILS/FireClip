@@ -109,7 +109,7 @@
                 "dmg",
                 "zip"
             ],
-            "icon": "icon512.icns",
+            "icon": "icon256.icns",
             "category": "public.app-category.productivity",
             "hardenedRuntime": true,
             "entitlements": "entitlements.mac.plist",
@@ -130,11 +130,11 @@
             "target": [
                 "nsis"
             ],
-            "icon": "icon512.ico"
+            "icon": "icon256.ico"
         },
         "nsis": {
-            "installerIcon": "icon512.ico",
-            "uninstallerIcon": "icon512.ico",
+            "installerIcon": "icon256.ico",
+            "uninstallerIcon": "icon256.ico",
             "uninstallDisplayName": "FireClip",
             "license": "license.txt",
             "oneClick": true,
