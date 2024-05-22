@@ -346,13 +346,13 @@ const channelsFromRender: IReceiveChannel[] = [
     },
     {
         name: 'to.backend.window.focus',
-        handler: async (event: IpcMainEvent, value: boolean) => {
+        handler: async (event: IpcMainEvent) => {
             localMainWindow.show()
         }
     },
     {
         name: 'to.backend.window.unhide',
-        handler: async (event: IpcMainEvent, value: boolean) => await actions.unhide()
+        handler: async (event: IpcMainEvent) => await actions.unhide()
     },
     {
         name: 'to.backend.set.shortcuts',
