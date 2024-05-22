@@ -76,7 +76,7 @@ export const actionsExported = {
     },
     sendCurrentItems: async () => {
         try {
-            actions.sendItems(items()?.getAll(), true)
+            actions.sendItems(items()?.getAll())
         } catch (error) {
             console.log(error)
         }
@@ -115,13 +115,8 @@ const actions = {
         localMainWindow.showInactive()
         localMainWindow.webContents.send(channelsToRender.unhide, true)
     },
-    resetSearch() {
-        localMainWindow.webContents.send(channelsToRender.searchReset, true)
-    },
-    sendItems(itemList: Map<string, IClipboardItem> | undefined, resetSearchField?: boolean) {
+    sendItems(itemList: Map<string, IClipboardItem> | undefined) {
         localMainWindow.webContents.send(channelsToRender.loadItems, itemList)
-        // resetItemIndex ? action.resetIndex() : null
-        resetSearchField ? actions.resetSearch() : null
     },
     async startClipboardPooling() {
         if (state.pullInterval) return
@@ -358,10 +353,6 @@ const channelsFromRender: IReceiveChannel[] = [
         handler: async (event: IpcMainEvent, value: boolean) => await actions.unhide()
     },
     {
-        name: 'textSearched',
-        handler: async (event: IpcMainEvent, text: string) => localMainWindow.webContents.send(channelsToRender.textSearched, text)
-    },
-    {
         name: 'to.backend.set.shortcuts',
         handler: async (event: IpcMainEvent, shortcuts: string) => {
             // console.log(shortcuts)
@@ -409,22 +400,19 @@ const channelsFromRender: IReceiveChannel[] = [
             localClipboard.writeText(downloadUrl)
             actionsExported.alertFrontend(messages().downloadLinkWritten.ok)
         }
-    }
+        }
 ]
 
 /**
  * Events sent to the renderer (front-end)
  */
 export const channelsToRender = {
-    indexChange: 'indexChange',
-    loadItems: 'loadItems',
-    searchReset: 'searchReset',
-    askPassword: 'askPassword',
-    passwordConfirmed: 'passwordConfirmed',
+    loadItems: 'to.renderer.loadItems',
+    askPassword: 'to.renderer.askPassword',
+    passwordConfirmed: 'to.renderer.passwordConfirmed',
     passwordIncorrect: 'to.renderer.error.passwordIncorrect',
-    textSearched: 'textSearched',
-    hide: 'hide',
-    unhide: 'unhide',
+    hide: 'to.renderer.hide',
+    unhide: 'to.renderer.unhide',
     setSettings: 'to.renderer.set.settings',
     setShortcuts: 'to.renderer.set.shortcuts',
     alert: 'to.renderer.alert',

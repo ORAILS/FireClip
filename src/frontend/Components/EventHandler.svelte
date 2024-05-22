@@ -27,14 +27,14 @@
 
     const channelFromBackend: IReceiveChannel[] = [
         {
-            name: 'loadItems',
+            name: 'to.renderer.loadItems',
             handler: function (event, store: any[]) {
                 $clipListFiltered = sort([...store]).desc((i) => i[1].modified)
                 $clipList = $clipListFiltered
             }
         },
         {
-            name: 'hide',
+            name: 'to.renderer.hide',
             handler: function (event, store) {
                 $isAppHidden = true
             }
@@ -46,13 +46,13 @@
             }
         },
         {
-            name: 'unhide',
+            name: 'to.renderer.unhide',
             handler: function (event, store) {
                 $isAppHidden = false
             }
         },
         {
-            name: 'askPassword',
+            name: 'to.renderer.askPassword',
             handler: function (event, store) {
                 $isPasswordAsked = true
                 $currentPage = IPages.login
@@ -69,7 +69,7 @@
         },
 
         {
-            name: 'passwordConfirmed',
+            name: 'to.renderer.passwordConfirmed',
             handler: function (event) {
                 $isPasswordAsked = false
                 $currentPage = IPages.items
