@@ -10,8 +10,8 @@ import { IAppState, IKeyboardEvent, IMouseEvent, IReceiveChannel } from '../Data
 import { CryptoService } from '../Utils/CryptoService'
 import { JsUtil } from '../Utils/JsUtil'
 import { AppSettings } from './AppSettings'
-import { InitUserSettings, IUserPreferences, store, userPreferences } from './UserPreferences'
 import { messages } from './CommunicationMessages'
+import { InitUserSettings, IUserPreferences, store, userPreferences } from './UserPreferences'
 
 const shortcutsKey = `fileclip.shortcuts`
 

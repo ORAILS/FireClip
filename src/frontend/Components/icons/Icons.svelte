@@ -3,19 +3,21 @@
     import Check from './paths/check.svelte'
     import Gear from './paths/gear.svelte'
     import Heart from './paths/heart.svelte'
+    import Logo from './paths/logo.svelte'
     import Sync from './paths/sync.svelte'
     import TrashBin from './paths/trash-bin.svelte'
     import Up from './paths/up.svelte'
     const dispatch = createEventDispatcher()
 
-    export let size = 4
+    export let size = '4'
     export let extraClass = ''
     export let extraClassDiv = ''
 
     export let stopPropagation = true
     export let filled = false
+    export let centered = true
 
-    export let icon: 'sync' | 'check' | 'up' | 'gear' | 'heart' | 'trash-bin' | undefined
+    export let icon: 'logo' | 'sync' | 'check' | 'up' | 'gear' | 'heart' | 'trash-bin' | undefined
 
     function handleClick(event) {
         if (stopPropagation) {
@@ -24,10 +26,10 @@
         dispatch('click')
     }
 
-    export let title = ''
+    export let title: string = ''
 </script>
 
-<div {title} class="h-{size} w-{size} {extraClassDiv} mx-auto my-auto" on:click={handleClick}>
+<div {title} class="h-{size} w-{size} {extraClassDiv} {centered ? 'mx-auto my-auto' : ''}" on:click={handleClick}>
     <!-- items offered under MIT license -->
     <!-- https://github.com/gorango/glyphs/blob/main/license -->
     <svg
@@ -54,6 +56,8 @@ stroke-gray-800 hover:cursor-pointer dark:stroke-gray-200
             <Heart />
         {:else if icon == 'trash-bin'}
             <TrashBin />
+        {:else if icon == 'logo'}
+            <Logo />
         {:else}
             select an icon
         {/if}
