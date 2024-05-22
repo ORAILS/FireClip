@@ -12,6 +12,6 @@ export interface LoginRes {
 }
 
 
-export interface BUlkRes {
+export interface BulkRes {
     clips: IClipboardItemEncrypted[]
 }

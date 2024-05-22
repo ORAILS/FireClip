@@ -87,5 +87,8 @@ export const CryptoService = {
     DecryptItem,
     HashUserLocal,
     // HashUserRemote,
+    sha512hex: (text: string): string => {
+        return CryptoJS.SHA512(text).toString(CryptoJS.enc.Hex)
+    },
     ContentHash
 }

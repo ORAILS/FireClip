@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
-import { action, state } from '../App/EventHandler'
+import { messages } from '../App/CommunicationMessages'
+import { actionsExported, state } from '../App/EventHandler'
 import { IClipboardItem, RemoteItemStatus } from '../DataModels/DataTypes'
 import { CryptoService } from '../Utils/CryptoService'
 import { RequestService } from './Requests'
@@ -87,31 +88,34 @@ const limitMapSize = async (maxSize: number): Promise<boolean> => {
 
 let oldestPull = DateTime.now()
 
-async function loadItemsBeforeDate(date: DateTime, limit: number, password: string): Promise<boolean>
-{
+async function loadItemsBeforeDate(date: DateTime, limit: number, masterKey: string): Promise<boolean> {
     const res = await RequestService.clips.getNBefore(date, limit)
-        let needsLoading = false
-        if (!state.user) {
-            throw new Error("user not found")
+    if (!res.ok || !res.data) {
+        actionsExported.alertFrontend(messages().generic.fail + `.\nFetch of items before ${date.toISO()}, limit ${limit}`)
+        return false
+    }
+    let needsLoading = false
+    if (!state.user) {
+        throw new Error("user not found")
+    }
+    // console.log("received items: " + res.data.clips.length)
+    for (const clip of res.data.clips) {
+        needsLoading = true
+        try {
+            const decrypted = CryptoService.DecryptItem(clip, masterKey)
+            items.set(clip.hash, decrypted)
+        } catch (error) {
+            const res = await remove(clip.hash)
+            console.log(`was removed: ${res}`)
+            console.log(clip)
+            console.log(error)
         }
-        console.log("received items: " + res.clips.length)
-        for (const clip of res.clips) {
-            needsLoading = true
-            try {
-                const decrypted = CryptoService.DecryptItem(clip, password)
-                items.set(clip.hash, decrypted)
-            } catch (error) {
-                const res = await remove(clip.hash)
-                console.log(`was removed: ${res}`)
-                console.log(clip)
-                console.log(error)
-            }
-        }
-        if (needsLoading) {
-            console.log("needs loading")
-            action.loadItems()
-        }
-        return needsLoading
+    }
+    if (needsLoading) {
+        console.log(`needs loading after pulling before ${date.toISO()}`)
+        actionsExported.sendCurrentItems()
+    }
+    return needsLoading
 }
 
 export const ItemRepo = {
@@ -145,13 +149,17 @@ export const ItemRepo = {
     syncWithRemote: async (password: string) => {
         console.log("syncing")
         const res = await RequestService.clips.getSince(oldestPull)
+        if (!res.ok || !res.data) {
+            actionsExported.alertFrontend(messages().generic.fail + `.\nFetch of items since ${oldestPull.toISO()}.`)
+            return
+        }
         oldestPull = DateTime.now().minus({ minute: 1 })
         let needsLoading = false
         if (!state.user) {
             throw new Error("user not found")
         }
-        console.log("received items: " + res.clips.length)
-        for (const clip of res.clips) {
+        console.log("received items: " + res.data.clips.length)
+        for (const clip of res.data.clips) {
             needsLoading = true
             try {
                 if (clip.contentType === -1) {
@@ -163,7 +171,7 @@ export const ItemRepo = {
                 items.set(clip.hash, decrypted)
             } catch (error) {
                 const res = await remove(clip.hash)
-                console.log(`was removed: ${res}`)
+                console.log(`failed to deserialize and was removed: ${res}`)
                 console.log(clip)
                 console.log(error)
             }
@@ -196,8 +204,8 @@ export const ItemRepo = {
         }
         console.log('done syncing')
         if (needsLoading) {
-            console.log("needs loading")
-            action.loadItems()
+            console.log("needs loading after remote sync")
+            actionsExported.sendCurrentItems()
         }
     }
 }

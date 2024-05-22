@@ -3,7 +3,7 @@ import { IpcMainEvent } from 'electron/main'
 import * as fs from 'fs'
 import { DateTime } from 'luxon'
 import { ItemRepo } from '../Data/ItemRepository'
-import { login, RequestService } from '../Data/Requests'
+import { RequestService, userTokens } from '../Data/Requests'
 import { ClipsEndpoints } from '../Data/RequestUtils'
 import { IClipboardItem, isImageContent, isRTFContent, isTextContent, RemoteItemStatus } from '../DataModels/DataTypes'
 import { IAppState, IKeyboardEvent, IMouseEvent, IReceiveChannel } from '../DataModels/LocalTypes'
@@ -56,7 +56,7 @@ export const handleCleanUpParameterChange = async () => {
         const wasCleaned = await items()?.cleanUp(userPreferences.maxClipAgeInHours.value * 60 * 60, userPreferences.maxNumberOfClips.value)
         if (wasCleaned) {
             console.log('Was cleaned!')
-            action.loadItems()
+            actionsExported.sendCurrentItems()
         }
     }
     cleanUpInterval = setInterval(cleanUp, 5 * 60 * 1000)
@@ -65,42 +65,28 @@ export const handleCleanUpParameterChange = async () => {
 
 const items = () => {
     if (state.user === undefined) {
-        action.askPassword()
+        actions.askPassword()
         return
     }
     return ItemRepo
 }
 
-export const action = {
-    askPassword: async () => localMainWindow.webContents.send(channelsToRender.askPassword, true),
-    sendSettings: (settings: IUserPreferences) => localMainWindow.webContents.send(channelsToRender.setSettings, JSON.stringify(settings)),
-    sendShortcuts: () => localMainWindow.webContents.send(channelsToRender.setShortcuts, store.get(shortcutsKey)),
-    hideWindow: () => {
-        localMainWindow.hide()
-        localMainWindow.webContents.send(channelsToRender.hide, true)
+export const actionsExported = {
+    alertFrontend: (message: string) => {
+        localMainWindow.webContents.send(channelsToRender.alert, message)
     },
-    unhide: () => {
-        localMainWindow.showInactive()
-        localMainWindow.webContents.send(channelsToRender.unhide, true)
-    },
-    resetSearch() {
-        localMainWindow.webContents.send(channelsToRender.searchReset, true)
-    },
-    sendItems(itemList: Map<string, IClipboardItem> | undefined, resetSearchField?: boolean) {
-        localMainWindow.webContents.send(channelsToRender.loadItems, itemList)
-        // resetItemIndex ? action.resetIndex() : null
-        resetSearchField ? action.resetSearch() : null
-    },
-    loadItems: async () => {
+    sendCurrentItems: async () => {
         try {
-            action.sendItems(await items()?.getAll(), true)
+            actions.sendItems(items()?.getAll(), true)
         } catch (error) {
             console.log(error)
         }
     },
-    async startClipboardPooling() {
-        if (state.pullInterval) return
-        state.pullInterval = setInterval(async () => await action.TrySaveClipboard(10), 200)
+    sendSettings: (settings: IUserPreferences) => actions.sendFrontendNotification(channelsToRender.setSettings, JSON.stringify(settings)),
+    clearSyncInterval: () => {
+        console.log("remote sync stopped!")
+        clearInterval(state.remoteSyncInterval)
+        state.remoteSyncInterval = undefined;
     },
     async startRemoteSync(interval: number) {
         if (state.remoteSyncInterval) return
@@ -117,6 +103,31 @@ export const action = {
         await ItemRepo.initialLoadItems(state.user.masterKey as string)
         state.remoteSyncInterval = setInterval(sync, interval)
     },
+}
+
+const actions = {
+    askPassword: async () => localMainWindow.webContents.send(channelsToRender.askPassword, true),
+    sendShortcuts: () => localMainWindow.webContents.send(channelsToRender.setShortcuts, store.get(shortcutsKey)),
+    hideWindow: () => {
+        localMainWindow.hide()
+        localMainWindow.webContents.send(channelsToRender.hide, true)
+    },
+    unhide: () => {
+        localMainWindow.showInactive()
+        localMainWindow.webContents.send(channelsToRender.unhide, true)
+    },
+    resetSearch() {
+        localMainWindow.webContents.send(channelsToRender.searchReset, true)
+    },
+    sendItems(itemList: Map<string, IClipboardItem> | undefined, resetSearchField?: boolean) {
+        localMainWindow.webContents.send(channelsToRender.loadItems, itemList)
+        // resetItemIndex ? action.resetIndex() : null
+        resetSearchField ? actions.resetSearch() : null
+    },
+    async startClipboardPooling() {
+        if (state.pullInterval) return
+        state.pullInterval = setInterval(async () => await actions.TrySaveClipboard(10), 200)
+    },
     async writeToClipboard(hash: string) {
         const result = items()?.get(hash)
         if (!result) throw new Error('Item not found')
@@ -126,16 +137,16 @@ export const action = {
         if (isImageContent(result)) localClipboard.writeImage(nativeImage.createFromDataURL(result.content))
 
         if (userPreferences.enableAutoPaste.value) {
-            await action.pasteItem()
+            await actions.pasteItem()
         }
     },
     async pasteItem() {
         if (!AppSettings.enablePaste) return
-        if (userPreferences.minimizeAfterPaste.value) action.hideWindow()
+        if (userPreferences.minimizeAfterPaste.value) actions.hideWindow()
     },
     getClipboardItem: async (): Promise<IClipboardItem | undefined> => {
         if (state.user === undefined) {
-            action.askPassword()
+            actions.askPassword()
             return
         }
 
@@ -184,27 +195,22 @@ export const action = {
         // TODO check if was inited
         await JsUtil.waitforme(delayMs)
 
-        const item = await action.getClipboardItem()
+        const item = await actions.getClipboardItem()
         if (!item) return
         state.lastHash = item.hash
         await items()?.add(item, state.user?.masterKey as string)
-        action.loadItems()
-    },
-    clearSyncInterval: () => {
-        console.log("remote sync stopped!")
-        clearInterval(state.remoteSyncInterval)
-        state.remoteSyncInterval = undefined;
+        actionsExported.sendCurrentItems()
     },
     logout: () => {
         RequestService.account.logout()
-        action.clearSyncInterval()
+        actionsExported.clearSyncInterval()
         ItemRepo.reset()
-        action.sendItems(ItemRepo.getAll())
+        actions.sendItems(ItemRepo.getAll())
         state.user = undefined
-        action.askPassword()
+        actions.askPassword()
     },
-    alertFrontend: (message: string) => {
-        localMainWindow.webContents.send(channelsToRender.alert, message)
+    sendFrontendNotification: (notification: typeof channelsToRender[keyof typeof channelsToRender], ...args: any[]) => {
+        localMainWindow.webContents.send(notification, ...args)
     }
 }
 
@@ -213,7 +219,7 @@ const ioHookChannels: IReceiveChannel[] = [
     {
         name: 'keydown',
         handler: async () => {
-            await action.TrySaveClipboard(50)
+            await actions.TrySaveClipboard(50)
         }
     },
     {
@@ -230,27 +236,30 @@ const ioHookChannels: IReceiveChannel[] = [
     }
 ]
 
-async function loginUser(user: { name: string, password: string }) {
+async function loginUser(rawUser: { name: string, password: string }) {
     try {
-        console.log(user)
-        const hashed = CryptoService.HashUserLocal(user)
-        state.user = hashed
-        console.log('hashed')
-        console.log(state.user)
+        const localUser = CryptoService.HashUserLocal(rawUser)
+        state.user = localUser
 
-        const ok = await login()
-        console.log(ok)
-        if (ok) {
-            action.startClipboardPooling()
+        const loginRes = await RequestService.account.login(localUser.name, localUser.remotePassword)
+        console.log(loginRes)
+        if (loginRes.ok && loginRes.data) {
+            userTokens.access = loginRes.data?.access_token
+            userTokens.refresh = loginRes.data?.refresh_token
+
+            actions.startClipboardPooling()
             if (userPreferences.enableRemoteSync.value) {
-                action.startRemoteSync(userPreferences.remoteSyncInterval.value * 1000)
+                actionsExported.startRemoteSync(userPreferences.remoteSyncInterval.value * 1000)
             }
-            action.loadItems()
-            action.sendSettings(userPreferences)
-            action.sendShortcuts()
-            localMainWindow.webContents.send(channelsToRender.passwordConfirmed, true)
+            actionsExported.sendCurrentItems()
+            actionsExported.sendSettings(userPreferences)
+            actions.sendShortcuts()
+            actions.sendFrontendNotification(channelsToRender.passwordConfirmed)
+        } else {
+            actions.sendFrontendNotification(channelsToRender.passwordIncorrect)
         }
-    } catch (e) {
+    } catch (e: any) {
+        actionsExported.alertFrontend(e.toString())
         console.log(e)
     }
 }
@@ -276,7 +285,7 @@ async function registerUser(user: { name: string, password: string }) {
 const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'window_minimize',
-        handler: () => action.hideWindow()
+        handler: () => actions.hideWindow()
     },
     /**
      * Event sent by the front-end to retreive the setting.
@@ -284,7 +293,7 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'get_settings',
         handler: () => {
-            action.sendSettings(userPreferences)
+            actionsExported.sendSettings(userPreferences)
         }
     },
     {
@@ -307,17 +316,17 @@ const channelsFromRender: IReceiveChannel[] = [
     },
     {
         name: 'RendererInit',
-        handler: () => action.askPassword()
+        handler: () => actions.askPassword()
     },
     {
         name: 'paste',
-        handler: async (event: IpcMainEvent, hash: string) => await action.writeToClipboard(hash)
+        handler: async (event: IpcMainEvent, hash: string) => await actions.writeToClipboard(hash)
     },
     {
         name: 'delete',
         handler: async (event: IpcMainEvent, hash: string) => {
             await ItemRepo.remove(hash)
-            await action.loadItems()
+            await actionsExported.sendCurrentItems()
         }
     },
     {
@@ -328,7 +337,7 @@ const channelsFromRender: IReceiveChannel[] = [
             item!.modified = new Date()
             item!.remoteStatus = RemoteItemStatus.needsUpdateOnRemote
             await ItemRepo.update(item!)
-            await action.loadItems()
+            await actionsExported.sendCurrentItems()
         }
     },
     {
@@ -346,7 +355,7 @@ const channelsFromRender: IReceiveChannel[] = [
     },
     {
         name: 'unhide',
-        handler: async (event: IpcMainEvent, value: boolean) => await action.unhide()
+        handler: async (event: IpcMainEvent, value: boolean) => await actions.unhide()
     },
     {
         name: 'textSearched',
@@ -362,7 +371,7 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'to.backend.user.logout',
         handler: () => {
-            action.logout()
+            actions.logout()
         }
     },
     {
@@ -370,8 +379,12 @@ const channelsFromRender: IReceiveChannel[] = [
         handler: async () => {
             const res = await RequestService.clips.deleteAll()
             console.log(res)
-            action.logout()
-            action.alertFrontend(`Data deletion res: ${res.message}`)
+            actions.logout()
+            if (res.ok) {
+                actionsExported.alertFrontend(messages().dataDeleted.ok)
+            } else {
+                actionsExported.alertFrontend(`${messages().dataDeleted.fail}. Error code: ${res.code}`)
+            }
         }
     },
     {
@@ -379,10 +392,14 @@ const channelsFromRender: IReceiveChannel[] = [
         handler: async () => {
             const resDeleteItems = await RequestService.clips.deleteAll()
             const resDeleteAccount = await RequestService.account.delete()
-            action.logout()
+            actions.logout()
             console.log(resDeleteItems)
             console.log(resDeleteAccount)
-            action.alertFrontend(`Data deletion res: ${resDeleteItems.message}\nAccount deletetion res: ${resDeleteAccount.message}`)
+            if (resDeleteItems.ok && resDeleteAccount.ok) {
+                actionsExported.alertFrontend(messages().accountAndDataDeleted.ok)
+            } else {
+                actionsExported.alertFrontend(`${messages().dataDeleted.fail}.\n\nAccount deletion code: ${resDeleteAccount.code}.\nData deletion code: ${resDeleteItems.code}`)
+            }
         }
     },
     {
@@ -390,7 +407,7 @@ const channelsFromRender: IReceiveChannel[] = [
         handler: async () => {
             const downloadUrl = ClipsEndpoints.GetDatabaseFile() + `?token=${await RequestService.account.accessToken()}`
             localClipboard.writeText(downloadUrl)
-            action.alertFrontend(messages().successfullyWrittenDownloadLink)
+            actionsExported.alertFrontend(messages().downloadLinkWritten.ok)
         }
     }
 ]
@@ -404,28 +421,14 @@ const channelsToRender = {
     searchReset: 'searchReset',
     askPassword: 'askPassword',
     passwordConfirmed: 'passwordConfirmed',
-    passwordIncorrect: 'passwordIncorrect',
-    /**
-     * Used when new items are added to reset the search.
-     */
+    passwordIncorrect: 'to.renderer.error.passwordIncorrect',
     textSearched: 'textSearched',
-    /**
-     * used to set a state in the front end
-     */
     hide: 'hide',
-    // registerOk: 'registerOk',
-    /**
-     * used to set a state in the front end
-     */
     unhide: 'unhide',
     setSettings: 'to.renderer.set.settings',
     setShortcuts: 'to.renderer.set.shortcuts',
-    alert: 'to.renderer.alert',
-    // success: {
-    //     // allDeleted: 'to.renderer.success.allDeleted',
-    //     // itemsAccountDeleted: 'to.renderer.success.itemsAccountDeleted',
-    // }
-}
+    alert: 'to.renderer.alert'
+} as const
 
 let localClipboard: Clipboard
 let localMainWindow: BrowserWindow

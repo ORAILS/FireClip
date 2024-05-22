@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { onMount } from 'svelte'
     import { ipcRenderer } from '../KeyboardEventUtil'
     import { appName, isPasswordIncorrect, loginPageMessage, passwordButtonText, showPassword } from '../stores'
     import Icons from './icons/Icons.svelte'
@@ -17,12 +18,18 @@
 
     function showConfirmWindow() {
         showPasswordConfirm = !showPasswordConfirm
+    }
+
+    function updateMessage(){
         if (showPasswordConfirm) {
             loginPageMessage.set(loginMessage)
         } else {
             loginPageMessage.set(registerMessage)
         }
     }
+    onMount(()=> {
+        setInterval(updateMessage, 3000)
+    })
     loginPageMessage.set(registerMessage)
 
     export const validatePassword = (pass: string, isRegisterPass = false): boolean => {
@@ -47,7 +54,7 @@
     }
 
     function resetPasswordCorrect() {
-        loginPageMessage.set('')
+        // loginPageMessage.set('')
         $isPasswordIncorrect = false
     }
     const onKeyEnter = async (e: KeyboardEvent) => {
@@ -72,6 +79,8 @@
         } else {
             ipcRenderer.send('loginUser', { name: username, password: userPassword })
         }
+
+        console.log('login request sent!')
     }
 </script>
 

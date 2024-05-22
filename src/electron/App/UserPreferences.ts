@@ -3,7 +3,7 @@ import Store from 'electron-store'
 import { IpcMainEvent } from 'electron/main'
 import { JsUtil } from '../Utils/JsUtil'
 import { AppSettings } from './AppSettings'
-import { action, handleCleanUpParameterChange, messageFromRenderer } from './EventHandler'
+import { actionsExported, handleCleanUpParameterChange, messageFromRenderer } from './EventHandler'
 
 /**
  * User preference object, the property name is used as key for saving the preference
@@ -52,7 +52,7 @@ const defaultHandler = async (e: IpcMainEvent, event: any) => {
     store.set(`${getPreferenceKey(event.key)}`, event.value)
     // so that the front end can also react to this change
     await JsUtil.waitforme(50)
-    action.sendSettings(userPreferences)
+    actionsExported.sendSettings(userPreferences)
 }
 
 /**
@@ -212,8 +212,8 @@ export const userPreferences: IUserPreferences = {
         selectableOptions: undefined,
         changeHandler: (e, event) => {
             userPreferences.remoteSyncInterval.value = event.value
-            action.clearSyncInterval()
-            action.startRemoteSync(event.value * 1000)
+            actionsExported.clearSyncInterval()
+            actionsExported.startRemoteSync(event.value * 1000)
             defaultHandler(e, event)
             handleCleanUpParameterChange()
         }

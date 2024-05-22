@@ -59,7 +59,7 @@
             }
         },
         {
-            name: 'passwordIncorrect',
+            name: 'to.renderer.error.passwordIncorrect',
             handler: function (event, store) {
                 $isPasswordIncorrect = true
                 setTimeout(() => {
@@ -70,7 +70,7 @@
 
         {
             name: 'passwordConfirmed',
-            handler: function (event, store) {
+            handler: function (event) {
                 $isPasswordAsked = false
                 $currentPage = IPages.items
             }
