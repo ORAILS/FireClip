@@ -11,6 +11,7 @@ import { CryptoService } from '../Utils/CryptoService'
 import { JsUtil } from '../Utils/JsUtil'
 import { AppSettings } from './AppSettings'
 import { InitUserSettings, IUserPreferences, store, userPreferences } from './UserPreferences'
+import { messages } from './CommunicationMessages'
 
 const shortcutsKey = `fileclip.shortcuts`
 
@@ -202,6 +203,9 @@ export const action = {
         state.user = undefined
         action.askPassword()
     },
+    alertFrontend: (message: string) => {
+        localMainWindow.webContents.send(channelsToRender.alert, message)
+    }
 }
 
 // from FrontEnd , iohook specific
@@ -367,7 +371,7 @@ const channelsFromRender: IReceiveChannel[] = [
             const res = await RequestService.clips.deleteAll()
             console.log(res)
             action.logout()
-            localMainWindow.webContents.send(channelsToRender.alert, `Data deletion res: ${res.message}`)
+            action.alertFrontend(`Data deletion res: ${res.message}`)
         }
     },
     {
@@ -378,14 +382,15 @@ const channelsFromRender: IReceiveChannel[] = [
             action.logout()
             console.log(resDeleteItems)
             console.log(resDeleteAccount)
-            localMainWindow.webContents.send(channelsToRender.alert, `Data deletion res: ${resDeleteItems.message}\nAccount deletetion res: ${resDeleteAccount.message}`)
+            action.alertFrontend(`Data deletion res: ${resDeleteItems.message}\nAccount deletetion res: ${resDeleteAccount.message}`)
         }
     },
     {
         name: 'to.backend.get.allData',
         handler: async () => {
-            const url = ClipsEndpoints.GetDatabaseFile() + `?token=${await RequestService.account.accessToken()}`
-            localClipboard.writeText(url)
+            const downloadUrl = ClipsEndpoints.GetDatabaseFile() + `?token=${await RequestService.account.accessToken()}`
+            localClipboard.writeText(downloadUrl)
+            action.alertFrontend(messages().successfullyWrittenDownloadLink)
         }
     }
 ]
@@ -416,10 +421,10 @@ const channelsToRender = {
     setSettings: 'to.renderer.set.settings',
     setShortcuts: 'to.renderer.set.shortcuts',
     alert: 'to.renderer.alert',
-    success: {
-        // allDeleted: 'to.renderer.success.allDeleted',
-        // itemsAccountDeleted: 'to.renderer.success.itemsAccountDeleted',
-    }
+    // success: {
+    //     // allDeleted: 'to.renderer.success.allDeleted',
+    //     // itemsAccountDeleted: 'to.renderer.success.itemsAccountDeleted',
+    // }
 }
 
 let localClipboard: Clipboard
@@ -440,8 +445,6 @@ async function InitIOHook(ipcMain: IpcMain, clipboard: Clipboard, mainWindow: Br
     for (const event of ioHookChannels) {
         messageFromRenderer.on(event.name, event.handler as never)
     }
-
-    // action.resetIndex()
 
     await handleCleanUpParameterChange()
 }
