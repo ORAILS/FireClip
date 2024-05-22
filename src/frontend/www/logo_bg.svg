@@ -76,8 +76,8 @@
      inkscape:deskcolor="#abd1d1"
      showgrid="true"
      inkscape:zoom="1"
-     inkscape:cx="504"
-     inkscape:cy="474"
+     inkscape:cx="466"
+     inkscape:cy="422"
      inkscape:window-width="1720"
      inkscape:window-height="1391"
      inkscape:window-x="1720"
@@ -178,7 +178,7 @@
        inkscape:label="logo">
       <path
          d="M 91.324181,13.443422 C -32.581443,145.10014 56.970358,245.79086 137.55075,245.00587 210.17761,244.29837 312.18295,145.19631 183.27367,31.951377 175.64809,43.020196 152.54948,64.103396 137.54085,73.322404 117.34435,54.218347 100.88089,31.849824 91.324181,13.443422 Z M 88.878896,43.214688 C 108.07875,68.261696 115.73474,75.601906 137.58981,99.034899 150.03877,84.990281 170.37917,71.277714 183.5471,54.626954 267.4498,145.10096 210.39876,225.18846 137.61325,225.21877 56.860931,225.19496 13.817652,145.14851 88.878896,43.214688 Z"
-         style="display:inline;stroke:none;stroke-width:10.6665;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:0.745098;paint-order:normal"
+         style="display:inline;stroke:#000000;stroke-width:0.26666244;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
          id="path1" />
       <path
          d="m 179.91225,120.33394 c -0.0777,0.0182 -0.15587,0.0753 -0.23437,0.17396 -7.19216,9.04899 -27.17254,19.64133 -38.62717,24.57606 17.92408,12.05453 39.299,14.65546 40.62506,-7.48631 0.44174,-9.02535 -0.59759,-17.53645 -1.76352,-17.26371 z"
