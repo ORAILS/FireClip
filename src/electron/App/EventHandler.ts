@@ -17,11 +17,6 @@ const shortcutsKey = `fileclip.shortcuts`
 export const state: IAppState = {
     pullInterval: undefined,
     remoteSyncInterval: undefined,
-    // index: 0,
-    // ctrlA: false,
-    // last: 0,
-    // last2: 0,
-    // last3: 0,
     user: undefined,
     lastHash: ''
 }
