@@ -289,7 +289,7 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'to.backend.save_clips',
         handler: async (event: IpcMainEvent) => {
-            await saveJSONFile(ItemRepo.getAll())
+            await saveJSONFile(Array.from(ItemRepo.getAll().entries()))
         }
     },
     {

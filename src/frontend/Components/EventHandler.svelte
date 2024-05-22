@@ -1,6 +1,6 @@
 <script lang="ts">
     import { arrayToArrayMap, getKeyName, ioHook, itemMatchesText, sort } from '../KeyboardEventUtil'
-    import { events } from '../events'
+    import { ipcRenderer } from '../events'
     import {
         clipList,
         clipListFiltered,
@@ -109,7 +109,7 @@
     ]
 
     for (const event of channelFromBackend) {
-        events.receive(event.name, event.handler as never)
+        ipcRenderer.on(event.name, event.handler as never)
     }
 
     // do nothing for now

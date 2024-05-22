@@ -5,7 +5,6 @@ export const events = {
     ipcRenderer.send(notification, ...args)
   },
   notify: ipcRenderer.send,
-  receive: ipcRenderer.on
 }
 
 export const eventsToBackend = {
@@ -24,4 +23,5 @@ export const eventsToBackend = {
   windowMinimize: "to.backend.window.minimize",
   windowFocus: 'to.backend.window.focus',
   windowUnhide: 'to.backend.window.unhide',
+  setShortcuts: `to.backend.set.shortcuts`,
 } as const
