@@ -22,7 +22,7 @@ export const AppSettings: AppSettings = {
     enableDevTools: false,
     enablePaste: true,
     widthNormal: 600,
-    heightNormal: 400,
+    heightNormal: 750,
     widthWithDevTools: 900,
     heightWithDevTools: 800,
     isLinux: contains(linuxPlatform, process.platform),
