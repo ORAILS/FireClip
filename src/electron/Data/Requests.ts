@@ -2,7 +2,7 @@ import { DateTime } from "luxon"
 import fetch from 'node-fetch'
 import { actionsExported } from "../App/EventHandler"
 import { IClipboardItemEncrypted } from "../DataModels/DataTypes"
-import { BulkRes, CommonRes, LoginRes } from "../DataModels/RequestTypes"
+import { BulkRes, CommonRes, LoginRes, RefreshRes } from "../DataModels/RequestTypes"
 import { CryptoService } from "../Utils/CryptoService"
 import { ClipsEndpoints, UserEndpoints } from "./RequestUtils"
 
@@ -42,7 +42,6 @@ type ResWrapped<T> = {
 
 async function requestWithResponseBody<T>(url: string, method: string = "GET", body?: object, headers?: Record<string, string>): Promise<ResWrapped<T>> {
     const res = await request(url, method, body, headers)
-    console.log(headers)
     const result: ResWrapped<T> = {
         ok: res.ok,
         code: res.status
@@ -52,38 +51,27 @@ async function requestWithResponseBody<T>(url: string, method: string = "GET", b
     } else {
         result.err = await res.text()
     }
-    console.log(result)
+    // console.log(result)
     return result
 }
 
 async function getAccessToken(): Promise<string> {
-    // if (DateTime.now().minus({ minute: 1 }) > userTokens.access_expires) {
-    //     if (!state.user) {
-    //         actionsExported.alertFrontend("User not set but tried to request a token!")
-    //         throw new Error("user not set")
-    //     }
-    //     const token = await RequestService.account.login(state.user.name, state.user.remotePassword)
-    //     userTokens.access_expires = DateTime.now().plus({ minutes: 55 })
-    //     if (token.ok && token.data) {
-    //         userTokens.access = token.data.access_token
-    //         userTokens.refresh = token.data.refresh_token
-    //     }
-    // }
+    if (DateTime.now().plus({ minute: 1 }) > userTokens.access_expires) {
+        console.log("access token needs a refresh!")
+        const refreshRes = await RequestService.account.refresh()
+        if (refreshRes.ok && refreshRes.data) {
+            userTokens.access_expires = DateTime.now().plus({ minutes: 55 })
+            userTokens.access = refreshRes.data.access_token
+        } else {
+            actionsExported.askPassword()
+        }
+    }
     if (!userTokens.access) {
-        actionsExported.alertFrontend("Cannot return emtpty token!")
-        throw new Error("user not set")
-
+        actionsExported.alertFrontend("Tried to call using an empty token!")
+        throw new Error("token not set")
     }
     return userTokens.access
 }
-
-// export async function login() {
-//     const res = await getToken()
-//     if (res.length > 0) {
-//         return true
-//     }
-//     return false
-// }
 
 async function requestToken(url: string, method: string = "GET", body?: object) {
     return await request(url, method, body, { 'authorization': `Bearer ${await getAccessToken()}` })
@@ -97,13 +85,17 @@ export const RequestService = {
     account: {
         register: (username: string, remotePass: string) => requestWithResponseBody<CommonRes>(UserEndpoints.Register, "POST", { username, password: remotePass }),
         login: (username: string, remotePass: string) => requestWithResponseBody<LoginRes>(UserEndpoints.Login, "POST", { username, password: CryptoService.sha512hex(remotePass) }),
+        refresh: () => requestWithResponseBody<RefreshRes>(UserEndpoints.RefreshToken, "POST", undefined, { "authorization": `Bearer ${userTokens.refresh}` }),
         logout() {
             userTokens.refresh = undefined
             userTokens.access = undefined
             userTokens.access_expires = DateTime.now()
         },
         delete: () => requestTokenBody<CommonRes>(UserEndpoints.DeleteProfile, 'DELETE'),
-        accessToken: getAccessToken
+        databaseDownloadUrl: async (): Promise<string> => {
+            const url = ClipsEndpoints.GetDatabaseFile() + `?token=${await getAccessToken()}`
+            return url
+        },
     },
     clips: {
         add: (clip: IClipboardItemEncrypted) => requestToken(ClipsEndpoints.CreateUpdate, "POST", clip),

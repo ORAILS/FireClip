@@ -4,11 +4,13 @@ export interface CommonRes {
     message: string
 }
 
-
-export interface LoginRes {
+export interface RefreshRes {
     access_token: string;
-    refresh_token: string;
     type: string;
+}
+
+export interface LoginRes extends RefreshRes {
+    refresh_token: string;
 }
 
 

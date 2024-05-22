@@ -158,7 +158,7 @@ export const ItemRepo = {
         if (!state.user) {
             throw new Error("user not found")
         }
-        console.log("received items: " + res.data.clips.length)
+        console.log("received items after sync: " + res.data.clips.length)
         for (const clip of res.data.clips) {
             needsLoading = true
             try {

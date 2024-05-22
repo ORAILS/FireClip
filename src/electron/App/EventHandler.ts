@@ -4,7 +4,6 @@ import * as fs from 'fs'
 import { DateTime } from 'luxon'
 import { ItemRepo } from '../Data/ItemRepository'
 import { RequestService, userTokens } from '../Data/Requests'
-import { ClipsEndpoints } from '../Data/RequestUtils'
 import { IClipboardItem, isImageContent, isRTFContent, isTextContent, RemoteItemStatus } from '../DataModels/DataTypes'
 import { IAppState, IKeyboardEvent, IMouseEvent, IReceiveChannel } from '../DataModels/LocalTypes'
 import { CryptoService } from '../Utils/CryptoService'
@@ -65,7 +64,7 @@ export const handleCleanUpParameterChange = async () => {
 
 const items = () => {
     if (state.user === undefined) {
-        actions.askPassword()
+        actionsExported.askPassword()
         return
     }
     return ItemRepo
@@ -95,18 +94,18 @@ export const actionsExported = {
             return
         }
         const sync = async () => {
-            const now = DateTime.now().toUnixInteger()
+            const now = DateTime.now().toMillis()
             console.log(`Started syncing`)
             await ItemRepo.syncWithRemote(state.user?.masterKey as string)
-            console.log(`Sync took ${DateTime.now().toUnixInteger() - now} seconds`)
+            console.log(`Sync took ${DateTime.now().toMillis() - now} ms`)
         }
         await ItemRepo.initialLoadItems(state.user.masterKey as string)
         state.remoteSyncInterval = setInterval(sync, interval)
     },
+    askPassword: async () => localMainWindow.webContents.send(channelsToRender.askPassword, true),
 }
 
 const actions = {
-    askPassword: async () => localMainWindow.webContents.send(channelsToRender.askPassword, true),
     sendShortcuts: () => localMainWindow.webContents.send(channelsToRender.setShortcuts, store.get(shortcutsKey)),
     hideWindow: () => {
         localMainWindow.hide()
@@ -146,7 +145,7 @@ const actions = {
     },
     getClipboardItem: async (): Promise<IClipboardItem | undefined> => {
         if (state.user === undefined) {
-            actions.askPassword()
+            actionsExported.askPassword()
             return
         }
 
@@ -207,7 +206,7 @@ const actions = {
         ItemRepo.reset()
         actions.sendItems(ItemRepo.getAll())
         state.user = undefined
-        actions.askPassword()
+        actionsExported.askPassword()
     },
     sendFrontendNotification: (notification: typeof channelsToRender[keyof typeof channelsToRender], ...args: any[]) => {
         localMainWindow.webContents.send(notification, ...args)
@@ -242,10 +241,11 @@ async function loginUser(rawUser: { name: string, password: string }) {
         state.user = localUser
 
         const loginRes = await RequestService.account.login(localUser.name, localUser.remotePassword)
-        console.log(loginRes)
+
         if (loginRes.ok && loginRes.data) {
-            userTokens.access = loginRes.data?.access_token
-            userTokens.refresh = loginRes.data?.refresh_token
+            userTokens.access_expires = DateTime.now().plus({ minutes: 55 })
+            userTokens.access = loginRes.data.access_token
+            userTokens.refresh = loginRes.data.refresh_token
 
             actions.startClipboardPooling()
             if (userPreferences.enableRemoteSync.value) {
@@ -314,10 +314,10 @@ const channelsFromRender: IReceiveChannel[] = [
             await registerUser(user)
         }
     },
-    {
-        name: 'RendererInit',
-        handler: () => actions.askPassword()
-    },
+    // {
+    //     name: 'RendererInit',
+    //     handler: () => actions.askPassword()
+    // },
     {
         name: 'paste',
         handler: async (event: IpcMainEvent, hash: string) => await actions.writeToClipboard(hash)
@@ -405,7 +405,7 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'to.backend.get.allData',
         handler: async () => {
-            const downloadUrl = ClipsEndpoints.GetDatabaseFile() + `?token=${await RequestService.account.accessToken()}`
+            const downloadUrl = await RequestService.account.databaseDownloadUrl()
             localClipboard.writeText(downloadUrl)
             actionsExported.alertFrontend(messages().downloadLinkWritten.ok)
         }
