@@ -153,7 +153,7 @@ export const ItemRepo = {
             actionsExported.alertFrontend(messages().generic.fail + `.\nFetch of items since ${oldestPull.toISO()}.`)
             return
         }
-        oldestPull = DateTime.now().minus({ minute: 1 })
+        oldestPull = DateTime.now()
         let needsLoading = false
         if (!state.user) {
             throw new Error("user not found")

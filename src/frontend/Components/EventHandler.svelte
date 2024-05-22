@@ -40,9 +40,9 @@
             }
         },
         {
-            name: 'log',
-            handler: async function (event, store) {
-                console.log(store)
+            name: 'to.renderer.log',
+            handler: async function (event, text) {
+                console.log(text)
             }
         },
         {

@@ -415,7 +415,7 @@ const channelsFromRender: IReceiveChannel[] = [
 /**
  * Events sent to the renderer (front-end)
  */
-const channelsToRender = {
+export const channelsToRender = {
     indexChange: 'indexChange',
     loadItems: 'loadItems',
     searchReset: 'searchReset',
@@ -427,7 +427,9 @@ const channelsToRender = {
     unhide: 'unhide',
     setSettings: 'to.renderer.set.settings',
     setShortcuts: 'to.renderer.set.shortcuts',
-    alert: 'to.renderer.alert'
+    alert: 'to.renderer.alert',
+    openWindow: 'to.renderer.open.window',
+    log: 'to.renderer.log',
 } as const
 
 let localClipboard: Clipboard

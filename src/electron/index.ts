@@ -3,11 +3,12 @@ import { autoUpdater } from 'electron-updater'
 import path from 'path'
 import { AppSettings } from './App/AppSettings'
 import CustomWindow from './App/CustomWindow'
-import { ioHookHandler } from './App/EventHandler'
+import { channelsToRender, ioHookHandler } from './App/EventHandler'
 import { userPreferences } from './App/UserPreferences'
 
 
 let mainWindow: CustomWindow
+let appIcon: Tray
 
 app.on('ready', async () => {
     await createMainWindow()
@@ -21,7 +22,7 @@ app.on('ready', async () => {
     const iconPath = path.join(__dirname, 'www', 'icons/png/32x32.png')
     const icon = nativeImage.createFromPath(iconPath)
 
-    const appIcon = new Tray(icon)
+    appIcon = new Tray(icon)
 
     const contextMenu = Menu.buildFromTemplate([
         {
@@ -38,7 +39,16 @@ app.on('ready', async () => {
             click: () => {
                 appIcon
                 mainWindow.window.show()
-                mainWindow.window.webContents.send('to.renderer.open.window', 'settings')
+                mainWindow.window.webContents.send(channelsToRender.openWindow, 'settings')
+            }
+        },
+        {
+            label: 'Shortcuts',
+            toolTip: 'Open shortcuts in settings',
+            click: () => {
+                appIcon
+                mainWindow.window.show()
+                mainWindow.window.webContents.send(channelsToRender.openWindow, 'shortcuts')
             }
         },
         {
@@ -69,33 +79,33 @@ app.on('ready', async () => {
 })
 
 setInterval(() => {
-    mainWindow.window.webContents.send('log', `Ping each 30s from index.ts. Current version ${autoUpdater.currentVersion}`)
+    mainWindow.window.webContents.send(channelsToRender.log, `Ping each 30s from index.ts. Current version ${autoUpdater.currentVersion}`)
     // mainWindow.window.reload()
 }, 30000)
 
 autoUpdater.on('checking-for-update', () => {
-    mainWindow.window.webContents.send('log', 'Checking for update...')
+    mainWindow.window.webContents.send(channelsToRender.log, 'Checking for update...')
 })
 autoUpdater.on('update-available', (info) => {
-    mainWindow.window.webContents.send('log', 'Update available.')
+    mainWindow.window.webContents.send(channelsToRender.log, 'Update available.')
 })
 autoUpdater.on('update-not-available', (info) => {
-    mainWindow.window.webContents.send('log', 'Update not available.')
+    mainWindow.window.webContents.send(channelsToRender.log, 'Update not available.')
 })
 autoUpdater.on('error', (err) => {
-    mainWindow.window.webContents.send('log', 'Error in auto-updater. ' + err)
+    mainWindow.window.webContents.send(channelsToRender.log, 'Error in auto-updater. ' + err)
 })
 autoUpdater.on('download-progress', (progressObj) => {
     let log_message = 'Download speed: ' + progressObj.bytesPerSecond
     log_message = log_message + ' - Downloaded ' + progressObj.percent + '%'
     log_message = log_message + ' (' + progressObj.transferred + '/' + progressObj.total + ')'
-    mainWindow.window.webContents.send('log', log_message)
+    mainWindow.window.webContents.send(channelsToRender.log, log_message)
 })
 /**
  * If user agereed to auto update his application without notice ( for now ). If disabled, the app will update un manual restart.
  */
 autoUpdater.on('update-downloaded', (info) => {
-    mainWindow.window.webContents.send('log', 'Update downloaded, restarting in 5 sec')
+    mainWindow.window.webContents.send(channelsToRender.log, 'Update downloaded, restarting in 5 sec')
     if (userPreferences.autoRestartOnUpdateAvailable) {
         setTimeout(() => autoUpdater.quitAndInstall(), 5000)
     }
