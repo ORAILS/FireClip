@@ -115,8 +115,12 @@ app.on('window-all-closed', () => {
     app.quit()
 })
 
-if (AppSettings.enableDevTools && AppSettings.isLinux) {
+
+if (AppSettings.isLinux) {
     app.commandLine.appendSwitch('disable-gpu-sandbox');
+}
+
+if (AppSettings.enableDevTools && AppSettings.isLinux) {
     const port = '8315'
     console.log(`starting debugging on port: ${port}`)
     app.commandLine.appendSwitch('remote-debugging-port', port);
