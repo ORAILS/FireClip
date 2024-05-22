@@ -254,15 +254,15 @@ async function loginUser(rawUser: { name: string, password: string }) {
     }
 }
 
-async function registerUser(user: { name: string, password: string }) {
+async function registerUser(rawUser: { name: string, password: string }) {
     try {
-        console.log(user)
-        const hashed = CryptoService.HashUserLocal(user)
-        state.user = hashed
-        const ok = await RequestService.account.register(hashed.name, hashed.remotePassword)
-        console.log(ok)
-        if (ok) {
-            localMainWindow.webContents.send(channelsToRender.alert, 'Successfully registered! Try to login now!')
+        const localUser = CryptoService.HashUserLocal(rawUser)
+        state.user = localUser
+        const registerRes = await RequestService.account.register(localUser.name, localUser.remotePassword)
+        if (registerRes.ok) {
+            actionsExported.alertFrontend('Successfully registered! Try to login now!')
+        } else {
+            actionsExported.alertFrontend(messages().generic.fail + `.\nStatus: ${registerRes.code}`)
         }
     } catch (e) {
         console.log(e)

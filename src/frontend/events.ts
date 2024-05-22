@@ -13,7 +13,7 @@ export const eventsToBackend = {
   pasteHash: "to.backend.item.paste",
   itemsLoadBeforeHash: "to.backend.items.load_before_hash",
   userLogin: "to.backend.user.login",
-  userRegister: "to.backend.user.login",
+  userRegister: "to.backend.user.register",
   userLogout: "to.backend.user.logout",
   getSettings: "to.backend.get_settings",
   saveClips: "to.backend.save_clips",

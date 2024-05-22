@@ -3,7 +3,6 @@ import fetch from 'node-fetch'
 import { actionsExported } from "../App/EventHandler"
 import { IClipboardItemEncrypted } from "../DataModels/DataTypes"
 import { BulkRes, CommonRes, LoginRes, RefreshRes } from "../DataModels/RequestTypes"
-import { CryptoService } from "../Utils/CryptoService"
 import { ClipsEndpoints, UserEndpoints } from "./RequestUtils"
 
 export const userTokens: Tokens = {
@@ -84,7 +83,7 @@ async function requestTokenBody<T>(url: string, method: string = "GET", body?: o
 export const RequestService = {
     account: {
         register: (username: string, remotePass: string) => requestWithResponseBody<CommonRes>(UserEndpoints.Register, "POST", { username, password: remotePass }),
-        login: (username: string, remotePass: string) => requestWithResponseBody<LoginRes>(UserEndpoints.Login, "POST", { username, password: CryptoService.sha512hex(remotePass) }),
+        login: (username: string, remotePass: string) => requestWithResponseBody<LoginRes>(UserEndpoints.Login, "POST", { username, password: remotePass }),
         refresh: () => requestWithResponseBody<RefreshRes>(UserEndpoints.RefreshToken, "POST", undefined, { "authorization": `Bearer ${userTokens.refresh}` }),
         logout() {
             userTokens.refresh = undefined
