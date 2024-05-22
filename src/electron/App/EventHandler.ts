@@ -279,53 +279,55 @@ async function registerUser(user: { name: string, password: string }) {
  */
 const channelsFromRender: IReceiveChannel[] = [
     {
-        name: 'window_minimize',
+        name: 'to.backend.window.minimize',
         handler: () => actions.hideWindow()
     },
     /**
      * Event sent by the front-end to retreive the setting.
      */
     {
-        name: 'get_settings',
+        name: 'to.backend.get_settings',
         handler: () => {
             actionsExported.sendSettings(userPreferences)
         }
     },
     {
-        name: 'save_items',
-        handler: async (event: IpcMainEvent, data: object) => {
-            await saveJSONFile(data)
+        name: 'to.backend.save_clips',
+        handler: async (event: IpcMainEvent) => {
+            await saveJSONFile(ItemRepo.getAll())
         }
     },
     {
-        name: 'loginUser',
+        name: 'to.backend.user.login',
         handler: async (event: IpcMainEvent, user: { name: string; password: string }) => {
             await loginUser(user)
         }
     },
     {
-        name: 'registerUser',
+        name: 'to.backend.user.register',
         handler: async (event: IpcMainEvent, user: { name: string; password: string }) => {
             await registerUser(user)
         }
     },
-    // {
-    //     name: 'RendererInit',
-    //     handler: () => actions.askPassword()
-    // },
     {
-        name: 'paste',
+        name: 'to.backend.user.logout',
+        handler: () => {
+            actions.logout()
+        }
+    },
+    {
+        name: 'to.backend.item.paste',
         handler: async (event: IpcMainEvent, hash: string) => await actions.writeToClipboard(hash)
     },
     {
-        name: 'delete',
+        name: 'to.backend.item.delete',
         handler: async (event: IpcMainEvent, hash: string) => {
             await ItemRepo.remove(hash)
             await actionsExported.sendCurrentItems()
         }
     },
     {
-        name: 'add_favorite',
+        name: 'to.backend.item.add_favorite',
         handler: async (event: IpcMainEvent, hash: string) => {
             const item = await ItemRepo.get(hash)
             item!.isFavorite = !item?.isFavorite
@@ -336,20 +338,20 @@ const channelsFromRender: IReceiveChannel[] = [
         }
     },
     {
-        name: 'load_before',
+        name: 'to.backend.items.load_before_hash',
         handler: async (event: IpcMainEvent, hash: string) => {
             console.log(`requested load before ${hash}`)
             await ItemRepo.loadItemsBeforeHash(hash, state.user?.masterKey as string)
         }
     },
     {
-        name: 'focus',
+        name: 'to.backend.window.focus',
         handler: async (event: IpcMainEvent, value: boolean) => {
             localMainWindow.show()
         }
     },
     {
-        name: 'unhide',
+        name: 'to.backend.window.unhide',
         handler: async (event: IpcMainEvent, value: boolean) => await actions.unhide()
     },
     {
@@ -357,12 +359,6 @@ const channelsFromRender: IReceiveChannel[] = [
         handler: async (event: IpcMainEvent, shortcuts: string) => {
             // console.log(shortcuts)
             store.set(shortcutsKey, shortcuts)
-        }
-    },
-    {
-        name: 'to.backend.user.logout',
-        handler: () => {
-            actions.logout()
         }
     },
     {
@@ -394,13 +390,13 @@ const channelsFromRender: IReceiveChannel[] = [
         }
     },
     {
-        name: 'to.backend.get.allData',
+        name: 'to.backend.get.dataDownloadLink',
         handler: async () => {
             const downloadUrl = await RequestService.account.databaseDownloadUrl()
             localClipboard.writeText(downloadUrl)
             actionsExported.alertFrontend(messages().downloadLinkWritten.ok)
         }
-        }
+    }
 ]
 
 /**

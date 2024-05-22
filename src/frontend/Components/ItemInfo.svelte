@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { ipcRenderer } from '../KeyboardEventUtil'
+    import { events, eventsToBackend } from '../events'
     import { RemoteItemStatus, type IClipboardItemFrontend } from '../types'
     import { timestampToRelativeTime } from '../util'
     import Icons from './icons/Icons.svelte'
@@ -7,10 +7,10 @@
     export let extraClassDiv = ''
     export let item: IClipboardItemFrontend
     async function deleteItem() {
-        ipcRenderer.send('delete', item.hash)
+        events.notifyBackend(eventsToBackend.itemDelete, item.hash)
     }
     async function addFavorite() {
-        ipcRenderer.send('add_favorite', item.hash)
+        events.notifyBackend(eventsToBackend.itemAddFavorite, item.hash)
     }
 </script>
 

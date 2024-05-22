@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte'
-    import { ipcRenderer } from '../KeyboardEventUtil'
+    import { events, eventsToBackend } from '../events'
     import { appName, isPasswordIncorrect, loginPageMessage, passwordButtonText, showPassword } from '../stores'
     import Icons from './icons/Icons.svelte'
 
@@ -8,26 +8,27 @@
         $passwordButtonText === 'show' ? ($passwordButtonText = 'hide') : ($passwordButtonText = 'show')
         $showPassword === true ? ($showPassword = false) : ($showPassword = true)
     }
+    let username: string = ''
     let userPassword: string = ''
     let userPasswordConfirm: string = ''
-    let showPasswordConfirm = false
-    let username: string = ''
-
+    
+    let userIsRegistering = false
+    
     let loginMessage = 'Have an account? Login'
     let registerMessage = 'New here? Register!'
 
     function showConfirmWindow() {
-        showPasswordConfirm = !showPasswordConfirm
+        userIsRegistering = !userIsRegistering
     }
 
-    function updateMessage(){
-        if (showPasswordConfirm) {
+    function updateMessage() {
+        if (userIsRegistering) {
             loginPageMessage.set(loginMessage)
         } else {
             loginPageMessage.set(registerMessage)
         }
     }
-    onMount(()=> {
+    onMount(() => {
         setInterval(updateMessage, 3000)
     })
     loginPageMessage.set(registerMessage)
@@ -69,15 +70,15 @@
         if (!validatePassword(userPassword)) {
             return
         }
-        if (showPasswordConfirm && !passwordsMatch()) {
+        if (userIsRegistering && !passwordsMatch()) {
             return
         }
 
         // TODO remove when we have the server working.
-        if (showPasswordConfirm) {
-            ipcRenderer.send('registerUser', { name: username, password: userPassword })
+        if (userIsRegistering) {
+            events.notifyBackend(eventsToBackend.userRegister, { name: username, password: userPassword })
         } else {
-            ipcRenderer.send('loginUser', { name: username, password: userPassword })
+            events.notifyBackend(eventsToBackend.userLogin, { name: username, password: userPassword })
         }
 
         console.log('login request sent!')
@@ -139,7 +140,7 @@
                             />
                         {/if}
                     </div>
-                    <div class="relative {showPasswordConfirm ? '' : 'hidden'} my-3 w-full ">
+                    <div class="relative {userIsRegistering ? '' : 'hidden'} my-3 w-full ">
                         {#if $showPassword}
                             <input
                                 bind:value={userPasswordConfirm}
@@ -168,7 +169,7 @@
                 </p>
                 <button
                     class="mr-2 mt-2 w-full border border-gray-400 px-5 py-2.5 text-center text-sm font-medium  text-gray-700 hover:bg-gray-400 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-slate-400 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-gray-800"
-                    on:click={onOkay}>{$isPasswordIncorrect ? 'Password incorrect! ' : showPasswordConfirm ? 'Register' : 'Login'}</button
+                    on:click={onOkay}>{$isPasswordIncorrect ? 'Password incorrect! ' : userIsRegistering ? 'Register' : 'Login'}</button
                 >
             </div>
         </div>

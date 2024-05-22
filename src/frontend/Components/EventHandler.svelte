@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { arrayToArrayMap, getKeyName, ioHook, ipcRenderer, itemMatchesText, sort } from '../KeyboardEventUtil'
+    import { arrayToArrayMap, getKeyName, ioHook, itemMatchesText, sort } from '../KeyboardEventUtil'
+    import { events } from '../events'
     import {
         clipList,
         clipListFiltered,
@@ -13,7 +14,7 @@
         shortcutsJson,
         userPreferences
     } from '../stores'
-    import type { IClipboardItem, IHookKeyboardEvent, IHookMouseEvent, IReceiveChannel } from '../types'
+    import type { IClipboardItem, IHookKeyboardEvent, IReceiveChannel } from '../types'
     import { IPages } from '../types'
 
     currentSearchedText.subscribe((text: string) => {
@@ -108,11 +109,11 @@
     ]
 
     for (const event of channelFromBackend) {
-        ipcRenderer.on(event.name, event.handler as never)
+        events.receive(event.name, event.handler as never)
     }
 
-    // do nothing now
-    ioHook.on('mouseclick', (event: IHookMouseEvent) => {})
+    // do nothing for now
+    // ioHook.on('mouseclick', (event: IHookMouseEvent) => {})
 
     ioHook.on('keydown', async (e: IHookKeyboardEvent) => {
         // the settings are send from the back

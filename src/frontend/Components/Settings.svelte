@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte'
-    import { ipcRenderer } from '../KeyboardEventUtil'
+    import { events, eventsToBackend } from '../events'
     import { appName, clipListFiltered, currentPage, userPreferences } from '../stores'
     import { IPages } from '../types'
     import MenuItem from './MenuItem.svelte'
@@ -9,12 +9,12 @@
     let initialName: string
 
     const sendChange = (key: string, newValue: never | any) => {
-        ipcRenderer.send(key, newValue)
+        events.notify(key, newValue)
     }
     onMount(() => {
         initialName = $appName
         appName.set(`Settings`)
-        ipcRenderer.send('get_settings')
+        events.notifyBackend(eventsToBackend.getSettings)
     })
 
     onDestroy(() => {
@@ -28,6 +28,8 @@
         string: (item) => 2 * item.length,
         object: (item) => (!item ? 0 : Object.keys(item).reduce((total, key) => sizeOf(key) + sizeOf(item[key]) + total, 0))
     }
+
+    userPreferences.subscribe((v) => console.log(v))
 
     const sizeOf = (value) => typeSizes[typeof value](value)
 </script>
@@ -72,7 +74,7 @@
             <p>
                 <button
                     on:click={() => {
-                        ipcRenderer.send('save_items', $clipListFiltered)
+                        events.notifyBackend(eventsToBackend.saveClips)
                     }}>Save clips as JSON</button
                 >
             </p>
@@ -87,7 +89,7 @@
             on:click={() => {
                 const c = confirm('confirm logout?')
                 if (c) {
-                    ipcRenderer.send('to.backend.user.logout')
+                    events.notifyBackend(eventsToBackend.userLogout)
                 }
             }}
         >
@@ -101,7 +103,7 @@
                     'Once confirmed, a link will be written to the clipboard.\nPaste the link in any web browser and all the data (an sqlite database file) will be downloaded.\n\nAnyone with the link can retrieve the database so keep it a secret.\n\nYou can later inspect the database on a site like sqliteviewer.app'
                 )
                 if (c) {
-                    ipcRenderer.send('to.backend.get.allData')
+                    events.notifyBackend(eventsToBackend.getDataDownloadLink)
                 }
             }}
         >
@@ -115,7 +117,7 @@
                     'This will delete all your clips (deletes the database file).\nThere is no way back!\n\nNew data from other instances will be pushed to a fresh database instance after the deletion, unless you log out on all instances.\n\nIt will also log you out on this device.\nThe user account will not be deleted!'
                 )
                 if (c) {
-                    ipcRenderer.send('to.backend.delete.allData')
+                    events.notifyBackend(eventsToBackend.deleteData)
                 }
             }}
         >
@@ -129,7 +131,7 @@
                     'This will delete all your clips (deletes the database file) and the account!\nThere is no way back!\n\nMake sure to sign out on other devices before proceeding as for a time of up to 1h, new data might get pushed to a fresh database instance created after this deletion (created on demand).\n\nIt will also log you out on this device.'
                 )
                 if (c) {
-                    ipcRenderer.send('to.backend.delete.allDataAndAccount')
+                    events.notifyBackend(eventsToBackend.deleteDataAccount)
                 }
             }}
         >

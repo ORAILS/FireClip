@@ -1,7 +1,8 @@
 <script lang="ts">
     import { DateTime } from 'luxon'
-    import { delay, ipcRenderer } from '../KeyboardEventUtil'
+    import { delay } from '../KeyboardEventUtil'
     import { sendShortcuts } from '../backendActions'
+    import { events, eventsToBackend } from '../events'
     import { currentPage, isAppHidden, isFocused, pressedKeysSizeLimit, shortcutsJson, userPreferences } from '../stores'
     import { IPages, type IShortCut } from '../types'
     import { clipListFiltered, currentScrollIndex, pressedKeys, selectedClipId } from './../stores'
@@ -97,7 +98,7 @@
                 if ($currentPage != IPages.items) {
                     return
                 }
-                ipcRenderer.send('unhide', true)
+                events.notifyBackend(eventsToBackend.windowUnhide)
                 if (
                     $clipListFiltered &&
                     $currentScrollIndex + 1 < $clipListFiltered.length &&
@@ -119,7 +120,7 @@
                 if ($currentPage != IPages.items) {
                     return
                 }
-                ipcRenderer.send('paste', $selectedClipId)
+                events.notifyBackend(eventsToBackend.pasteHash, $selectedClipId)
                 $currentScrollIndex = -1
                 $selectedClipId = ''
             },
@@ -134,7 +135,7 @@
                     return
                 }
                 if (!$isAppHidden) {
-                    ipcRenderer.send('focus', true)
+                    events.notifyBackend(eventsToBackend.windowFocus)
                     await delay(100)
                     isFocused.set($isFocused + 1)
                 }
@@ -146,7 +147,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '1']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[0][1].hash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[0][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -156,7 +157,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '2']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[1][1].hash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[1][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -165,7 +166,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '3']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[2][1].hash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[2][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -175,7 +176,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '4']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[3][1].hash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[3][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -185,7 +186,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '5']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[4][1].hash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[4][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -195,7 +196,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '6']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[5][1].hash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[5][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -205,7 +206,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '7']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[6][1].hash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[6][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -215,7 +216,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '8']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[7][1].hash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[7][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -225,7 +226,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '9']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[8][1].hash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[8][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -235,7 +236,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '0']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[9][1].hash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[9][1].hash)
             },
             combinationChangeHandler: () => {}
         }

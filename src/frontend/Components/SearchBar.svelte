@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { ipcRenderer } from '../KeyboardEventUtil'
     import { currentPage, currentSearchedText, isFocused } from '../stores'
     import { IPages } from '../types'
     import Icons from './icons/Icons.svelte'
@@ -14,10 +13,10 @@
         }
     })
 
-    ipcRenderer.on('searchReset', function (event, store) {
-        text = ''
-        currentSearchedText.set('')
-    })
+    // maybe ? in case the search is reset from backend
+    // currentSearchedText.subscribe(v=> {
+    //     text = v
+    // })
 
     function handleChange() {
         currentSearchedText.set(text)

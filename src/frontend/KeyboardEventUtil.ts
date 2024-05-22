@@ -1,7 +1,6 @@
 import type { IClipboardItem, IHookKeyboardEvent } from './types'
 import { isImageContent, isRTFContent, isTextContent } from './types'
 
-export const ipcRenderer = window.require('electron').ipcRenderer
 export const ioHook = window.require('iohook')
 export const { sort } = window.require('fast-sort')
 

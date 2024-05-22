@@ -1,8 +1,5 @@
 <script lang="ts">
-    import { delay, ipcRenderer } from '../KeyboardEventUtil'
-    import { isAppHidden, isFocused, currentPage } from '../stores'
-    import { IPages, type IShortCut } from '../types'
-    import { clipListFiltered, currentScrollIndex, selectedClipId, pressedKeys } from './../stores'
+    import { pressedKeys } from './../stores'
 </script>
 
 <div

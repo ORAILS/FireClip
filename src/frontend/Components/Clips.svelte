@@ -1,5 +1,6 @@
 <script lang="ts">
-    import { getTitle, ipcRenderer } from '../KeyboardEventUtil'
+    import { getTitle } from '../KeyboardEventUtil'
+    import { events, eventsToBackend } from '../events'
     import { clipListFiltered, currentScrollIndex, selectedClipId, userPreferences } from '../stores'
     import type { IClipboardItemFrontend } from '../types'
     import { isImageContent, isTextContent } from '../types'
@@ -14,7 +15,7 @@
     function loadMoreItemsBefore(hash: string) {
         if (lastFire != hash) {
             lastFire = hash
-            ipcRenderer.send('load_before', hash)
+            events.notifyBackend(eventsToBackend.itemsLoadBeforeHash, hash)
             // console.log('loading items')
             if (resetFire != undefined) {
                 clearTimeout(resetFire)
@@ -26,7 +27,7 @@
     }
 
     function handleClick(item: IClipboardItemFrontend) {
-        ipcRenderer.send('paste', item.hash)
+        events.notifyBackend(eventsToBackend.pasteHash, item.hash)
         $currentScrollIndex = -1
         $selectedClipId = ''
     }
