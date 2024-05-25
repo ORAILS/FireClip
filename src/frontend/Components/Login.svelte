@@ -32,9 +32,9 @@
     onMount(() => {
         // on interval to clear up the errors
         setInterval(updateMessage, 5000)
-
-        }, 400)
+        
     })
+
     loginPageMessage.set(registerMessage)
 
     export const validatePassword = (pass: string, isRegisterPass = false): boolean => {
