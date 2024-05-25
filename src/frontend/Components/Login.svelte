@@ -11,9 +11,9 @@
     let username: string = ''
     let userPassword: string = ''
     let userPasswordConfirm: string = ''
-    
+
     let userIsRegistering = false
-    
+
     let loginMessage = 'Have an account? Login'
     let registerMessage = 'New here? Register!'
 
@@ -32,9 +32,9 @@
     onMount(() => {
         // on interval to clear up the errors
         setInterval(updateMessage, 5000)
-        
-    })
 
+
+    })
     loginPageMessage.set(registerMessage)
 
     export const validatePassword = (pass: string, isRegisterPass = false): boolean => {

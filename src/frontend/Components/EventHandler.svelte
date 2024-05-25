@@ -86,7 +86,7 @@
             name: 'to.renderer.passwordConfirmed',
             handler: function (event) {
                 $isPasswordAsked = false
-                $currentPage = IPages.search
+                $currentPage = IPages.items
             }
         },
         {
