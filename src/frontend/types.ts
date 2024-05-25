@@ -95,6 +95,7 @@ export enum IPages {
     notifications,
     login,
     shortcuts,
+    search,
     info
 }
 

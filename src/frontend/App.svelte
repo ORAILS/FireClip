@@ -9,6 +9,7 @@
 
     import EventHandler from './Components/EventHandler.svelte'
     import Info from './Components/Info.svelte'
+    import Search from './Components/Search.svelte'
     import ShortcutsHandler from './Components/ShortcutsHandler.svelte'
     import { currentPage } from './stores'
     import { IPages } from './types'
@@ -31,6 +32,8 @@
             <Notifications />
         {:else if $currentPage === IPages.info}
             <Info />
+        {:else if $currentPage === IPages.search}
+            <Search />
         {/if}
         <ShortcutsHandler />
     </section>

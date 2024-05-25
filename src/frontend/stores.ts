@@ -29,6 +29,7 @@ export const passwordButtonText: Writable<string> = writable('show')
 export const userPreferences: Writable<IUserPreferences | undefined> = writable(undefined)
 export const isAppHidden: Writable<boolean> = writable(true)
 export const currentSearchedText: Writable<string> = writable('')
+export const searchOnlyImages: Writable<boolean> = writable(false)
 export const shortcutsJson: Writable<string> = writable('')
 
 export const loginPageMessage: Writable<string> = writable("")

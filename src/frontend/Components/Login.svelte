@@ -19,6 +19,7 @@
 
     function showConfirmWindow() {
         userIsRegistering = !userIsRegistering
+        updateMessage()
     }
 
     function updateMessage() {
@@ -29,7 +30,10 @@
         }
     }
     onMount(() => {
-        setInterval(updateMessage, 3000)
+        // on interval to clear up the errors
+        setInterval(updateMessage, 5000)
+
+        }, 400)
     })
     loginPageMessage.set(registerMessage)
 

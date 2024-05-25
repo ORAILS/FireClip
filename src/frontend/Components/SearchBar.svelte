@@ -35,14 +35,26 @@
             bind:value={text}
             on:input={handleChange}
         />
-        <div
-            class="ml-1 flex h-6"
-            on:click={() => {
-                console.log('clicked')
-                currentPage.set(IPages.settings)
-            }}
-        >
-            <Icons icon="gear" title="Open settings" stopPropagation={false} size="6" />
+        <div class="ml-1 flex h-6">
+            <Icons
+                icon="tint"
+                on:click={() => {
+                    console.log('clicked')
+                    currentPage.set(IPages.search)
+                }}
+                title="Advanced search"
+                stopPropagation={false}
+                size="6"
+            />
+            <Icons
+                icon="gear"
+                on:click={() => {
+                    currentPage.set(IPages.settings)
+                }}
+                title="Open settings"
+                stopPropagation={false}
+                size="6"
+            />
         </div>
     </footer>
 {/if}

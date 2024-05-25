@@ -5,6 +5,7 @@
     import { IPages } from '../types'
     import MenuItem from './MenuItem.svelte'
     import Switch from './Switch.svelte'
+    import Icons from './icons/Icons.svelte'
 
     let initialName: string
 
@@ -36,7 +37,10 @@
 
 <div class="settings flex cursor-pointer flex-col justify-items-start">
     <MenuItem title="Go back to the items list">
-        <p class="text-xl" on:click={() => currentPage.set(IPages.items)}>&lt; Back to items</p>
+        <div class="flex flex-row ">
+            <Icons icon="arrow-circle" centered={false} extraClass="stroke-2 rotate-[-90deg]" size="8" />
+            <p class="text-xl" on:click={() => currentPage.set(IPages.items)}>Back to items</p>
+        </div>
     </MenuItem>
     <MenuItem title="Open shortcuts configuration">
         <p on:click={() => currentPage.set(IPages.shortcuts)}>Shortcuts &gt;</p>

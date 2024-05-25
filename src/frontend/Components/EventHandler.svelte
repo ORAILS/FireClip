@@ -11,19 +11,32 @@
         isPasswordIncorrect,
         pressedKeys,
         pressedKeysSizeLimit,
+        searchOnlyImages,
         shortcutsJson,
         userPreferences
     } from '../stores'
     import type { IClipboardItem, IHookKeyboardEvent, IReceiveChannel } from '../types'
-    import { IPages } from '../types'
+    import { IPages, isImageContent } from '../types'
 
     currentSearchedText.subscribe((text: string) => {
+        if ($searchOnlyImages) {
+            return
+        }
         if (text.length == 0) {
             $clipListFiltered = $clipList
             return
         }
 
-        $clipListFiltered = arrayToArrayMap<[string, IClipboardItem]>((i) => itemMatchesText(text, i), $clipList)
+        clipListFiltered.set(arrayToArrayMap<[string, IClipboardItem]>((i) => itemMatchesText(text, i), $clipList))
+    })
+
+    searchOnlyImages.subscribe((v) => {
+        console.log('test')
+        if (v) {
+            $clipListFiltered = arrayToArrayMap<[string, IClipboardItem]>((i) => isImageContent(i[1]), $clipList)
+        } else {
+            $clipListFiltered = $clipList
+        }
     })
 
     const channelFromBackend: IReceiveChannel[] = [
@@ -73,7 +86,7 @@
             name: 'to.renderer.passwordConfirmed',
             handler: function (event) {
                 $isPasswordAsked = false
-                $currentPage = IPages.items
+                $currentPage = IPages.search
             }
         },
         {
