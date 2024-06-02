@@ -78,7 +78,7 @@
                 $isPasswordIncorrect = true
                 setTimeout(() => {
                     $isPasswordIncorrect = false
-                }, 3000)
+                }, 3500)
             }
         },
 

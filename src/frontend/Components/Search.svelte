@@ -26,10 +26,10 @@
             }}
         />
     </MenuItem>
-    <MenuItem>
+    <MenuItem extraClass="border-b">
         <input
             type="text"
-            placeholder="Show items containing"
+            placeholder="type text to search"
             class="h-full w-full bg-[transparent] placeholder-gray-200"
             bind:value={$currentSearchedText}
             on:change={() => {
@@ -37,9 +37,5 @@
             }}
         />
     </MenuItem>
-    <MenuItem extraClass="pb-4" title="Go back to the items list">
-        <p class="text-xl">Search results:</p>
-    </MenuItem>
 </div>
-
 <Clips />

@@ -21,18 +21,17 @@
         userIsRegistering = !userIsRegistering
         updateMessage()
     }
-
+    let buttonText = 'LOGIN'
     function updateMessage() {
         if (userIsRegistering) {
+            buttonText = 'REGISTER'
             loginPageMessage.set(loginMessage)
         } else {
+            buttonText = 'LOGIN'
             loginPageMessage.set(registerMessage)
         }
     }
     onMount(() => {
-        // on interval to clear up the errors
-        setInterval(updateMessage, 5000)
-
 
     })
     loginPageMessage.set(registerMessage)
@@ -64,13 +63,13 @@
     }
     const onKeyEnter = async (e: KeyboardEvent) => {
         if (e.key == 'Enter') {
-            sendLoginRequest()
+            sendRequest()
         }
     }
     const onOkay = (e: Event) => {
-        sendLoginRequest()
+        sendRequest()
     }
-    const sendLoginRequest = () => {
+    const sendRequest = () => {
         if (!validatePassword(userPassword)) {
             return
         }
@@ -84,9 +83,16 @@
         } else {
             events.notifyBackend(eventsToBackend.userLogin, { name: username, password: userPassword })
         }
-
+        buttonText = "Loading..."
         console.log('login request sent!')
     }
+    isPasswordIncorrect.subscribe((value) => {
+        if (value) {
+            buttonText = 'Password incorrect!'
+        } else {
+            updateMessage()
+        }
+    })
 </script>
 
 <div class="container mx-auto flex justify-center">
@@ -173,7 +179,7 @@
                 </p>
                 <button
                     class="mr-2 mt-2 w-full border border-gray-400 px-5 py-2.5 text-center text-sm font-medium  text-gray-700 hover:bg-gray-400 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-slate-400 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-gray-800"
-                    on:click={onOkay}>{$isPasswordIncorrect ? 'Password incorrect! ' : userIsRegistering ? 'Register' : 'Login'}</button
+                    on:click={onOkay}>{buttonText}</button
                 >
             </div>
         </div>
