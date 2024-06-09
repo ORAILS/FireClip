@@ -96,7 +96,8 @@ export enum IPages {
     login,
     shortcuts,
     search,
-    info
+    info,
+    debug
 }
 
 export function isTextContent(obj: IClipboardItem) {

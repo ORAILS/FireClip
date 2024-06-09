@@ -344,7 +344,7 @@ dark:text-gray-200
 even:dark:border-gray-800 
 even:dark:bg-slate-900"
         >
-            <div class="my-6 flex flex-col">
+            <div class="my-2 flex flex-col">
                 <div class="flex flex-row justify-between">
                     <h4>
                         {getNameFromKey(shortcut[0])}

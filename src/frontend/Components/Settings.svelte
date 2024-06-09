@@ -142,4 +142,7 @@
             Delete account and all my data &gt;
         </p>
     </MenuItem>
+    <MenuItem title="Open debug page">
+        <p on:click={() => currentPage.set(IPages.debug)}>Debug page &gt;</p>
+    </MenuItem>
 </div>

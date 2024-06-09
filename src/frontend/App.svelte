@@ -13,6 +13,7 @@
     import ShortcutsHandler from './Components/ShortcutsHandler.svelte'
     import { currentPage } from './stores'
     import { IPages } from './types'
+    import Debug from './Components/Debug.svelte'
 </script>
 
 <svelte:head>
@@ -34,6 +35,8 @@
             <Info />
         {:else if $currentPage === IPages.search}
             <Search />
+        {:else if $currentPage === IPages.debug}
+            <Debug />
         {/if}
         <ShortcutsHandler />
     </section>
