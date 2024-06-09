@@ -82,13 +82,9 @@
     let activeShortcutChanged = false
     // when shortcuts are received from the backend.
     shortcutsJson.subscribe((v) => {
-        alert(v)
         if (!v || v.length === 0) return
         const savedShortcuts: Record<string, string[][][]> = JSON.parse(v)
         for (const key of Object.keys(shortcuts)) {
-            if (key == 'scroll') {
-                alert(JSON.stringify(savedShortcuts[key]))
-            }
             if (savedShortcuts[key]) {
                 shortcuts[key].combinations = savedShortcuts[key]
             }
@@ -280,13 +276,6 @@
         }
     })
 
-    function saveShortcuts() {
-        const shortcutToCombination = {}
-        for (const key of Object.keys(shortcuts)) {
-            shortcutToCombination[key] = shortcuts[key].combinations
-        }
-        sendShortcuts(JSON.stringify(shortcutToCombination))
-    }
     const checkShortcuts = async (currentlyPressed: string[][]) => {
         if (!$userPreferences || !$userPreferences.enableKeyboardShortcuts.value) {
             return
@@ -336,6 +325,9 @@
 
 {#if $currentPage === IPages.shortcuts}
     <MenuItem>
+        <p class="text-xl">Shortcuts</p></MenuItem
+    >
+    <MenuItem>
         <p
             class="text-xl"
             on:click={() => {
@@ -347,9 +339,9 @@
     >
     {#each entries(shortcuts) as shortcut}
         <div
-            class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock
-dark:text-gray-200
-even:dark:border-gray-800
+            class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
+dark:text-gray-200 
+even:dark:border-gray-800 
 even:dark:bg-slate-900"
         >
             <div class="my-6 flex flex-col">
@@ -357,34 +349,27 @@ even:dark:bg-slate-900"
                     <h4>
                         {getNameFromKey(shortcut[0])}
                     </h4>
-                    <div class="flex flex-row">
-                        {#if activeShortcutChanged}
-                            <Button
-                                label="Exit"
-                                on:click={() => {
-                                    // closing other edits
-                                    for (const s of entries(shortcuts)) {
-                                        s[1].editVisible = false
-                                    }
-                                }}
-                            />
-                        {/if}
-
-                        <Button
-                            label={shortcut[1].editVisible ? 'Cancel' : 'Edit'}
-                            on:click={() => {
-                                // closing other edits
-                                for (const s of entries(shortcuts)) {
-                                    if (s[0] != shortcut[0]) {
-                                        s[1].editVisible = false
-                                    }
+                    <Button
+                        label={shortcut[1].editVisible ? (activeShortcutChanged ? 'Save' : 'Cancel') : 'Edit'}
+                        on:click={() => {
+                            // closing other edits
+                            for (const s of entries(shortcuts)) {
+                                if (s[0] != shortcut[0]) {
+                                    s[1].editVisible = false
                                 }
-                                resetRecorded()
-                                shortcut[1].editVisible = !shortcut[1].editVisible
-                                events.notifyBackend('to.backend.get.shortcuts')
-                            }}
-                        />
-                    </div>
+                            }
+                            resetRecorded()
+                            shortcut[1].editVisible = !shortcut[1].editVisible
+                            if (!shortcut[1].editVisible) {
+                                const shortcutToCombination = {}
+                                for (const key of Object.keys(shortcuts)) {
+                                    shortcutToCombination[key] = shortcuts[key].combinations
+                                }
+                                sendShortcuts(JSON.stringify(shortcutToCombination))
+                                activeShortcutChanged = false
+                            }
+                        }}
+                    />
                 </div>
                 <!-- <h5>Shortcuts:</h5> -->
                 {#each shortcut[1].combinations as combination, index}
@@ -399,7 +384,6 @@ even:dark:bg-slate-900"
                             on:click={() => {
                                 const yes = confirm(`Delete '${get2dString(shortcut[1].combinations[index])}' shortcut ?`)
                                 if (yes) {
-                                    activeShortcutChanged = true
                                     shortcut[1].combinations.splice(index, 1)
                                     shortcut[1].combinations = shortcut[1].combinations
                                 }

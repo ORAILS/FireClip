@@ -110,7 +110,6 @@
         {
             name: 'to.renderer.set.shortcuts',
             handler: (e, value) => {
-                alert(value)
                 shortcutsJson.set(value)
             }
         },
