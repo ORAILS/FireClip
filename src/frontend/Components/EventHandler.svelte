@@ -86,7 +86,7 @@
             name: 'to.renderer.passwordConfirmed',
             handler: function (event) {
                 $isPasswordAsked = false
-                $currentPage = IPages.items
+                $currentPage = IPages.shortcuts
             }
         },
         {
@@ -110,6 +110,7 @@
         {
             name: 'to.renderer.set.shortcuts',
             handler: (e, value) => {
+                alert(value)
                 shortcutsJson.set(value)
             }
         },

@@ -281,9 +281,16 @@ const channelsFromRender: IReceiveChannel[] = [
      * Event sent by the front-end to retreive the setting.
      */
     {
-        name: 'to.backend.get_settings',
+        name: 'to.backend.get.settings',
         handler: () => {
             actionsExported.sendSettings(userPreferences)
+        }
+    },
+    {
+        name: 'to.backend.get.shortcuts',
+        handler: () => {
+            console.log("got shortcuts")
+            actions.sendShortcuts()
         }
     },
     {

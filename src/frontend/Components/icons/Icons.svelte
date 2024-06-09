@@ -1,6 +1,7 @@
 <script lang="ts">
     import { createEventDispatcher } from 'svelte'
     import ArrowCircle from './paths/arrow-circle.svelte'
+    import Arrow from './paths/arrow.svelte'
     import Check from './paths/check.svelte'
     import Gear from './paths/gear.svelte'
     import Heart from './paths/heart.svelte'
@@ -19,7 +20,7 @@
     export let filled = false
     export let centered = true
 
-    export let icon: 'tint' | 'logo' | 'sync' | 'check' | 'up' | 'gear' | 'heart' | 'trash-bin' | 'arrow-circle' | undefined
+    export let icon: 'tint' | 'logo' | 'sync' | 'check' | 'up' | 'gear' | 'heart' | 'trash-bin' | 'arrow-circle' | 'arrow' | undefined
 
     function handleClick(event) {
         if (stopPropagation) {
@@ -64,6 +65,8 @@ stroke-gray-800 hover:cursor-pointer dark:stroke-gray-200
             <Tint />
         {:else if icon == 'arrow-circle'}
             <ArrowCircle />
+        {:else if icon == 'arrow'}
+            <Arrow />
         {:else}
             select an icon
         {/if}
