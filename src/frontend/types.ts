@@ -114,12 +114,6 @@ export function sortItemsByDate(a: [string, IClipboardItem], b: [string, IClipbo
     return new Date(b[1].modified).getTime() - new Date(a[1].modified).getTime()
 }
 
-export interface DbData {
-    items: string
-    maxIndex: number
-    isEncrypted: boolean
-}
-
 export interface IHookMouseEvent {
     button: number
     clicks: number

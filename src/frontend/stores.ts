@@ -33,3 +33,5 @@ export const searchOnlyImages: Writable<boolean> = writable(false)
 export const shortcutsJson: Writable<string> = writable('')
 
 export const loginPageMessage: Writable<string> = writable("")
+
+export const backendLogs: Writable<string[]> = writable([])

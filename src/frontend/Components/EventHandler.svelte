@@ -1,7 +1,9 @@
 <script lang="ts">
+    import { get } from 'svelte/store'
     import { arrayToArrayMap, getKeyName, ioHook, itemMatchesText, sort } from '../KeyboardEventUtil'
     import { ipcRenderer } from '../events'
     import {
+    backendLogs,
         clipList,
         clipListFiltered,
         currentPage,
@@ -115,6 +117,19 @@
         },
         {
             name: 'to.renderer.alert',
+            handler: (e, value) => {
+                alert(value);
+                const logs = get(backendLogs)
+                if(logs.length > 1000)
+                {
+                    logs.pop()
+                }
+                logs.unshift(value)
+                backendLogs.set(logs)
+            }
+        },
+        {
+            name: 'to.renderer.alertWindow',
             handler: (e, value) => {
                 alert(value)
             }

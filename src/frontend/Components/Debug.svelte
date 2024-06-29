@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { currentPage, pressedKeys } from '../stores'
+    import { backendLogs, currentPage, pressedKeys } from '../stores'
     import { IPages } from '../types'
     import MenuItem from './MenuItem.svelte'
 </script>
@@ -20,10 +20,22 @@ dark:text-gray-200
 even:dark:border-gray-800 
 even:dark:bg-slate-900"
 >
-    <h1>Pressed keys</h1>
-    {#each $pressedKeys as key}
-        <p>
-            {key}
-        </p>
-    {/each}
+    <div class="flex flex-row justify-between">
+        <div class="flex flex-col">
+            <p>Pressed keys</p>
+            {#each $pressedKeys as key}
+                <p>
+                    {key}
+                </p>
+            {/each}
+        </div>
+        <div class="flex flex-col">
+            <p>logs</p>
+            {#each $backendLogs as log}
+                <p>
+                    {log}
+                </p>
+            {/each}
+        </div>
+    </div>
 </div>
