@@ -1,15 +1,33 @@
 <script lang="ts">
-    import { getTitle, ipcRenderer } from '../KeyboardEventUtil'
+    import { getTitle } from '../KeyboardEventUtil'
+    import { events, eventsToBackend } from '../events'
     import { clipListFiltered, currentScrollIndex, selectedClipId, userPreferences } from '../stores'
-    import type { IClipboardItem } from '../types'
-    import { isImageContent, isRTFContent, isTextContent } from '../types'
+    import type { IClipboardItemFrontend } from '../types'
+    import { isImageContent, isTextContent } from '../types'
     import viewport from '../viewPortAction'
+    import ItemInfo from './ItemInfo.svelte'
     import IconCommand from './icons/_IconCommand.svelte'
 
     let visibleHashes: string[] = []
 
-    function handleClick(item: IClipboardItem) {
-        ipcRenderer.send('paste', item.contentHash)
+    let lastFire = ''
+    let resetFire: NodeJS.Timeout | undefined
+    function loadMoreItemsBefore(hash: string) {
+        if (lastFire != hash) {
+            lastFire = hash
+            events.notifyBackend(eventsToBackend.itemsLoadBeforeHash, hash)
+            // console.log('loading items')
+            if (resetFire != undefined) {
+                clearTimeout(resetFire)
+            }
+            resetFire = setTimeout(() => {
+                lastFire = ''
+            }, 5000)
+        }
+    }
+
+    function handleClick(item: IClipboardItemFrontend) {
+        events.notifyBackend(eventsToBackend.pasteHash, item.hash)
         $currentScrollIndex = -1
         $selectedClipId = ''
     }
@@ -21,11 +39,15 @@
         }
     })
 
-    const handleEnter = (hash: string, content: string) => {
+    const handleEnter = (hash: string) => {
         visibleHashes.push(hash)
         visibleHashes = visibleHashes
+        if (visibleHashes.includes($clipListFiltered[$clipListFiltered.length - 6][1].hash)) {
+            loadMoreItemsBefore($clipListFiltered[$clipListFiltered.length - 1][1].hash)
+            // console.log('5th at the end is visible')
+        }
     }
-    const handleExit = (hash: string, content: string) => {
+    const handleExit = (hash: string) => {
         const newArr = visibleHashes.filter((i) => i != hash)
         if (newArr.length < 2) {
             return
@@ -42,19 +64,19 @@
     }
 </script>
 
-<div class="nosbar flex flex-col">
+<div class="nosbar flex flex-col pb-8 pt-1">
     {#if $clipListFiltered}
         {#each $clipListFiltered as [key, item]}
-            {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1)) || visibleHashes.includes(getPreviousHash(key, -2)) || visibleHashes.includes(getPreviousHash(key, 2))}
+            {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1)) || visibleHashes.includes(getPreviousHash(key, -2)) || visibleHashes.includes(getPreviousHash(key, 2)) || visibleHashes.includes(getPreviousHash(key, -3)) || visibleHashes.includes(getPreviousHash(key, 3))}
                 <item
                     use:viewport
-                    on:enterViewport={() => handleEnter(key, item.content)}
-                    on:exitViewport={() => handleExit(key, item.content)}
+                    on:enterViewport={() => handleEnter(key)}
+                    on:exitViewport={() => handleExit(key)}
                     title={getTitle(item)}
-                    class="clipboard-item border-slate-800 {$selectedClipId === item.contentHash
-                        ? 'bg-gray-300 even:bg-gray-300 dark:bg-slate-700 even:dark:bg-slate-700'
+                    class="clipboard-item border-slate-800 {$selectedClipId === item.hash
+                        ? 'bg-gray-300 even:bg-gray-300 hover:bg-gray-100 dark:bg-slate-700 even:dark:bg-slate-700 dark:hover:bg-slate-500'
                         : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-700'} dark:text-gray-100 dark:even:border-y"
-                    id={item.contentHash}
+                    id={item.hash}
                     on:click|preventDefault={() => handleClick(item)}
                 >
                     <div class="flex">
@@ -65,13 +87,16 @@
                                 <IconCommand number={0} />
                             {/if}
                         {/if}
-                        {#if isTextContent(item)}
-                            <p>{item.content}</p>
-                        {:else if isRTFContent(item)}
-                            <p>{item.content}</p>
-                        {:else if isImageContent(item)}
-                            <img src={item.content} alt="Base64png" />
-                        {/if}
+                        <div class="my-auto h-full w-full overflow-hidden py-2">
+                            {#if isTextContent(item)}
+                                <p>{item.content}</p>
+                            {:else if isImageContent(item)}
+                                <img src={item.content} alt="Base64png" />
+                                <!-- TODO RTF CONTENT -->
+                            {/if}
+                        </div>
+
+                        <ItemInfo {item} extraClassDiv="justify-self-end" />
                     </div>
                 </item>
             {/if}
@@ -83,7 +108,7 @@
 
 <style lang="postcss">
     .clipboard-item {
-        @apply mx-0 my-auto cursor-pointer overflow-hidden text-clip whitespace-nowrap py-2 pl-2 text-left;
+        @apply cursor-pointer overflow-hidden text-clip whitespace-nowrap p-1 pl-2 text-left;
         /* border-bottom: 0.3px solid lightgray; */
         line-height: 15px;
     }

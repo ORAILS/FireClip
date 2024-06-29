@@ -1,11 +1,15 @@
 <script lang="ts">
     import { DateTime } from 'luxon'
-    import { delay, ipcRenderer } from '../KeyboardEventUtil'
+    import { delay } from '../KeyboardEventUtil'
     import { sendShortcuts } from '../backendActions'
+    import { events, eventsToBackend } from '../events'
     import { currentPage, isAppHidden, isFocused, pressedKeysSizeLimit, shortcutsJson, userPreferences } from '../stores'
     import { IPages, type IShortCut } from '../types'
     import { clipListFiltered, currentScrollIndex, pressedKeys, selectedClipId } from './../stores'
     import Button from './Button.svelte'
+    import MenuItem from './MenuItem.svelte'
+    import ShortcutButtons from './ShortcutButtons.svelte'
+    import ShortcutButtons2d from './ShortcutButtons2d.svelte'
     import Switch from './Switch.svelte'
 
     interface IExecutedShortcut {
@@ -72,9 +76,10 @@
         paste9: IShortCut
         paste10: IShortCut
     }
-    const shortcutSimpleName = 'simple'
-    const shortcutSequenceName = 'sequence'
+    const shortcutSimpleName = 'combination'
+    const shortcutSequenceName = `chain of ${shortcutSimpleName}s`
 
+    let activeShortcutChanged = false
     // when shortcuts are received from the backend.
     shortcutsJson.subscribe((v) => {
         if (!v || v.length === 0) return
@@ -96,7 +101,7 @@
                 if ($currentPage != IPages.items) {
                     return
                 }
-                ipcRenderer.send('unhide', true)
+                events.notifyBackend(eventsToBackend.windowUnhide)
                 if (
                     $clipListFiltered &&
                     $currentScrollIndex + 1 < $clipListFiltered.length &&
@@ -118,7 +123,7 @@
                 if ($currentPage != IPages.items) {
                     return
                 }
-                ipcRenderer.send('paste', $selectedClipId)
+                events.notifyBackend(eventsToBackend.pasteHash, $selectedClipId)
                 $currentScrollIndex = -1
                 $selectedClipId = ''
             },
@@ -133,7 +138,7 @@
                     return
                 }
                 if (!$isAppHidden) {
-                    ipcRenderer.send('focus', true)
+                    events.notifyBackend(eventsToBackend.windowFocus)
                     await delay(100)
                     isFocused.set($isFocused + 1)
                 }
@@ -145,7 +150,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '1']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[0][1].contentHash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[0][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -155,7 +160,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '2']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[1][1].contentHash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[1][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -164,7 +169,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '3']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[2][1].contentHash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[2][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -174,7 +179,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '4']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[3][1].contentHash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[3][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -184,7 +189,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '5']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[4][1].contentHash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[4][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -194,7 +199,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '6']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[5][1].contentHash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[5][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -204,7 +209,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '7']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[6][1].contentHash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[6][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -214,7 +219,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '8']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[7][1].contentHash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[7][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -224,7 +229,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '9']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[8][1].contentHash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[8][1].hash)
             },
             combinationChangeHandler: () => {}
         },
@@ -234,7 +239,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '0']]],
             handler: async () => {
-                ipcRenderer.send('paste', $clipListFiltered[9][1].contentHash)
+                events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[9][1].hash)
             },
             combinationChangeHandler: () => {}
         }
@@ -319,6 +324,19 @@
 </script>
 
 {#if $currentPage === IPages.shortcuts}
+    <MenuItem>
+        <p class="text-xl">Shortcuts</p></MenuItem
+    >
+    <MenuItem>
+        <p
+            class="text-xl"
+            on:click={() => {
+                currentPage.set(IPages.settings)
+            }}
+        >
+            &lt; Back to settings
+        </p></MenuItem
+    >
     {#each entries(shortcuts) as shortcut}
         <div
             class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
@@ -326,36 +344,40 @@ dark:text-gray-200
 even:dark:border-gray-800 
 even:dark:bg-slate-900"
         >
-            <div class=" my-6 flex flex-col">
+            <div class="my-2 flex flex-col">
                 <div class="flex flex-row justify-between">
                     <h4>
                         {getNameFromKey(shortcut[0])}
                     </h4>
                     <Button
-                        label={shortcut[1].editVisible ? 'Save' : 'Edit'}
+                        label={shortcut[1].editVisible ? (activeShortcutChanged ? 'Save' : 'Cancel') : 'Edit'}
                         on:click={() => {
-                            resetRecorded()
-                            shortcut[1].editVisible = !shortcut[1].editVisible
-                            if (!shortcut[1].editVisible) {
-                                const some = {}
-                                for (const key of Object.keys(shortcuts)) {
-                                    some[key] = shortcuts[key].combinations
-                                }
-                                sendShortcuts(JSON.stringify(some))
-                            }
                             // closing other edits
                             for (const s of entries(shortcuts)) {
                                 if (s[0] != shortcut[0]) {
                                     s[1].editVisible = false
                                 }
                             }
+                            resetRecorded()
+                            shortcut[1].editVisible = !shortcut[1].editVisible
+                            if (!shortcut[1].editVisible) {
+                                const shortcutToCombination = {}
+                                for (const key of Object.keys(shortcuts)) {
+                                    shortcutToCombination[key] = shortcuts[key].combinations
+                                }
+                                sendShortcuts(JSON.stringify(shortcutToCombination))
+                                activeShortcutChanged = false
+                            }
                         }}
                     />
                 </div>
-                <h5>Shortcuts:</h5>
+                <!-- <h5>Shortcuts:</h5> -->
                 {#each shortcut[1].combinations as combination, index}
                     <div class="flex flex-row justify-between">
-                        <p>{get2dString(combination)}</p>
+                        <div class="flex flex-row">
+                            <p>{index + 1}.</p>
+                            <ShortcutButtons2d data={combination} />
+                        </div>
                         <Button
                             label="Delete"
                             visible={shortcut[1].editVisible}
@@ -373,8 +395,8 @@ even:dark:bg-slate-900"
                     <div class="div my-2">
                         <Switch
                             type="select"
-                            label="Type"
-                            title="If set to '{shortcutSimpleName}' a key combination will be recorded and can be used to trigger the action. If '{shortcutSequenceName}' is selected, the exact sequence of the buttons needs to be pressed for the shortcut to trigger."
+                            label="New shortcut kind"
+                            title="If set to '{shortcutSimpleName}' a key combination will be recorded and can be used to trigger the action. \n If '{shortcutSequenceName}' is selected, the exact sequence of the buttons needs to be pressed for the shortcut to trigger."
                             fontSize={12}
                             selectOptions={[shortcutSimpleName, shortcutSequenceName]}
                             bind:value={type}
@@ -383,34 +405,26 @@ even:dark:bg-slate-900"
                             }}
                         />
                     </div>
-                    <h3>
-                        {#if type === shortcutSimpleName}
-                            Recorded combination:
-                            <!-- content here -->
-                            {JSON.stringify(simplestShortcut)}
-                        {:else}
-                            Recorded sequence:
-                            <!-- else content here -->
-                            {#each recordedSequence as recordedCombination, index}
-                                <div class="flex flex-row justify-between">
-                                    <p>{get1dString(recordedCombination)}</p>
-                                    {#if recordedSequence.length > 1}
-                                        <Button
-                                            label="Delete"
-                                            on:click={() => {
-                                                recordedSequence.splice(index, 1)
-                                                recordedSequence = recordedSequence
-                                            }}
-                                        />
-                                    {/if}
-                                </div>
-                            {/each}
-                        {/if}
-                    </h3>
+                    {#if type === shortcutSimpleName}
+                        <!-- content here -->
+                        <div class="flex flex-row items-center ">
+                            <p class="mr-2">Recorded combination</p>
+                            <ShortcutButtons data={simplestShortcut} />
+                        </div>
+                    {:else}
+                        <div class="mb-6">Recorded sequence</div>
+                        <ShortcutButtons2d
+                            rootFlex="col"
+                            childFlex="col"
+                            svgExtraClass="stroke-2 rotate-180"
+                            showDelete={true}
+                            data={recordedSequence}
+                        />
+                    {/if}
                     <Button extraClasses="mt-4" label="Reset recorded" on:click={resetRecorded} />
                 {/if}
                 <Button
-                    label="Add"
+                    label="Add recorded shortcut"
                     visible={shortcut[1].editVisible}
                     on:click={() => {
                         if (simplestShortcut.length === 0) {
@@ -432,6 +446,7 @@ even:dark:bg-slate-900"
                             }
                             shortcut[1].combinations.push(recordedSequence)
                         }
+                        activeShortcutChanged = true
                         shortcut[1].combinations = shortcut[1].combinations
                         resetRecorded()
                     }}

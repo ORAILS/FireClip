@@ -1,5 +1,3 @@
-import { IpcMainEvent } from 'electron/main'
-
 interface AppSettings {
     name: string
     openDevTools: boolean
@@ -24,7 +22,7 @@ export const AppSettings: AppSettings = {
     enableDevTools: false,
     enablePaste: true,
     widthNormal: 600,
-    heightNormal: 400,
+    heightNormal: 750,
     widthWithDevTools: 900,
     heightWithDevTools: 800,
     isLinux: contains(linuxPlatform, process.platform),
@@ -42,14 +40,4 @@ export const WindowSettings = {
 
 function contains(array: string[], item: string) {
     return array.find((i) => i === item) != undefined
-}
-
-export interface INetworkSettings {
-    authServerUrl: string
-    dataServerUrl: string
-}
-
-export const NetworkSettings: INetworkSettings = {
-    authServerUrl: 'http://localhost:3006',
-    dataServerUrl: 'http://localhost:3007'
 }

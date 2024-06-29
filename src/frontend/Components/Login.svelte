@@ -1,55 +1,98 @@
 <script lang="ts">
     import { onMount } from 'svelte'
-    import { ipcRenderer } from '../KeyboardEventUtil'
-    import { appName, isPasswordIncorrect, passwordButtonText, showPassword } from '../stores'
+    import { events, eventsToBackend } from '../events'
+    import { appName, isPasswordIncorrect, loginPageMessage, passwordButtonText, showPassword } from '../stores'
+    import Icons from './icons/Icons.svelte'
 
     function togglePasswordInput() {
         $passwordButtonText === 'show' ? ($passwordButtonText = 'hide') : ($passwordButtonText = 'show')
         $showPassword === true ? ($showPassword = false) : ($showPassword = true)
     }
-    let userPassword = 'password'
+    let username: string = ''
+    let userPassword: string = ''
+    let userPasswordConfirm: string = ''
 
-    onMount(async () => {
-        ipcRenderer.send('RendererInit', true)
-        setTimeout(() => {
-            ipcRenderer.send('loginUser', {
-                name: 'me',
-                email: 'email',
-                password: userPassword
-            })
-        }, 400)
+    let userIsRegistering = false
+
+    let loginMessage = 'Have an account? Login'
+    let registerMessage = 'New here? Register!'
+
+    function showConfirmWindow() {
+        userIsRegistering = !userIsRegistering
+        updateMessage()
+    }
+    let buttonText = 'LOGIN'
+    function updateMessage() {
+        if (userIsRegistering) {
+            buttonText = 'REGISTER'
+            loginPageMessage.set(loginMessage)
+        } else {
+            buttonText = 'LOGIN'
+            loginPageMessage.set(registerMessage)
+        }
+    }
+    onMount(() => {
+
     })
+    loginPageMessage.set(registerMessage)
 
     export const validatePassword = (pass: string, isRegisterPass = false): boolean => {
-        if (!pass || pass.length < 0) {
+        if (username.length < 3) {
+            loginPageMessage.set('username should be at least 3 characters long')
             return false
         }
-        if (!isRegisterPass) return true
+        if (!pass || pass.length < 5) {
+            loginPageMessage.set('password should be at least 5 characters long')
+            return false
+        }
+        // if (!isRegisterPass) return true
         // TODO -> add validation for register password
-        return false
+        return true
+    }
+
+    function passwordsMatch() {
+        if (userPassword != userPasswordConfirm) {
+            loginPageMessage.set("Passwords don't match!")
+        }
+        return userPasswordConfirm === userPassword
     }
 
     function resetPasswordCorrect() {
+        // loginPageMessage.set('')
         $isPasswordIncorrect = false
     }
     const onKeyEnter = async (e: KeyboardEvent) => {
         if (e.key == 'Enter') {
-            sendLoginRequest()
+            sendRequest()
         }
     }
     const onOkay = (e: Event) => {
-        sendLoginRequest()
+        sendRequest()
     }
-    const sendLoginRequest = () => {
-        if (validatePassword(userPassword)) {
-            // TODO remove when we have the server working.
-            ipcRenderer.send('loginUser', {
-                name: 'me',
-                email: 'email',
-                password: userPassword
-            })
+    const sendRequest = () => {
+        if (!validatePassword(userPassword)) {
+            return
         }
+        if (userIsRegistering && !passwordsMatch()) {
+            return
+        }
+
+        // TODO remove when we have the server working.
+        if (userIsRegistering) {
+            events.notifyBackend(eventsToBackend.userRegister, { name: username, password: userPassword })
+        } else {
+            events.notifyBackend(eventsToBackend.userLogin, { name: username, password: userPassword })
+        }
+        buttonText = "Loading..."
+        console.log('login request sent!')
     }
+    isPasswordIncorrect.subscribe((value) => {
+        if (value) {
+            buttonText = 'Password incorrect!'
+        } else {
+            updateMessage()
+        }
+    })
 </script>
 
 <div class="container mx-auto flex justify-center">
@@ -57,53 +100,87 @@
         class="absolute inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50 text-slate-900 dark:bg-slate-900 dark:text-gray-100"
     >
         <div class="max-w-sm bg-white p-6 dark:bg-rock">
-            <div class="">
-                <h3 class="text-center text-2xl">
-                    {$appName} is locked
-                </h3>
+            <div class="flex h-12 flex-row items-center justify-center">
+                <Icons icon="logo" centered={false} size="12" />
+                <h1 class="pl-1 text-2xl">
+                    {$appName}
+                </h1>
             </div>
             <div class="mt-2">
-                <p class="text-center text-sm">Use password to decrypt data</p>
-                <div class="relative my-3 w-full ">
-                    <div class="absolute inset-y-0 right-0 flex items-center px-2">
-                        <input class="js-$password-toggle hidden" id="toggle" type="checkbox" />
-                        <label
-                            on:click={togglePasswordInput}
-                            class="js-$password-label cursor-pointer bg-gray-300 px-2 py-1 font-mono text-sm text-gray-600 hover:bg-gray-400 dark:bg-slate-900 dark:text-gray-200 hover:dark:bg-slate-800"
-                            for="toggle">{$passwordButtonText}</label
-                        >
-                    </div>
-                    {#if $showPassword}
+                <p class="text-center text-sm">Login or Register</p>
+                <div class="inputs">
+                    <div class="relative my-3 w-full ">
                         <input
-                            bind:value={userPassword}
+                            bind:value={username}
                             on:input={resetPasswordCorrect}
-                            on:keypress={onKeyEnter}
                             class="border-1 w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono  leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 focus:outline-none  dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-gray-800"
                             type="text"
                             autocomplete="off"
+                            placeholder="username"
                         />
-                    {:else}
-                        <input
-                            bind:value={userPassword}
-                            on:input={resetPasswordCorrect}
-                            on:keypress={onKeyEnter}
-                            class="border-1 dark:focus:bg-gray-800focus:outline-none w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-slate-700"
-                            type="password"
-                            autocomplete="off"
-                        />
-                    {/if}
+                    </div>
+                    <div class="relative my-3 w-full ">
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2">
+                            <input class="js-$password-toggle hidden" id="toggle" type="checkbox" />
+                            <label
+                                on:click={togglePasswordInput}
+                                class="js-$password-label cursor-pointer bg-gray-300 px-2 py-1 font-mono text-sm text-gray-600 hover:bg-gray-400 dark:bg-slate-900 dark:text-gray-200 hover:dark:bg-slate-800"
+                                for="toggle">{$passwordButtonText}</label
+                            >
+                        </div>
+                        {#if $showPassword}
+                            <input
+                                bind:value={userPassword}
+                                on:input={resetPasswordCorrect}
+                                on:keypress={onKeyEnter}
+                                class="border-1 w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono  leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 focus:outline-none  dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-gray-800"
+                                type="text"
+                                placeholder="password"
+                                autocomplete="off"
+                            />
+                        {:else}
+                            <input
+                                bind:value={userPassword}
+                                on:input={resetPasswordCorrect}
+                                on:keypress={onKeyEnter}
+                                class="border-1 dark:focus:bg-gray-800focus:outline-none w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-slate-700"
+                                type="password"
+                                placeholder="password"
+                                autocomplete="off"
+                            />
+                        {/if}
+                    </div>
+                    <div class="relative {userIsRegistering ? '' : 'hidden'} my-3 w-full ">
+                        {#if $showPassword}
+                            <input
+                                bind:value={userPasswordConfirm}
+                                on:input={resetPasswordCorrect}
+                                on:keypress={onKeyEnter}
+                                class="border-1 w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono  leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 focus:outline-none  dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-gray-800"
+                                type="text"
+                                placeholder="password confirmation"
+                                autocomplete="off"
+                            />
+                        {:else}
+                            <input
+                                bind:value={userPasswordConfirm}
+                                on:input={resetPasswordCorrect}
+                                on:keypress={onKeyEnter}
+                                class="border-1 dark:focus:bg-gray-800focus:outline-none w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-slate-700"
+                                type="password"
+                                placeholder="password confirmation"
+                                autocomplete="off"
+                            />
+                        {/if}
+                    </div>
                 </div>
-                {#if $isPasswordIncorrect}
-                    <button
-                        class="border-red-500 text-red-700 hover:bg-red-500 dark:hover:bg-red-600 dark:focus:ring-red-800 mr-2 mt-2 w-full border px-5  py-2.5 text-center text-sm font-medium hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white"
-                        on:click={onOkay}>Password incorrect!</button
-                    >
-                {:else}
-                    <button
-                        class="mr-2 mt-2 w-full border border-gray-400 px-5 py-2.5 text-center text-sm font-medium  text-gray-700 hover:bg-gray-400 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-slate-400 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-gray-800"
-                        on:click={onOkay}>Unlock</button
-                    >
-                {/if}
+                <p class="my-2 text-center" on:click={showConfirmWindow}>
+                    {$loginPageMessage}
+                </p>
+                <button
+                    class="mr-2 mt-2 w-full border border-gray-400 px-5 py-2.5 text-center text-sm font-medium  text-gray-700 hover:bg-gray-400 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-slate-400 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-gray-800"
+                    on:click={onOkay}>{buttonText}</button
+                >
             </div>
         </div>
     </div>

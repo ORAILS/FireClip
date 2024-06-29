@@ -1,6 +1,6 @@
 <script lang="ts">
-    import Login from './Components/Login.svelte'
     import Clips from './Components/Clips.svelte'
+    import Login from './Components/Login.svelte'
     import Notifications from './Components/Notifications.svelte'
     import PageHandler from './Components/PageHandler.svelte'
     import Settings from './Components/Settings.svelte'
@@ -8,11 +8,12 @@
     import './www/tailwind.pcss'
 
     import EventHandler from './Components/EventHandler.svelte'
+    import Info from './Components/Info.svelte'
+    import Search from './Components/Search.svelte'
+    import ShortcutsHandler from './Components/ShortcutsHandler.svelte'
     import { currentPage } from './stores'
     import { IPages } from './types'
-    import Shortcuts from './Components/Shortcuts.svelte'
-    import Info from './Components/Info.svelte'
-    import ShortcutsHandler from './Components/ShortcutsHandler.svelte'
+    import Debug from './Components/Debug.svelte'
 </script>
 
 <svelte:head>
@@ -21,7 +22,7 @@
 
 <EventHandler />
 <PageHandler title={$appName}>
-    <section class="h-full space-y-6">
+    <section class="h-full">
         {#if $currentPage === IPages.login}
             <Login />
         {:else if $currentPage === IPages.items}
@@ -32,6 +33,10 @@
             <Notifications />
         {:else if $currentPage === IPages.info}
             <Info />
+        {:else if $currentPage === IPages.search}
+            <Search />
+        {:else if $currentPage === IPages.debug}
+            <Debug />
         {/if}
         <ShortcutsHandler />
     </section>

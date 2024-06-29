@@ -3,12 +3,12 @@ import { autoUpdater } from 'electron-updater'
 import path from 'path'
 import { AppSettings } from './App/AppSettings'
 import CustomWindow from './App/CustomWindow'
-import { ioHookHandler } from './App/EventHandler'
+import { channelsToRender, ioHookHandler } from './App/EventHandler'
 import { userPreferences } from './App/UserPreferences'
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require('electron-reload')('./src/**')
+
 
 let mainWindow: CustomWindow
+let appIcon: Tray
 
 app.on('ready', async () => {
     await createMainWindow()
@@ -19,10 +19,10 @@ app.on('ready', async () => {
         autoUpdater.checkForUpdatesAndNotify()
     }, 5 * 60 * 1000)
 
-    const iconPath = path.join(__dirname, 'www', 'icon16.png')
+    const iconPath = path.join(__dirname, 'www', 'icons/png/32x32.png')
     const icon = nativeImage.createFromPath(iconPath)
 
-    const appIcon = new Tray(icon)
+    appIcon = new Tray(icon)
 
     const contextMenu = Menu.buildFromTemplate([
         {
@@ -39,7 +39,16 @@ app.on('ready', async () => {
             click: () => {
                 appIcon
                 mainWindow.window.show()
-                mainWindow.window.webContents.send('to.renderer.open.window', 'settings')
+                mainWindow.window.webContents.send(channelsToRender.openWindow, 'settings')
+            }
+        },
+        {
+            label: 'Shortcuts',
+            toolTip: 'Open shortcuts in settings',
+            click: () => {
+                appIcon
+                mainWindow.window.show()
+                mainWindow.window.webContents.send(channelsToRender.openWindow, 'shortcuts')
             }
         },
         {
@@ -60,38 +69,43 @@ app.on('ready', async () => {
     })
     appIcon.setToolTip(AppSettings.name)
 
-    AppSettings.openDevTools ? mainWindow.window.webContents.openDevTools() : null
-    app.dock.hide()
+    if (AppSettings.openDevTools) {
+        console.log("open dev tools!")
+        mainWindow.window.webContents.openDevTools()
+    }
+    if (AppSettings.isMac) {
+        app.dock.hide()
+    }
 })
 
 setInterval(() => {
-    mainWindow.window.webContents.send('log', `Ping each 30s from index.ts. Current version ${autoUpdater.currentVersion}`)
+    mainWindow.window.webContents.send(channelsToRender.log, `Ping each 30s from index.ts. Current version ${autoUpdater.currentVersion}`)
     // mainWindow.window.reload()
 }, 30000)
 
 autoUpdater.on('checking-for-update', () => {
-    mainWindow.window.webContents.send('log', 'Checking for update...')
+    mainWindow.window.webContents.send(channelsToRender.log, 'Checking for update...')
 })
 autoUpdater.on('update-available', (info) => {
-    mainWindow.window.webContents.send('log', 'Update available.')
+    mainWindow.window.webContents.send(channelsToRender.log, 'Update available.')
 })
 autoUpdater.on('update-not-available', (info) => {
-    mainWindow.window.webContents.send('log', 'Update not available.')
+    mainWindow.window.webContents.send(channelsToRender.log, 'Update not available.')
 })
 autoUpdater.on('error', (err) => {
-    mainWindow.window.webContents.send('log', 'Error in auto-updater. ' + err)
+    mainWindow.window.webContents.send(channelsToRender.log, 'Error in auto-updater. ' + err)
 })
 autoUpdater.on('download-progress', (progressObj) => {
     let log_message = 'Download speed: ' + progressObj.bytesPerSecond
     log_message = log_message + ' - Downloaded ' + progressObj.percent + '%'
     log_message = log_message + ' (' + progressObj.transferred + '/' + progressObj.total + ')'
-    mainWindow.window.webContents.send('log', log_message)
+    mainWindow.window.webContents.send(channelsToRender.log, log_message)
 })
 /**
  * If user agereed to auto update his application without notice ( for now ). If disabled, the app will update un manual restart.
  */
 autoUpdater.on('update-downloaded', (info) => {
-    mainWindow.window.webContents.send('log', 'Update downloaded, restarting in 5 sec')
+    mainWindow.window.webContents.send(channelsToRender.log, 'Update downloaded, restarting in 5 sec')
     if (userPreferences.autoRestartOnUpdateAvailable) {
         setTimeout(() => autoUpdater.quitAndInstall(), 5000)
     }
@@ -101,13 +115,30 @@ app.on('window-all-closed', () => {
     app.quit()
 })
 
-app.on('ready', () => {
+
+if (AppSettings.isLinux) {
+    app.commandLine.appendSwitch('disable-gpu-sandbox');
+}
+
+if (AppSettings.enableDevTools && AppSettings.isLinux) {
+    const port = '8315'
+    console.log(`starting debugging on port: ${port}`)
+    app.commandLine.appendSwitch('remote-debugging-port', port);
+    app.commandLine.appendSwitch('host-rules', 'MAP * 127.0.0.1');
+}
+
+function stopProcessReuse() {
     console.log('no more reuse!')
     app.allowRendererProcessReuse = false
+}
+
+app.on('ready', () => {
+    stopProcessReuse()
 })
 async function createMainWindow() {
     mainWindow = new CustomWindow()
     const urlPage = path.join(__dirname, 'www', 'index.html')
+    stopProcessReuse()
     mainWindow.createWindow(urlPage)
     ioHookHandler.InitIOHook(ipcMain, clipboard, mainWindow.window)
 }

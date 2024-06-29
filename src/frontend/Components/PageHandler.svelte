@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { ipcRenderer } from '../KeyboardEventUtil'
+    import { events, eventsToBackend } from '../events'
     import { userPreferences } from '../stores'
     import SearchBar from './SearchBar.svelte'
     import TitleBar from './TitleBar.svelte'
@@ -27,27 +27,18 @@
     })
 
     function minimize() {
-        ipcRenderer.send('window_minimize', true)
-    }
-    function maximize() {
-        globalThis.api.windowControls.send('maximize', null)
-    }
-    function close() {
-        ipcRenderer.send('window_close', true)
-    }
-    function unmaximize() {
-        globalThis.api.windowControls.send('unmaximize', null)
+        events.notifyBackend(eventsToBackend.windowMinimize)
     }
 </script>
 
 <svelte:window bind:outerWidth={outerW} />
 
-<main class={appClasses}>
-    <TitleBar {title} on:clickMinimize={minimize} on:clickUnmaximize={unmaximize} on:clickMaximize={maximize} on:clickClose={close} />
+<main class="flex flex-col {appClasses}">
+    <TitleBar {title} on:clickMinimize={minimize} />
     <div class="nosbar page bg-white dark:bg-rock">
         <slot />
     </div>
-    <SearchBar />
+    <SearchBar height={10} />
 </main>
 
 <style lang="postcss">
@@ -55,8 +46,7 @@
         @apply w-full;
     }
     .page {
-        @apply w-full overflow-y-auto p-0;
-        height: calc(100% - theme('spacing.8') - theme('spacing.10'));
+        @apply h-full w-full overflow-y-auto p-0;
     }
 
     .page::-webkit-scrollbar {

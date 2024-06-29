@@ -1,5 +1,5 @@
-import { ipcRenderer } from './KeyboardEventUtil'
+import { events, eventsToBackend } from "./events"
 
 export function sendShortcuts(serialized: string) {
-    ipcRenderer.send(`to.backend.set.shortcuts`, serialized)
+    events.notify(eventsToBackend.setShortcuts, serialized)
 }

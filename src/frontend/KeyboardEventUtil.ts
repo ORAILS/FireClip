@@ -1,7 +1,6 @@
 import type { IClipboardItem, IHookKeyboardEvent } from './types'
 import { isImageContent, isRTFContent, isTextContent } from './types'
 
-export const ipcRenderer = window.require('electron').ipcRenderer
 export const ioHook = window.require('iohook')
 export const { sort } = window.require('fast-sort')
 
@@ -10,12 +9,12 @@ export const delay = (delayInms: number) => {
 }
 
 export const getTitle = (item: IClipboardItem) => {
+    let returned = `Created at: ${getDateFormat(item.created)}\nUsed at:  ${getDateFormat(item.modified)}\nSize: ${Math.round(item.content.length / 1024 / 1024 * 100) / 100} MB\n\n`
     if (isTextContent(item))
-        return item.content + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.lastModified)
+        returned += item.content
     if (isImageContent(item))
-        return 'PNG Image' + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.lastModified)
-    if (isRTFContent(item))
-        return item.content + '\n\nCreated at: ' + getDateFormat(item.created) + '\nUsed at: ' + getDateFormat(item.lastModified)
+        returned += 'Base64 PNG Image'
+    return returned
 }
 
 /**

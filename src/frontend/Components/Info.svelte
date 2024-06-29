@@ -1,7 +1,23 @@
 <script>
-    import { version, name } from '../../../package.json'
+    import { name, version } from '../../../package.json'
+    import { currentPage } from '../stores'
+    import { IPages } from '../types'
+    import MenuItem from './MenuItem.svelte'
 </script>
 
-<div class="px-2 py-2 pl-3">
-    <p class="text-white">{name}-{version}</p>
+<div class="">
+    <MenuItem>
+        <p
+            class="my-auto text-xl"
+            on:click={() => {
+                currentPage.set(IPages.settings)
+            }}
+        >
+            &lt; Back to settings
+        </p>
+    </MenuItem>
+    <MenuItem>
+        <p class="">name : {name}</p>
+        <p class="">version : {version}</p>
+    </MenuItem>
 </div>

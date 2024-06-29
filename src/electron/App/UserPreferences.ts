@@ -3,7 +3,7 @@ import Store from 'electron-store'
 import { IpcMainEvent } from 'electron/main'
 import { JsUtil } from '../Utils/JsUtil'
 import { AppSettings } from './AppSettings'
-import { action, handleCleanUpParameterChange, messageFromRenderer } from './EventHandler'
+import { actionsExported, handleCleanUpParameterChange, messageFromRenderer } from './EventHandler'
 
 /**
  * User preference object, the property name is used as key for saving the preference
@@ -25,6 +25,10 @@ export interface IUserPreference<T> {
 export interface IUserPreferences {
     darkMode: IUserPreference<'system' | 'on' | 'off'>
     keyboardLayout: IUserPreference<'qwerty' | 'dvorak'>
+    authUrl: IUserPreference<string>
+    storeUrl: IUserPreference<string>
+    remoteSyncInterval: IUserPreference<number>
+    enableRemoteSync: IUserPreference<boolean>
     enableKeyboardShortcuts: IUserPreference<boolean>
     regiserCommandNumberShortcuts: IUserPreference<boolean>
     showCommandNumberIcons: IUserPreference<boolean>
@@ -48,7 +52,7 @@ const defaultHandler = async (e: IpcMainEvent, event: any) => {
     store.set(`${getPreferenceKey(event.key)}`, event.value)
     // so that the front end can also react to this change
     await JsUtil.waitforme(50)
-    action.sendSettings(userPreferences)
+    actionsExported.sendSettings(userPreferences)
 }
 
 /**
@@ -175,7 +179,56 @@ export const userPreferences: IUserPreferences = {
             defaultHandler(e, event)
             handleCleanUpParameterChange()
         }
-    }
+    },
+    authUrl: {
+        displayName: 'Auth server URL',
+        description: 'the server used for authentication',
+        value: "https://auth.dev.fireclip.net",
+        type: 'string',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userPreferences.authUrl.value = event.value
+            defaultHandler(e, event)
+            handleCleanUpParameterChange()
+        }
+    },
+    storeUrl: {
+        displayName: 'Store server URL',
+        description: 'server used for clips storage',
+        value: "https://clips.dev.fireclip.net",
+        type: 'string',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userPreferences.storeUrl.value = event.value
+            defaultHandler(e, event)
+            handleCleanUpParameterChange()
+        }
+    },
+    remoteSyncInterval: {
+        displayName: 'Interval in seconds to perform a remote sync',
+        description: 'Every time an amount of seconds equal to this value passes, the app will sync to the remote storage.',
+        value: 15,
+        type: 'number',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userPreferences.remoteSyncInterval.value = event.value
+            actionsExported.clearSyncInterval()
+            actionsExported.startRemoteSync(event.value * 1000)
+            defaultHandler(e, event)
+            handleCleanUpParameterChange()
+        }
+    },
+    enableRemoteSync: {
+        displayName: 'Enable remote sync',
+        description: 'If enabled, the items will be pushed to the "cloud" to sync on other devices',
+        value: true,
+        type: 'toggle',
+        selectableOptions: undefined,
+        changeHandler: (e, event) => {
+            userPreferences.enableRemoteSync.value = event.value
+            defaultHandler(e, event)
+        }
+    },
 }
 
 /**
@@ -233,6 +286,5 @@ export const InitUserSettings = async () => {
 
     // default triggering shortcut, always enabled (most likely also a user settings in the future)
     globalShortcut.register('CommandOrControl+`', () => {
-        // action.handleShortcut()
     })
 }
