@@ -1,8 +1,9 @@
 <script lang="ts">
     import { onMount } from 'svelte'
     import { events, eventsToBackend } from '../events'
-    import { appName, isPasswordIncorrect, loginPageMessage, passwordButtonText, showPassword } from '../stores'
+    import { appName, currentPage, isPasswordIncorrect, loginPageMessage, passwordButtonText, showPassword } from '../stores'
     import Icons from './icons/Icons.svelte'
+    import { IPages } from '../types'
 
     function togglePasswordInput() {
         $passwordButtonText === 'show' ? ($passwordButtonText = 'hide') : ($passwordButtonText = 'show')
@@ -12,10 +13,11 @@
     let userPassword: string = ''
     let userPasswordConfirm: string = ''
 
+    let code2fa = ""
     let userIsRegistering = false
 
-    let loginMessage = 'Have an account? Login'
-    let registerMessage = 'New here? Register!'
+    let loginMessage = 'Have an account? <b>Login</b>'
+    let registerMessage = 'New here? <b>Register!</b>'
 
     function showConfirmWindow() {
         userIsRegistering = !userIsRegistering
@@ -32,7 +34,7 @@
         }
     }
     onMount(() => {
-
+        usernameField.focus()
     })
     loginPageMessage.set(registerMessage)
 
@@ -81,7 +83,7 @@
         if (userIsRegistering) {
             events.notifyBackend(eventsToBackend.userRegister, { name: username, password: userPassword })
         } else {
-            events.notifyBackend(eventsToBackend.userLogin, { name: username, password: userPassword })
+            events.notifyBackend(eventsToBackend.userLogin, { name: username, password: userPassword, code: code2fa })
         }
         buttonText = "Loading..."
         console.log('login request sent!')
@@ -93,6 +95,7 @@
             updateMessage()
         }
     })
+    let usernameField: HTMLElement
 </script>
 
 <div class="container mx-auto flex justify-center">
@@ -101,7 +104,7 @@
     >
         <div class="max-w-sm bg-white p-6 dark:bg-rock">
             <div class="flex h-12 flex-row items-center justify-center">
-                <Icons icon="logo" centered={false} size="12" />
+                <Icons icon="logo" centered={false} size="12" on:click={()=>{currentPage.set(IPages.settings)}}/>
                 <h1 class="pl-1 text-2xl">
                     {$appName}
                 </h1>
@@ -111,6 +114,7 @@
                 <div class="inputs">
                     <div class="relative my-3 w-full ">
                         <input
+                            bind:this={usernameField}
                             bind:value={username}
                             on:input={resetPasswordCorrect}
                             class="border-1 w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono  leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 focus:outline-none  dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-gray-800"
@@ -173,9 +177,19 @@
                             />
                         {/if}
                     </div>
+                    <div class="relative {userIsRegistering ? 'hidden' : ''} my-3 w-full ">
+                        <input
+                                bind:value={code2fa}
+                                on:keypress={onKeyEnter}
+                                class="border-1 w-full appearance-none border-gray-300 bg-gray-100 px-3 py-3 pr-16 font-mono  leading-tight text-gray-700 focus:border-gray-500 focus:bg-gray-200 focus:outline-none  dark:bg-slate-800 dark:text-gray-200 dark:focus:bg-gray-800"
+                                type="text"
+                                placeholder="2fa code"
+                                autocomplete="off"
+                            />
+                    </div>
                 </div>
                 <p class="my-2 text-center" on:click={showConfirmWindow}>
-                    {$loginPageMessage}
+                    {@html $loginPageMessage}
                 </p>
                 <button
                     class="mr-2 mt-2 w-full border border-gray-400 px-5 py-2.5 text-center text-sm font-medium  text-gray-700 hover:bg-gray-400 hover:text-white focus:outline-none focus:ring-4 focus:ring-gray-300 dark:border-slate-400 dark:text-slate-200 dark:hover:bg-slate-700 dark:hover:text-white dark:focus:ring-gray-800"

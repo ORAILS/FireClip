@@ -71,7 +71,9 @@ app.on('ready', async () => {
 
     if (AppSettings.openDevTools) {
         console.log("open dev tools!")
-        mainWindow.window.webContents.openDevTools()
+        setTimeout(() => {
+            mainWindow.window.webContents.openDevTools({ mode: "detach" })
+        }, 1000)
     }
     if (AppSettings.isMac) {
         app.dock.hide()
@@ -122,7 +124,7 @@ if (AppSettings.isLinux) {
 
 if (AppSettings.enableDevTools && AppSettings.isLinux) {
     const port = '8315'
-    console.log(`starting debugging on port: ${port}`)
+    console.log(`starting debugging on port: ${port}. Open http://localhost:${port}`)
     app.commandLine.appendSwitch('remote-debugging-port', port);
     app.commandLine.appendSwitch('host-rules', 'MAP * 127.0.0.1');
 }

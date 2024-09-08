@@ -91,7 +91,7 @@ let oldestPull = DateTime.now()
 async function loadItemsBeforeDate(date: DateTime, limit: number, masterKey: string): Promise<boolean> {
     const res = await RequestService.clips.getNBefore(date, limit)
     if (!res.ok || !res.data) {
-        actionsExported.alertFrontend(messages().generic.fail + `.\nFetch of items before ${date.toISO()}, limit ${limit}`)
+        actionsExported.logFrontend(messages().generic.fail + `.\nFetch of items before ${date.toISO()}, limit ${limit}`)
         return false
     }
     let needsLoading = false
@@ -150,7 +150,7 @@ export const ItemRepo = {
         console.log("syncing")
         const res = await RequestService.clips.getSince(oldestPull)
         if (!res.ok || !res.data) {
-            actionsExported.alertFrontend(messages().generic.fail + `.\nFetch of items since ${oldestPull.toISO()}.`)
+            actionsExported.logFrontend(messages().generic.fail + `.\nFetch of items since ${oldestPull.toISO()}.`)
             return
         }
         oldestPull = DateTime.now()

@@ -22,4 +22,5 @@ export const UserEndpoints = {
     Login: `${userPreferences.authUrl.value}/v1/login`,
     RefreshToken: `${userPreferences.authUrl.value}/v1/refresh`,
     DeleteProfile: `${userPreferences.authUrl.value}/v1/deleteAccount`,
+    Confirm2FA: `${userPreferences.authUrl.value}/v1/confirm2fa`,
 }

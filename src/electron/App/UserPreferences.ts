@@ -183,7 +183,7 @@ export const userPreferences: IUserPreferences = {
     authUrl: {
         displayName: 'Auth server URL',
         description: 'the server used for authentication',
-        value: "https://auth.dev.fireclip.net",
+        value: "https://dev.auth.fireclip.net",
         type: 'string',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
@@ -195,7 +195,7 @@ export const userPreferences: IUserPreferences = {
     storeUrl: {
         displayName: 'Store server URL',
         description: 'server used for clips storage',
-        value: "https://clips.dev.fireclip.net",
+        value: "https://dev.clips.fireclip.net",
         type: 'string',
         selectableOptions: undefined,
         changeHandler: (e, event) => {

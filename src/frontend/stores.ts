@@ -1,5 +1,5 @@
 import { Writable, writable } from 'svelte/store'
-import { IClipboardItemFrontend, IPages, IUserPreferences } from './types'
+import { IClipboardItemFrontend, IPages, IUserPreferences, TotpRes } from './types'
 
 /**
  * Wether the app is focused (used for seaching function), as it's only triggered when focused
@@ -17,7 +17,7 @@ export const appName: Writable<string> = writable('FireClip')
 // export const currentEvent: Writable<IHookKeyboardEvent | undefined> = writable(undefined)
 export const pressedKeysSizeLimit = 20
 export const pressedKeys: Writable<string[][]> = writable([[]])
-export const isPasswordAsked: Writable<boolean> = writable(false)
+export const isPasswordAsked: Writable<boolean> = writable(true)
 export const isPasswordIncorrect: Writable<boolean> = writable(false)
 export const selectedClipId: Writable<string> = writable('')
 export const currentScrollIndex: Writable<number> = writable(-1)
@@ -27,6 +27,7 @@ export const visibleClipsHashes: Writable<string[]> = writable([])
 export const showPassword: Writable<boolean> = writable(false)
 export const passwordButtonText: Writable<string> = writable('show')
 export const userPreferences: Writable<IUserPreferences | undefined> = writable(undefined)
+export const totpConfirmInfo: Writable<{totp: TotpRes} | undefined> = writable(undefined)
 export const isAppHidden: Writable<boolean> = writable(true)
 export const currentSearchedText: Writable<string> = writable('')
 export const searchOnlyImages: Writable<boolean> = writable(false)

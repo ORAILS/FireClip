@@ -69,6 +69,9 @@ export const actionsExported = {
     alertFrontend: (message: string) => {
         localMainWindow.webContents.send(channelsToRender.alert, message)
     },
+    logFrontend: (message: string) => {
+        localMainWindow.webContents.send(channelsToRender.log, message)
+    },
     sendCurrentItems: async () => {
         try {
             actions.sendItems(items()?.getAll())
@@ -98,6 +101,7 @@ export const actionsExported = {
         state.remoteSyncInterval = setInterval(sync, interval)
     },
     askPassword: async () => localMainWindow.webContents.send(channelsToRender.askPassword, true),
+    openWindow: async (window: string) => localMainWindow.webContents.send(channelsToRender.openWindow, window)
 }
 
 const actions = {
@@ -225,13 +229,24 @@ const ioHookChannels: IReceiveChannel[] = [
     }
 ]
 
-async function loginUser(rawUser: { name: string, password: string }) {
+async function loginUser(rawUser: { name: string, password: string, code: string }) {
     try {
         const localUser = CryptoService.HashUserLocal(rawUser)
         state.user = localUser
 
-        const loginRes = await RequestService.account.login(localUser.name, localUser.remotePassword)
+        const loginRes = await RequestService.account.login(localUser.name, localUser.remotePassword, rawUser.code)
 
+        if (loginRes.code === 206) {
+            if (loginRes.data) {
+                localMainWindow.webContents.send(channelsToRender.confirmTotp, loginRes.data)
+            }
+            return
+        }
+        if(loginRes.code === 400)
+        {
+            actionsExported.alertFrontend("2fa code incorrect!")
+            return
+        }
         if (loginRes.ok && loginRes.data) {
             userTokens.access_expires = DateTime.now().plus({ minutes: 55 })
             userTokens.access = loginRes.data.access_token
@@ -246,7 +261,8 @@ async function loginUser(rawUser: { name: string, password: string }) {
             actions.sendShortcuts()
             actions.sendFrontendNotification(channelsToRender.passwordConfirmed)
         } else {
-            actions.sendFrontendNotification(channelsToRender.passwordIncorrect)
+            // actions.sendFrontendNotification(channelsToRender.passwordIncorrect)
+            actionsExported.alertFrontend("password incorrect!")
         }
     } catch (e: any) {
         actionsExported.alertFrontend(e.toString())
@@ -260,7 +276,10 @@ async function registerUser(rawUser: { name: string, password: string }) {
         state.user = localUser
         const registerRes = await RequestService.account.register(localUser.name, localUser.remotePassword)
         if (registerRes.ok) {
-            actionsExported.alertFrontend('Successfully registered! Try to login now!')
+            const body = registerRes.data
+            if (body) {
+                localMainWindow.webContents.send(channelsToRender.confirmTotp, body)
+            }
         } else {
             actionsExported.alertFrontend(messages().generic.fail + `.\nStatus: ${registerRes.code}`)
         }
@@ -301,7 +320,7 @@ const channelsFromRender: IReceiveChannel[] = [
     },
     {
         name: 'to.backend.user.login',
-        handler: async (event: IpcMainEvent, user: { name: string; password: string }) => {
+        handler: async (event: IpcMainEvent, user: any) => {
             await loginUser(user)
         }
     },
@@ -320,6 +339,13 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'to.backend.item.paste',
         handler: async (event: IpcMainEvent, hash: string) => await actions.writeToClipboard(hash)
+    },
+    {
+        name: 'to.backend.text.paste',
+        handler: async (event: IpcMainEvent, text: string) => {
+            localClipboard.writeText(text)
+            actionsExported.alertFrontend("copied!")
+        }
     },
     {
         name: 'to.backend.item.delete',
@@ -398,7 +424,19 @@ const channelsFromRender: IReceiveChannel[] = [
             localClipboard.writeText(downloadUrl)
             actionsExported.alertFrontend(messages().downloadLinkWritten.ok)
         }
-    }
+    },
+    {
+        name: 'to.backend.confirm.2fa',
+        handler: async (event: any, code: string, token: string) => {
+            const res = await RequestService.account.confirm2fa(code, token)
+            if (res.ok) {
+                actionsExported.alertFrontend("2FA successfully enabled! Try logging in")
+                actionsExported.openWindow("login")
+            } else {
+                actionsExported.alertFrontend(`failed enabling 2FA. Code ${res.code}`)
+            }
+        }
+    },
 ]
 
 /**
@@ -416,6 +454,7 @@ export const channelsToRender = {
     alert: 'to.renderer.alert',
     openWindow: 'to.renderer.open.window',
     log: 'to.renderer.log',
+    confirmTotp: 'to.renderer.confirm.totp',
 } as const
 
 let localClipboard: Clipboard

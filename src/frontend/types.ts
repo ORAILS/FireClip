@@ -97,7 +97,8 @@ export enum IPages {
     shortcuts,
     search,
     info,
-    debug
+    debug,
+    totpConfirm
 }
 
 export function isTextContent(obj: IClipboardItem) {
@@ -130,4 +131,10 @@ export interface IHookKeyboardEvent {
     keycode: number
     rawcode: number
     type: string
+}
+
+export interface TotpRes {
+    qr : string
+    secret : string
+    token : string
 }
