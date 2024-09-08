@@ -14,6 +14,7 @@
     import { currentPage } from './stores'
     import { IPages } from './types'
     import Debug from './Components/Debug.svelte'
+    import TotpConfirm from './Components/TotpConfirm.svelte'
 </script>
 
 <svelte:head>
@@ -37,6 +38,8 @@
             <Search />
         {:else if $currentPage === IPages.debug}
             <Debug />
+        {:else if $currentPage === IPages.totpConfirm}
+            <TotpConfirm />
         {/if}
         <ShortcutsHandler />
     </section>

@@ -3,7 +3,7 @@
     import { arrayToArrayMap, getKeyName, ioHook, itemMatchesText, sort } from '../KeyboardEventUtil'
     import { ipcRenderer } from '../events'
     import {
-    backendLogs,
+        backendLogs,
         clipList,
         clipListFiltered,
         currentPage,
@@ -15,6 +15,7 @@
         pressedKeysSizeLimit,
         searchOnlyImages,
         shortcutsJson,
+        totpConfirmInfo,
         userPreferences
     } from '../stores'
     import type { IClipboardItem, IHookKeyboardEvent, IReceiveChannel } from '../types'
@@ -33,7 +34,6 @@
     })
 
     searchOnlyImages.subscribe((v) => {
-        console.log('test')
         if (v) {
             $clipListFiltered = arrayToArrayMap<[string, IClipboardItem]>((i) => isImageContent(i[1]), $clipList)
         } else {
@@ -72,6 +72,14 @@
             handler: function (event, store) {
                 $isPasswordAsked = true
                 $currentPage = IPages.login
+            }
+        },
+        {
+            name: 'to.renderer.confirm.totp',
+            handler: function (event, body) {
+                totpConfirmInfo.set(body)
+                currentPage.set(IPages.totpConfirm)
+                console.log(body)
             }
         },
         {
@@ -118,14 +126,14 @@
         {
             name: 'to.renderer.alert',
             handler: (e, value) => {
-                alert(value);
-                const logs = get(backendLogs)
-                if(logs.length > 1000)
-                {
-                    logs.pop()
-                }
-                logs.unshift(value)
-                backendLogs.set(logs)
+                alert(value)
+                addLog(value)
+            }
+        },
+        {
+            name: 'to.renderer.log',
+            handler: (e, value) => {
+                addLog(value)
             }
         },
         {
@@ -135,6 +143,14 @@
             }
         }
     ]
+    function addLog(log: string) {
+        const logs = get(backendLogs)
+        if (logs.length > 1000) {
+            logs.pop()
+        }
+        logs.unshift(log)
+        backendLogs.set(logs)
+    }
 
     for (const event of channelFromBackend) {
         ipcRenderer.on(event.name, event.handler as never)

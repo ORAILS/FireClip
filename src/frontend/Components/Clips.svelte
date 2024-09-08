@@ -1,9 +1,10 @@
 <script lang="ts">
+    import { onMount } from 'svelte'
     import { getTitle } from '../KeyboardEventUtil'
     import { events, eventsToBackend } from '../events'
-    import { clipListFiltered, currentScrollIndex, selectedClipId, userPreferences } from '../stores'
+    import { clipListFiltered, currentPage, currentScrollIndex, isPasswordAsked, selectedClipId, userPreferences } from '../stores'
     import type { IClipboardItemFrontend } from '../types'
-    import { isImageContent, isTextContent } from '../types'
+    import { IPages, isImageContent, isTextContent } from '../types'
     import viewport from '../viewPortAction'
     import ItemInfo from './ItemInfo.svelte'
     import IconCommand from './icons/_IconCommand.svelte'
@@ -62,6 +63,11 @@
         }
         return ''
     }
+    onMount(() => {
+        if ($isPasswordAsked) {
+            currentPage.set(IPages.login)
+        }
+    })
 </script>
 
 <div class="nosbar flex flex-col pb-8 pt-1">

@@ -24,7 +24,7 @@ export interface IAppState {
 
 export interface IReceiveChannel {
     name: string
-    handler: (event: IpcMainEvent, data: never) => Promise<void> | void
+    handler: (event: IpcMainEvent, ...args: any[]) => Promise<void> | void
 }
 
 export interface IMouseEvent {

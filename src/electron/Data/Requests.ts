@@ -2,7 +2,7 @@ import { DateTime } from "luxon"
 import fetch from 'node-fetch'
 import { actionsExported } from "../App/EventHandler"
 import { IClipboardItemEncrypted } from "../DataModels/DataTypes"
-import { BulkRes, CommonRes, LoginRes, RefreshRes } from "../DataModels/RequestTypes"
+import { BulkRes, CommonRes, LoginRes, RefreshRes, RegisterRes } from "../DataModels/RequestTypes"
 import { ClipsEndpoints, UserEndpoints } from "./RequestUtils"
 
 export const userTokens: Tokens = {
@@ -66,7 +66,7 @@ async function getAccessToken(): Promise<string> {
         }
     }
     if (!userTokens.access) {
-        actionsExported.alertFrontend("Tried to call using an empty token!")
+        actionsExported.logFrontend("Tried to call using an empty token!")
         throw new Error("token not set")
     }
     return userTokens.access
@@ -82,8 +82,8 @@ async function requestTokenBody<T>(url: string, method: string = "GET", body?: o
 
 export const RequestService = {
     account: {
-        register: (username: string, remotePass: string) => requestWithResponseBody<CommonRes>(UserEndpoints.Register, "POST", { username, password: remotePass }),
-        login: (username: string, remotePass: string) => requestWithResponseBody<LoginRes>(UserEndpoints.Login, "POST", { username, password: remotePass }),
+        register: (username: string, remotePass: string) => requestWithResponseBody<RegisterRes>(UserEndpoints.Register, "POST", { username, password: remotePass }),
+        login: (username: string, remotePass: string, code2fa: string) => requestWithResponseBody<LoginRes>(UserEndpoints.Login, "POST", { username, password: remotePass, code: code2fa }),
         refresh: () => requestWithResponseBody<RefreshRes>(UserEndpoints.RefreshToken, "POST", undefined, { "authorization": `Bearer ${userTokens.refresh}` }),
         logout() {
             userTokens.refresh = undefined
@@ -95,6 +95,9 @@ export const RequestService = {
             const url = ClipsEndpoints.GetDatabaseFile() + `?token=${await getAccessToken()}`
             return url
         },
+        confirm2fa: (code: string, token: string) => requestWithResponseBody<CommonRes>(UserEndpoints.Confirm2FA, "POST", {
+            code
+        }, { "authorization": `Bearer ${token}` })
     },
     clips: {
         add: (clip: IClipboardItemEncrypted) => requestToken(ClipsEndpoints.CreateUpdate, "POST", clip),

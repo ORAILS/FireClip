@@ -11,6 +11,7 @@ export const eventsToBackend = {
   itemAddFavorite: "to.backend.item.add_favorite",
   itemDelete: "to.backend.item.delete",
   pasteHash: "to.backend.item.paste",
+  pasteText: "to.backend.text.paste",
   itemsLoadBeforeHash: "to.backend.items.load_before_hash",
   userLogin: "to.backend.user.login",
   userRegister: "to.backend.user.register",
@@ -25,4 +26,5 @@ export const eventsToBackend = {
   windowFocus: 'to.backend.window.focus',
   windowUnhide: 'to.backend.window.unhide',
   setShortcuts: `to.backend.set.shortcuts`,
+  confirm2fa: `to.backend.confirm.2fa`,
 } as const
