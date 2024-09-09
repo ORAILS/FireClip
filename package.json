@@ -108,10 +108,9 @@
         "npmRebuild": false,
         "mac": {
             "target": [
-                "dmg",
-                "zip"
+                "dmg"
             ],
-            "icon": "mac/icon.icns",
+            "icon": "src/frontend/www/icons/mac/icon.icns",
             "category": "public.app-category.productivity",
             "hardenedRuntime": true,
             "entitlements": "entitlements.mac.plist",
