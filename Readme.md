@@ -1,6 +1,7 @@
 # [FireClip](https://fireclip.net)
 
 ![img](src/frontend/www/icons/png/128x128.png)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FORAILS%2FFireClip.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FORAILS%2FFireClip?ref=badge_shield)
 
 A privacy focused clipboard manager with real-time synchronisation across devices and platforms.
 
@@ -40,6 +41,9 @@ MacOS, Windows and Linux platforms will share the codebase from this repo and wi
 ### Licencing
 
 `"Source Available"`, all rights being reserved by ORAILS and/or Daniel Railean.
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FORAILS%2FFireClip.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FORAILS%2FFireClip?ref=badge_large)
 
 ### More
 
