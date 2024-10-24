@@ -2,7 +2,7 @@
     import { onMount } from 'svelte'
     import { getTitle } from '../KeyboardEventUtil'
     import { events, eventsToBackend } from '../events'
-    import { clipListFiltered, currentPage, currentScrollIndex, isPasswordAsked, selectedClipId, userPreferences } from '../stores'
+    import { clipListFiltered, currentPage, currentScrollIndex, currentSearchedText, isPasswordAsked, selectedClipId, userPreferences } from '../stores'
     import type { IClipboardItemFrontend } from '../types'
     import { IPages, isImageContent, isTextContent } from '../types'
     import viewport from '../viewPortAction'
@@ -30,6 +30,7 @@
     function handleClick(item: IClipboardItemFrontend) {
         events.notifyBackend(eventsToBackend.pasteHash, item.hash)
         $currentScrollIndex = -1
+        currentSearchedText.set("")
         $selectedClipId = ''
     }
 

@@ -3,7 +3,7 @@
     import { delay } from '../KeyboardEventUtil'
     import { sendShortcuts } from '../backendActions'
     import { events, eventsToBackend } from '../events'
-    import { currentPage, isAppHidden, isFocused, pressedKeysSizeLimit, shortcutsJson, userPreferences } from '../stores'
+    import { currentPage, currentSearchedText, isAppHidden, isFocused, pressedKeysSizeLimit, shortcutsJson, userPreferences } from '../stores'
     import { IPages, type IShortCut } from '../types'
     import { clipListFiltered, currentScrollIndex, pressedKeys, selectedClipId } from './../stores'
     import Button from './Button.svelte'
@@ -120,6 +120,7 @@
             editVisible: false,
             delayMsBetweenTriggers: 100,
             handler: () => {
+                pasteItemHandlerBase()
                 if ($currentPage != IPages.items) {
                     return
                 }
@@ -150,6 +151,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '1']]],
             handler: async () => {
+                pasteItemHandlerBase()
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[0][1].hash)
             },
             combinationChangeHandler: () => {}
@@ -160,6 +162,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '2']]],
             handler: async () => {
+                pasteItemHandlerBase()
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[1][1].hash)
             },
             combinationChangeHandler: () => {}
@@ -169,6 +172,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '3']]],
             handler: async () => {
+                pasteItemHandlerBase()
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[2][1].hash)
             },
             combinationChangeHandler: () => {}
@@ -179,6 +183,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '4']]],
             handler: async () => {
+                pasteItemHandlerBase()
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[3][1].hash)
             },
             combinationChangeHandler: () => {}
@@ -189,6 +194,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '5']]],
             handler: async () => {
+                pasteItemHandlerBase()
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[4][1].hash)
             },
             combinationChangeHandler: () => {}
@@ -199,6 +205,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '6']]],
             handler: async () => {
+                pasteItemHandlerBase()
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[5][1].hash)
             },
             combinationChangeHandler: () => {}
@@ -209,6 +216,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '7']]],
             handler: async () => {
+                pasteItemHandlerBase()
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[6][1].hash)
             },
             combinationChangeHandler: () => {}
@@ -219,6 +227,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '8']]],
             handler: async () => {
+                pasteItemHandlerBase()
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[7][1].hash)
             },
             combinationChangeHandler: () => {}
@@ -229,6 +238,7 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '9']]],
             handler: async () => {
+                pasteItemHandlerBase()
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[8][1].hash)
             },
             combinationChangeHandler: () => {}
@@ -239,10 +249,15 @@
             delayMsBetweenTriggers: 100,
             combinations: [[['Left Command', '0']]],
             handler: async () => {
+                pasteItemHandlerBase()
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[9][1].hash)
             },
             combinationChangeHandler: () => {}
         }
+    }
+
+    function pasteItemHandlerBase(){
+        currentSearchedText.set("")
     }
 
     export const arr1dSameValues = (arr1: string[], arr2: string[]): boolean => {

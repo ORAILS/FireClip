@@ -12,15 +12,6 @@
             element.focus()
         }
     })
-
-    // maybe ? in case the search is reset from backend
-    // currentSearchedText.subscribe(v=> {
-    //     text = v
-    // })
-
-    function handleChange() {
-        currentSearchedText.set(text)
-    }
 </script>
 
 {#if $currentPage == IPages.items}
@@ -32,8 +23,10 @@
             class="ml-3 w-full border-none bg-white pr-3 text-gray-600 outline-none dark:bg-slate-900 dark:text-gray-100"
             type="text"
             placeholder="Search"
-            bind:value={text}
-            on:input={handleChange}
+            bind:value={$currentSearchedText}
+            on:change={() => {
+                currentSearchedText.set($currentSearchedText)
+            }}
         />
         <div class="ml-1 flex h-6">
             <Icons
