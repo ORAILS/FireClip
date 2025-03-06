@@ -6,6 +6,7 @@ const main = async () => {
     console.log(`arch: '${arch}'`)
     console.log(`node arch: '${archNode}'`)
     if (arch != archNode) {
+        // macos scenario
         if (arch == 'i386' && archNode == 'x64') {
             return
         }
