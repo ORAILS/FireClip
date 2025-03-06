@@ -145,7 +145,7 @@
     ]
     function addLog(log: string) {
         const logs = get(backendLogs)
-        if (logs.length > 1000) {
+        if (logs.length > 50) {
             logs.pop()
         }
         logs.unshift(log)
