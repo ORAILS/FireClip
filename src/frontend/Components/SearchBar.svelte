@@ -21,6 +21,12 @@
     function handleChange() {
         currentSearchedText.set(text)
     }
+    currentSearchedText.subscribe((v) => {
+        if (v == '') {
+            text = ''
+        }
+    })
+    let searchFocused = false
 </script>
 
 {#if $currentPage == IPages.items}
@@ -33,19 +39,27 @@
             type="text"
             placeholder="Search"
             bind:value={text}
+            on:blur={() => {
+                searchFocused = false
+            }}
+            on:focus={() => {
+                searchFocused = true
+            }}
             on:input={handleChange}
         />
         <div class="ml-1 flex h-6">
-            <Icons
-                icon="tint"
-                on:click={() => {
-                    console.log('clicked')
-                    currentPage.set(IPages.search)
-                }}
-                title="Advanced search"
-                stopPropagation={false}
-                size="6"
-            />
+            {#if searchFocused}
+                <Icons
+                    icon="tint"
+                    on:click={() => {
+                        console.log('clicked')
+                        currentPage.set(IPages.search)
+                    }}
+                    title="Advanced search"
+                    stopPropagation={false}
+                    size="6"
+                />
+            {/if}
             <Icons
                 icon="gear"
                 on:click={() => {

@@ -54,7 +54,7 @@
                     label={item.displayName}
                     title={item.description}
                     fontSize={12}
-                    defaultValue={item.value}
+                    value={item.value}
                     selectOptions={item.selectableOptions}
                     on:change={(e) => {
                         sendChange(key, { key, value: e.detail })

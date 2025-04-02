@@ -3,7 +3,7 @@
     import { delay } from '../KeyboardEventUtil'
     import { sendShortcuts } from '../backendActions'
     import { events, eventsToBackend } from '../events'
-    import { currentPage, isAppHidden, isFocused, pressedKeysSizeLimit, shortcutsJson, userPreferences } from '../stores'
+    import { currentPage, currentSearchedText, isAppHidden, isFocused, pressedKeysSizeLimit, shortcutsJson, userPreferences } from '../stores'
     import { IPages, type IShortCut } from '../types'
     import { clipListFiltered, currentScrollIndex, pressedKeys, selectedClipId } from './../stores'
     import Button from './Button.svelte'
@@ -63,6 +63,7 @@
 
     interface IShortcuts {
         scroll: IShortCut
+        scroll_up: IShortCut
         close_and_paste: IShortCut
         search: IShortCut
         paste1: IShortCut
@@ -115,6 +116,27 @@
             combinationChangeHandler: (newCombination: string[][][]) => {}
         },
 
+        scroll_up: {
+            combinations: [[['Left Command', 'Left Shift', '`']]],
+            editVisible: false,
+            delayMsBetweenTriggers: 100,
+            handler: async () => {
+                if ($currentPage != IPages.items) {
+                    return
+                }
+                if ($isAppHidden) {
+                    return
+                }
+                events.notifyBackend(eventsToBackend.windowUnhide)
+                if ($clipListFiltered && $currentScrollIndex - 1 >= 0 && $clipListFiltered[$currentScrollIndex - 1][0]) {
+                    $currentScrollIndex--
+                    $selectedClipId = $clipListFiltered[$currentScrollIndex][0]
+                    scrollIntoView($selectedClipId)
+                }
+            },
+            combinationChangeHandler: (newCombination: string[][][]) => {}
+        },
+
         close_and_paste: {
             combinations: [[['Left Command', '`'], ['Left Command'], []]],
             editVisible: false,
@@ -124,6 +146,7 @@
                     return
                 }
                 events.notifyBackend(eventsToBackend.pasteHash, $selectedClipId)
+                currentSearchedText.set('')
                 $currentScrollIndex = -1
                 $selectedClipId = ''
             },
@@ -151,6 +174,7 @@
             combinations: [[['Left Command', '1']]],
             handler: async () => {
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[0][1].hash)
+                currentSearchedText.set('')
             },
             combinationChangeHandler: () => {}
         },
@@ -161,6 +185,7 @@
             combinations: [[['Left Command', '2']]],
             handler: async () => {
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[1][1].hash)
+                currentSearchedText.set('')
             },
             combinationChangeHandler: () => {}
         },
@@ -170,6 +195,7 @@
             combinations: [[['Left Command', '3']]],
             handler: async () => {
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[2][1].hash)
+                currentSearchedText.set('')
             },
             combinationChangeHandler: () => {}
         },
@@ -180,6 +206,7 @@
             combinations: [[['Left Command', '4']]],
             handler: async () => {
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[3][1].hash)
+                currentSearchedText.set('')
             },
             combinationChangeHandler: () => {}
         },
@@ -190,6 +217,7 @@
             combinations: [[['Left Command', '5']]],
             handler: async () => {
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[4][1].hash)
+                currentSearchedText.set('')
             },
             combinationChangeHandler: () => {}
         },
@@ -200,6 +228,7 @@
             combinations: [[['Left Command', '6']]],
             handler: async () => {
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[5][1].hash)
+                currentSearchedText.set('')
             },
             combinationChangeHandler: () => {}
         },
@@ -210,6 +239,7 @@
             combinations: [[['Left Command', '7']]],
             handler: async () => {
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[6][1].hash)
+                currentSearchedText.set('')
             },
             combinationChangeHandler: () => {}
         },
@@ -220,6 +250,7 @@
             combinations: [[['Left Command', '8']]],
             handler: async () => {
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[7][1].hash)
+                currentSearchedText.set('')
             },
             combinationChangeHandler: () => {}
         },
@@ -230,6 +261,7 @@
             combinations: [[['Left Command', '9']]],
             handler: async () => {
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[8][1].hash)
+                currentSearchedText.set('')
             },
             combinationChangeHandler: () => {}
         },
@@ -240,6 +272,7 @@
             combinations: [[['Left Command', '0']]],
             handler: async () => {
                 events.notifyBackend(eventsToBackend.pasteHash, $clipListFiltered[9][1].hash)
+                currentSearchedText.set('')
             },
             combinationChangeHandler: () => {}
         }
@@ -304,12 +337,10 @@
         return { exists: false, name: '' }
     }
     export const getNameFromKey = (key: string): string => {
-        return key.toUpperCase().replaceAll('_', ' ')
+        return key.toUpperCase().replace(/_/g, ' ')
     }
     export const resetRecorded = () => {
-        console.log('reseted!')
         simplestShortcut = []
-        // recordedShortcuts = [[]]
         pressedKeys.set([[]])
     }
     currentPage.subscribe((v) => {

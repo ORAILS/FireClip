@@ -8,13 +8,9 @@
     export let selectOptions: undefined | string[] = undefined
     export let type: string
     export let value: any = undefined
-    export let defaultValue: any = undefined
     export let title: string | undefined = undefined
 
     onMount(() => {
-        if (!value && defaultValue) {
-            value = defaultValue
-        }
     })
 
     function handleClick(event) {
