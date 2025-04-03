@@ -44,3 +44,22 @@ MacOS, Windows and Linux platforms will share the codebase from this repo and wi
 ### More
 
 - [Disclaimer](./disclaimer.md)
+
+### Troubleshooting
+
+<details>
+<summary>The APP keeps asking for accesibility settings even if those were granted</summary>
+<br>
+To fix the app permissions need a reset and then they need to be granted again.
+Try the following in the exact order:
+
+1. close the APP
+2. open the terminal and run: `tccutil reset All com.orails.fireclip` → it should output something like `Successfully reset All approval status for com.orails.fireclip`
+3. open the APP → it should ask for 'Accessibility' access again
+4. grant the Accessibility access in settings
+5. close the APP
+6. open the APP again → it shouldn't ask for access this time
+7. it works now
+
+read more about this bug on [stackexchange.com](https://apple.stackexchange.com/questions/257580/accessibility-settings-asking-everytime)
+</details>
