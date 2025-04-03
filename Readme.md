@@ -61,4 +61,5 @@ Try the following in the exact order:
 6. open the APP again → it shouldn't ask for access this time
 7. it works now
 
+read more about this on [stackexchange.com](https://apple.stackexchange.com/questions/257580/accessibility-settings-asking-everytime)
 </details>
