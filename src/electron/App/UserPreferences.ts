@@ -41,6 +41,21 @@ export interface IUserPreferences {
 
 export const store = new Store()
 
+const getDataKey = (key: string) => `${AppSettings.name}.data.${key}`
+
+export const UserDataKeys = {
+    savedUser: 'savedUser'
+}
+
+export function storeUserData(key: keyof typeof UserDataKeys, data: string) {
+    store.set(getDataKey(key), data)
+}
+export function getUserData(key: keyof typeof UserDataKeys) {
+    return store.get(getDataKey(key)) as string
+}
+export function clearUserData(key: keyof typeof UserDataKeys) {
+    store.delete(getDataKey(key))
+}
 /**
  * Used to generate the key for the electron-storage preference saving
  */
@@ -183,7 +198,7 @@ export const userPreferences: IUserPreferences = {
     authUrl: {
         displayName: 'Auth server URL',
         description: 'the server used for authentication',
-        value: "https://dev.auth.fireclip.net",
+        value: 'https://dev.auth.fireclip.net',
         type: 'string',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
@@ -195,7 +210,7 @@ export const userPreferences: IUserPreferences = {
     storeUrl: {
         displayName: 'Store server URL',
         description: 'server used for clips storage',
-        value: "https://dev.clips.fireclip.net",
+        value: 'https://dev.clips.fireclip.net',
         type: 'string',
         selectableOptions: undefined,
         changeHandler: (e, event) => {
@@ -228,7 +243,7 @@ export const userPreferences: IUserPreferences = {
             userPreferences.enableRemoteSync.value = event.value
             defaultHandler(e, event)
         }
-    },
+    }
 }
 
 /**
@@ -285,6 +300,5 @@ export const InitUserSettings = async () => {
     }
 
     // default triggering shortcut, always enabled (most likely also a user settings in the future)
-    globalShortcut.register('CommandOrControl+`', () => {
-    })
+    globalShortcut.register('CommandOrControl+`', () => {})
 }

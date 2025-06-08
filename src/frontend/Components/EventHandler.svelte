@@ -1,7 +1,7 @@
 <script lang="ts">
     import { get } from 'svelte/store'
     import { arrayToArrayMap, getKeyName, ioHook, itemMatchesText, sort } from '../KeyboardEventUtil'
-    import { ipcRenderer } from '../events'
+    import { events, eventsToBackend, ipcRenderer } from '../events'
     import {
         backendLogs,
         clipList,
@@ -11,6 +11,7 @@
         isAppHidden,
         isPasswordAsked,
         isPasswordIncorrect,
+        isUserRemembered,
         pressedKeys,
         pressedKeysSizeLimit,
         searchOnlyImages,
@@ -20,6 +21,11 @@
     } from '../stores'
     import type { IClipboardItem, IHookKeyboardEvent, IReceiveChannel } from '../types'
     import { IPages, isImageContent } from '../types'
+    import { onMount } from 'svelte'
+
+    onMount(() => {
+        events.notifyBackend(eventsToBackend.frontendEventsReady)
+    })
 
     currentSearchedText.subscribe((text: string) => {
         if ($searchOnlyImages) {
@@ -70,6 +76,7 @@
         {
             name: 'to.renderer.askPassword',
             handler: function (event, store) {
+                isUserRemembered.set(store)
                 $isPasswordAsked = true
                 $currentPage = IPages.login
             }
@@ -95,8 +102,8 @@
         {
             name: 'to.renderer.passwordConfirmed',
             handler: function (event) {
-                $isPasswordAsked = false
-                $currentPage = IPages.items
+                isPasswordAsked.set(false)
+                currentPage.set(IPages.items)
             }
         },
         {

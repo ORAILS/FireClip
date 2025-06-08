@@ -12,7 +12,7 @@ export interface IKeyboardEvent {
 
 export interface IAppState {
     user: ILocalUser | undefined
-    pullInterval: NodeJS.Timer | undefined
+    clipboardPullInterval: NodeJS.Timer | undefined
     remoteSyncInterval: NodeJS.Timer | undefined
     // index: number
     // ctrlA: boolean
@@ -20,6 +20,11 @@ export interface IAppState {
     // last2: number
     // last3: number
     lastHash: string
+}
+
+export interface ISavedUser {
+    name: string
+    refresh: string
 }
 
 export interface IReceiveChannel {

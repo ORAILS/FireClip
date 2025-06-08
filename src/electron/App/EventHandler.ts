@@ -5,17 +5,17 @@ import { DateTime } from 'luxon'
 import { ItemRepo } from '../Data/ItemRepository'
 import { RequestService, userTokens } from '../Data/Requests'
 import { IClipboardItem, isImageContent, isRTFContent, isTextContent, RemoteItemStatus } from '../DataModels/DataTypes'
-import { IAppState, IKeyboardEvent, IMouseEvent, IReceiveChannel } from '../DataModels/LocalTypes'
+import { IAppState, IKeyboardEvent, IMouseEvent, IReceiveChannel, ISavedUser } from '../DataModels/LocalTypes'
 import { CryptoService } from '../Utils/CryptoService'
 import { JsUtil } from '../Utils/JsUtil'
 import { AppSettings } from './AppSettings'
 import { messages } from './CommunicationMessages'
-import { InitUserSettings, IUserPreferences, store, userPreferences } from './UserPreferences'
+import { clearUserData, getUserData, InitUserSettings, IUserPreferences, store, storeUserData, userPreferences } from './UserPreferences'
 
 const shortcutsKey = `fileclip.shortcuts`
 
 export const state: IAppState = {
-    pullInterval: undefined,
+    clipboardPullInterval: undefined,
     remoteSyncInterval: undefined,
     user: undefined,
     lastHash: ''
@@ -41,7 +41,7 @@ async function saveJSONFile(data: object) {
 let cleanUpInterval: NodeJS.Timer | undefined = undefined
 
 export const handleCleanUpParameterChange = async () => {
-    console.log("CLEANUP CALLED")
+    console.log('CLEANUP CALLED')
     if (cleanUpInterval) {
         clearInterval(cleanUpInterval)
     }
@@ -81,9 +81,9 @@ export const actionsExported = {
     },
     sendSettings: (settings: IUserPreferences) => actions.sendFrontendNotification(channelsToRender.setSettings, JSON.stringify(settings)),
     clearSyncInterval: () => {
-        console.log("remote sync stopped!")
+        console.log('remote sync stopped!')
         clearInterval(state.remoteSyncInterval)
-        state.remoteSyncInterval = undefined;
+        state.remoteSyncInterval = undefined
     },
     async startRemoteSync(interval: number) {
         if (state.remoteSyncInterval) return
@@ -100,7 +100,14 @@ export const actionsExported = {
         await ItemRepo.initialLoadItems(state.user.masterKey as string)
         state.remoteSyncInterval = setInterval(sync, interval)
     },
-    askPassword: async () => localMainWindow.webContents.send(channelsToRender.askPassword, true),
+    askPassword: async () => {
+        const saved = getUserData('savedUser')
+        if (saved) {
+            localMainWindow.webContents.send(channelsToRender.askPassword, true)
+        } else {
+            localMainWindow.webContents.send(channelsToRender.askPassword, false)
+        }
+    },
     openWindow: async (window: string) => localMainWindow.webContents.send(channelsToRender.openWindow, window)
 }
 
@@ -118,8 +125,8 @@ const actions = {
         localMainWindow.webContents.send(channelsToRender.loadItems, itemList)
     },
     async startClipboardPooling() {
-        if (state.pullInterval) return
-        state.pullInterval = setInterval(async () => await actions.TrySaveClipboard(10), 200)
+        if (state.clipboardPullInterval) return
+        state.clipboardPullInterval = setInterval(async () => await actions.TrySaveClipboard(10), 200)
     },
     async writeToClipboard(hash: string) {
         const result = items()?.get(hash)
@@ -197,9 +204,11 @@ const actions = {
     logout: () => {
         RequestService.account.logout()
         actionsExported.clearSyncInterval()
+        clearInterval(state.clipboardPullInterval)
         ItemRepo.reset()
         actions.sendItems(ItemRepo.getAll())
         state.user = undefined
+        clearUserData('savedUser')
         actionsExported.askPassword()
     },
     sendFrontendNotification: (notification: typeof channelsToRender[keyof typeof channelsToRender], ...args: any[]) => {
@@ -229,48 +238,77 @@ const ioHookChannels: IReceiveChannel[] = [
     }
 ]
 
-async function loginUser(rawUser: { name: string, password: string, code: string }) {
+async function loginUser(rawUser: { name: string; password: string; code: string; wasRemembered: boolean; rememberLogin: boolean }) {
     try {
-        const localUser = CryptoService.HashUserLocal(rawUser)
-        state.user = localUser
-
-        const loginRes = await RequestService.account.login(localUser.name, localUser.remotePassword, rawUser.code)
-
-        if (loginRes.code === 206) {
-            if (loginRes.data) {
-                localMainWindow.webContents.send(channelsToRender.confirmTotp, loginRes.data)
+        if (rawUser.wasRemembered) {
+            const data = JSON.parse(getUserData('savedUser')) as ISavedUser
+            const localUser = CryptoService.HashUserLocal({ name: data.name, password: rawUser.password })
+            try {
+                const refresh = CryptoService.DecryptText(data.refresh, localUser.masterKey)
+                userTokens.refresh = refresh
+                console.log(refresh)
+            } catch (error) {
+                actionsExported.alertFrontend('password incorrect!')
+                return
             }
-            return
-        }
-        if(loginRes.code === 400)
-        {
-            actionsExported.alertFrontend("2fa code incorrect!")
-            return
-        }
-        if (loginRes.ok && loginRes.data) {
-            userTokens.access_expires = DateTime.now().plus({ minutes: 55 })
-            userTokens.access = loginRes.data.access_token
-            userTokens.refresh = loginRes.data.refresh_token
-
-            actions.startClipboardPooling()
-            if (userPreferences.enableRemoteSync.value) {
-                actionsExported.startRemoteSync(userPreferences.remoteSyncInterval.value * 1000)
+            state.user = localUser
+            // TODO add retries
+            const refreshRes = await RequestService.account.refresh()
+            if (refreshRes.ok && refreshRes.data) {
+                userTokens.access_expires = DateTime.now().plus({ minutes: 55 })
+                userTokens.access = refreshRes.data.access_token
+            } else {
+                actionsExported.alertFrontend('failed refresh the token. please try to log in again.')
+                actions.logout()
             }
-            actionsExported.sendCurrentItems()
-            actionsExported.sendSettings(userPreferences)
-            actions.sendShortcuts()
-            actions.sendFrontendNotification(channelsToRender.passwordConfirmed)
         } else {
-            // actions.sendFrontendNotification(channelsToRender.passwordIncorrect)
-            actionsExported.alertFrontend("password incorrect!")
+            const localUser = CryptoService.HashUserLocal(rawUser)
+            state.user = localUser
+
+            const loginRes = await RequestService.account.login(localUser.name, localUser.remotePassword, rawUser.code)
+
+            if (loginRes.code === 206) {
+                if (loginRes.data) {
+                    localMainWindow.webContents.send(channelsToRender.confirmTotp, loginRes.data)
+                }
+                return
+            }
+            if (loginRes.code === 400) {
+                actionsExported.alertFrontend('2fa code incorrect!')
+                return
+            }
+            if (loginRes.ok && loginRes.data) {
+                userTokens.access_expires = DateTime.now().plus({ minutes: 55 })
+                userTokens.access = loginRes.data.access_token
+                userTokens.refresh = loginRes.data.refresh_token
+                if (rawUser.rememberLogin) {
+                    const saved: ISavedUser = {
+                        refresh: CryptoService.EncryptText(userTokens.refresh, state.user.masterKey as string),
+                        name: localUser.name
+                    }
+                    storeUserData('savedUser', JSON.stringify(saved))
+                }
+            } else {
+                actionsExported.alertFrontend('password incorrect!')
+            }
         }
+
+        actions.startClipboardPooling()
+        if (userPreferences.enableRemoteSync.value) {
+            actionsExported.startRemoteSync(userPreferences.remoteSyncInterval.value * 1000)
+        }
+        actionsExported.sendCurrentItems()
+        actionsExported.sendSettings(userPreferences)
+        actions.sendShortcuts()
+        actions.sendFrontendNotification(channelsToRender.passwordConfirmed)
+        console.log('end of flow')
     } catch (e: any) {
         actionsExported.alertFrontend(e.toString())
         console.log(e)
     }
 }
 
-async function registerUser(rawUser: { name: string, password: string }) {
+async function registerUser(rawUser: { name: string; password: string }) {
     try {
         const localUser = CryptoService.HashUserLocal(rawUser)
         state.user = localUser
@@ -308,7 +346,7 @@ const channelsFromRender: IReceiveChannel[] = [
     {
         name: 'to.backend.get.shortcuts',
         handler: () => {
-            console.log("got shortcuts")
+            console.log('got shortcuts')
             actions.sendShortcuts()
         }
     },
@@ -344,7 +382,7 @@ const channelsFromRender: IReceiveChannel[] = [
         name: 'to.backend.text.paste',
         handler: async (event: IpcMainEvent, text: string) => {
             localClipboard.writeText(text)
-            actionsExported.alertFrontend("copied!")
+            actionsExported.alertFrontend('copied!')
         }
     },
     {
@@ -413,7 +451,11 @@ const channelsFromRender: IReceiveChannel[] = [
             if (resDeleteItems.ok && resDeleteAccount.ok) {
                 actionsExported.alertFrontend(messages().accountAndDataDeleted.ok)
             } else {
-                actionsExported.alertFrontend(`${messages().dataDeleted.fail}.\n\nAccount deletion code: ${resDeleteAccount.code}.\nData deletion code: ${resDeleteItems.code}`)
+                actionsExported.alertFrontend(
+                    `${messages().dataDeleted.fail}.\n\nAccount deletion code: ${resDeleteAccount.code}.\nData deletion code: ${
+                        resDeleteItems.code
+                    }`
+                )
             }
         }
     },
@@ -430,13 +472,19 @@ const channelsFromRender: IReceiveChannel[] = [
         handler: async (event: any, code: string, token: string) => {
             const res = await RequestService.account.confirm2fa(code, token)
             if (res.ok) {
-                actionsExported.alertFrontend("2FA successfully enabled! Try logging in")
-                actionsExported.openWindow("login")
+                actionsExported.alertFrontend('2FA successfully enabled! Try logging in')
+                actionsExported.openWindow('login')
             } else {
                 actionsExported.alertFrontend(`failed enabling 2FA. Code ${res.code}`)
             }
         }
     },
+    {
+        name: 'to.backend.frontendHandler.isReady',
+        handler: async (event: any) => {
+            actionsExported.askPassword()
+        }
+    }
 ]
 
 /**
@@ -454,7 +502,7 @@ export const channelsToRender = {
     alert: 'to.renderer.alert',
     openWindow: 'to.renderer.open.window',
     log: 'to.renderer.log',
-    confirmTotp: 'to.renderer.confirm.totp',
+    confirmTotp: 'to.renderer.confirm.totp'
 } as const
 
 let localClipboard: Clipboard
