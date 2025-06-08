@@ -4,7 +4,7 @@
     "description": "Privacy focused, cross-platform clipboard manager",
     "author": "Daniel Railean <me@ddlele.com>",
     "license": "No licence, rights reserved",
-    "version": "0.8.6-2april2025",
+    "version": "0.8.6-8june2025",
     "main": "dist/index.js",
     "repository": {
         "type": "git",
