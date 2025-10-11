@@ -6,7 +6,6 @@ import CustomWindow from './App/CustomWindow'
 import { channelsToRender, ioHookHandler } from './App/EventHandler'
 import { userPreferences } from './App/UserPreferences'
 
-
 let mainWindow: CustomWindow
 let appIcon: Tray
 
@@ -70,9 +69,9 @@ app.on('ready', async () => {
     appIcon.setToolTip(AppSettings.name)
 
     if (AppSettings.openDevTools) {
-        console.log("open dev tools!")
+        console.log('open dev tools!')
         setTimeout(() => {
-            mainWindow.window.webContents.openDevTools({ mode: "detach" })
+            mainWindow.window.webContents.openDevTools({ mode: 'detach' })
         }, 1000)
     }
     if (AppSettings.isMac) {
@@ -117,16 +116,15 @@ app.on('window-all-closed', () => {
     app.quit()
 })
 
-
 if (AppSettings.isLinux) {
-    app.commandLine.appendSwitch('disable-gpu-sandbox');
+    app.commandLine.appendSwitch('disable-gpu-sandbox')
 }
 
 if (AppSettings.enableDevTools && AppSettings.isLinux) {
     const port = '8315'
     console.log(`starting debugging on port: ${port}. Open http://localhost:${port}`)
-    app.commandLine.appendSwitch('remote-debugging-port', port);
-    app.commandLine.appendSwitch('host-rules', 'MAP * 127.0.0.1');
+    app.commandLine.appendSwitch('remote-debugging-port', port)
+    app.commandLine.appendSwitch('host-rules', 'MAP * 127.0.0.1')
 }
 
 function stopProcessReuse() {

@@ -68,9 +68,20 @@
             currentPage.set(IPages.login)
         }
     })
+    function saveBlob(blob: any, fileName: string) {
+        var a = document.createElement('a')
+        document.body.appendChild(a)
+        a.style = 'display: none'
+
+        var url = window.URL.createObjectURL(blob)
+        a.href = url
+        a.download = fileName
+        a.click()
+        window.URL.revokeObjectURL(url)
+    }
 </script>
 
-<div class="nosbar flex flex-col pb-8 pt-1">
+<div class="nosbar flex flex-col pb-8">
     {#if $clipListFiltered}
         {#each $clipListFiltered as [key, item]}
             {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1)) || visibleHashes.includes(getPreviousHash(key, -2)) || visibleHashes.includes(getPreviousHash(key, 2)) || visibleHashes.includes(getPreviousHash(key, -3)) || visibleHashes.includes(getPreviousHash(key, 3))}
@@ -79,9 +90,9 @@
                     on:enterViewport={() => handleEnter(key)}
                     on:exitViewport={() => handleExit(key)}
                     title={getTitle(item)}
-                    class="clipboard-item border-slate-800 {$selectedClipId === item.hash
-                        ? 'bg-gray-300 even:bg-gray-300 hover:bg-gray-100 dark:bg-slate-700 even:dark:bg-slate-700 dark:hover:bg-slate-500'
-                        : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-700'} dark:text-gray-100 dark:even:border-y"
+                    class="clipboard-item border-zinc-800 {$selectedClipId === item.hash
+                        ? 'bg-neutral-300 even:bg-neutral-300 hover:bg-neutral-100 dark:bg-zinc-700 even:dark:bg-zinc-700 dark:hover:bg-zinc-500'
+                        : 'bg-neutral-100 even:bg-white hover:bg-neutral-300 dark:bg-neutral-900 even:dark:bg-zinc-900 dark:hover:bg-zinc-700'} dark:text-neutral-100 dark:even:border-y"
                     id={item.hash}
                     on:click|preventDefault={() => handleClick(item)}
                 >
@@ -93,11 +104,43 @@
                                 <IconCommand number={0} />
                             {/if}
                         {/if}
-                        <div class="my-auto h-full w-full overflow-hidden py-2">
+                        <div class="my-auto flex h-full w-full flex-row overflow-hidden py-2">
                             {#if isTextContent(item)}
                                 <p>{item.content}</p>
                             {:else if isImageContent(item)}
                                 <img src={item.content} alt="Base64png" />
+                                <div class="ml-1 flex flex-col">
+                                    <button
+                                        class="m-1 h-8 rounded bg-gray-200 p-1 px-2 shadow dark:bg-stone-900"
+                                        on:click|stopPropagation={async () => {
+                                            const img = new Image()
+                                            img.src = item.content
+                                            await img.decode()
+                                            console.log(img.width)
+                                            events.notify(eventsToBackend.openImage, item.hash, img.width, img.height)
+                                        }}
+                                    >
+                                        preview</button
+                                    >
+                                    <button
+                                        class="m-1 h-8 rounded bg-gray-200 p-1 px-2 shadow dark:bg-stone-900"
+                                        on:click|stopPropagation={async () => {
+                                            const content = item.content.substring(22)
+                                            console.log(content)
+                                            const decodedData = atob(content)
+                                            const uInt8Array = new Uint8Array(decodedData.length)
+
+                                            // Insert all character code into uInt8Array
+                                            for (let i = 0; i < decodedData.length; ++i) {
+                                                uInt8Array[i] = decodedData.charCodeAt(i)
+                                            }
+                                            const data = new Blob([uInt8Array], { type: 'image/png' })
+                                            saveBlob(data, `${item.modified.toISOString()}.png`)
+                                        }}
+                                    >
+                                        save</button
+                                    >
+                                </div>
                                 <!-- TODO RTF CONTENT -->
                             {/if}
                         </div>
@@ -108,7 +151,7 @@
             {/if}
         {/each}
     {:else}
-        <p class="mt-3 text-gray-600">No items!</p>
+        <p class="mt-3 text-neutral-600">No items!</p>
     {/if}
 </div>
 
@@ -123,6 +166,6 @@
     }
 
     ::selection {
-        @apply bg-gray-500 text-white;
+        @apply bg-neutral-500 text-white;
     }
 </style>

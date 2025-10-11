@@ -35,7 +35,7 @@
 
 <main class="flex flex-col {appClasses}">
     <TitleBar {title} on:clickMinimize={minimize} />
-    <div class="nosbar page bg-white dark:bg-rock">
+    <div class="nosbar page bg-white dark:bg-stone-900">
         <slot />
     </div>
     <SearchBar height={10} />
@@ -54,9 +54,9 @@
     }
 
     .page::-webkit-scrollbar-track {
-        @apply w-2 border-l border-none border-gray-600 bg-gray-50 dark:bg-slate-600;
+        @apply w-2 border-l border-none border-neutral-600 bg-neutral-50 dark:bg-zinc-600;
     }
     .page::-webkit-scrollbar-thumb {
-        @apply w-2 bg-gray-300 dark:bg-gray-800;
+        @apply w-2 bg-neutral-300 dark:bg-neutral-800;
     }
 </style>

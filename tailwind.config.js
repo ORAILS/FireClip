@@ -14,7 +14,9 @@ module.exports = {
             yellow: colors.yellow,
             slate: colors.slate,
             green: colors.green,
-            stone: colors.stone
+            stone: colors.stone,
+            zinc: colors.zinc,
+            neutral: colors.neutral
         },
         extend: {}
     },

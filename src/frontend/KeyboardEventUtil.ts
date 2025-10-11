@@ -296,6 +296,9 @@ export const getKeyName = (keycode: number, rawcode: number, layout: string, pla
         }
     }
     if (platform === 'mac') {
+        if (!result) {
+            return ''
+        }
         return result.replace(/Win/g, 'Command').replace(/Alt/g, 'Option')
     }
     return result

@@ -327,7 +327,7 @@ async function registerUser(rawUser: { name: string; password: string }) {
 }
 
 /**
- * Events send by the front-end, not Iohook specific
+ * from frontend, not Iohook specific
  */
 const channelsFromRender: IReceiveChannel[] = [
     {
@@ -483,6 +483,33 @@ const channelsFromRender: IReceiveChannel[] = [
         name: 'to.backend.frontendHandler.isReady',
         handler: async (event: any) => {
             actionsExported.askPassword()
+        }
+    },
+    {
+        name: 'to.backend.openImage',
+        handler: async (event: any, hash: string, width: number, height: number) => {
+            const item = await ItemRepo.get(hash)
+            if (!item || item.contentType !== 3) {
+                actionsExported.alertFrontend('cannot open a non image')
+            }
+            const win = new BrowserWindow({
+                height,
+                width,
+                show: false,
+                autoHideMenuBar: true
+            })
+
+            const content = `data:text/html;charset=utf-8,<html><head><title>image taken on ${item?.modified.toLocaleString()}</title></head><body> <img style="height: 100%;" src="${
+                item?.content
+            }"></body></html>`
+            win.loadURL(content)
+            win.setAlwaysOnTop(true, 'floating')
+            win.setVisibleOnAllWorkspaces(true)
+            win.once('ready-to-show', () => {
+                win.show()
+            })
+            win.focus()
+            win
         }
     }
 ]

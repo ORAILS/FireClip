@@ -1,6 +1,5 @@
 import stringify from 'json-stable-stringify'
 
-
 // export interface IItemsDb {
 //     Add(item: IClipboardItemEncrypted): Promise<IClipboardItemEncrypted>
 //     GetRange(start: number, end: number): Promise<IClipboardItemEncrypted[]>
@@ -68,7 +67,7 @@ export enum RemoteItemStatus {
 }
 
 export interface IClipboardItem extends ItemBase {
-    content: string;
+    content: string
     created: Date
     modified: Date
     remoteStatus: RemoteItemStatus

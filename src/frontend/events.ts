@@ -27,5 +27,6 @@ export const eventsToBackend = {
     windowUnhide: 'to.backend.window.unhide',
     setShortcuts: `to.backend.set.shortcuts`,
     confirm2fa: `to.backend.confirm.2fa`,
-    frontendEventsReady: `to.backend.frontendHandler.isReady`
+    frontendEventsReady: `to.backend.frontendHandler.isReady`,
+    openImage: `to.backend.openImage`
 } as const

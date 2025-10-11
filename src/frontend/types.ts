@@ -76,10 +76,10 @@ export enum RemoteItemStatus {
 }
 
 export interface IClipboardItem extends ItemBase {
-    content: string;
+    content: string
     created: Date
     modified: Date
-    remoteStatus: RemoteItemStatus,
+    remoteStatus: RemoteItemStatus
 }
 
 export interface IClipboardItemFrontend extends IClipboardItem {
@@ -134,7 +134,7 @@ export interface IHookKeyboardEvent {
 }
 
 export interface TotpRes {
-    qr : string
-    secret : string
-    token : string
+    qr: string
+    secret: string
+    token: string
 }

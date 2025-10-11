@@ -30,7 +30,7 @@
         <input
             type="text"
             placeholder="type text to search"
-            class="h-full w-full bg-[transparent] placeholder-gray-200"
+            class="h-full w-full bg-[transparent] placeholder-neutral-200"
             bind:value={$currentSearchedText}
             on:change={() => {
                 currentSearchedText.set($currentSearchedText)

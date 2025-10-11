@@ -20,7 +20,7 @@
 </script>
 
 <header
-    class="opacity h-8 w-full border-b border-gray-300 bg-white p-1 font-bold text-gray-700 dark:border-gray-800 dark:bg-slate-900 dark:text-gray-300 "
+    class="opacity h-8 w-full border-b border-neutral-300 bg-white p-1 font-bold text-neutral-700 dark:border-neutral-800 dark:bg-zinc-900 dark:text-neutral-300 "
 >
     <div class="drag-region" data-testid="drag-region">
         <div class="title flex flex-row items-center" on:click={handleTitleClick} data-testid="title">
