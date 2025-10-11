@@ -8,10 +8,9 @@
 </script>
 
 <div class="flex flex-col">
-    <MenuItem title="Go back to the items list">
+    <MenuItem title="Items">
         <div class="flex flex-row ">
-            <Icons icon="arrow-circle" centered={false} extraClass="stroke-2 rotate-[-90deg]" size="8" />
-            <p class="text-xl" on:click={() => currentPage.set(IPages.items)}>Back to items</p>
+            <p class="text-xl" on:click={() => currentPage.set(IPages.items)}>&lt; Items</p>
         </div>
     </MenuItem>
     <MenuItem>
@@ -20,7 +19,6 @@
             label="Show just images"
             title="show images only"
             fontSize={12}
-            defaultValue={false}
             on:change={(e) => {
                 searchOnlyImages.set(e.detail)
             }}

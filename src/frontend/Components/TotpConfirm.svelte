@@ -25,7 +25,7 @@
     <div
         class="absolute inset-0 flex items-center justify-center bg-neutral-700 bg-opacity-50 text-zinc-900 dark:bg-zinc-900 dark:text-neutral-100"
     >
-        <div class="max-w-sm bg-white p-6 dark:bg-stone-900">
+        <div class="max-w-sm bg-white p-6 dark:bg-neutral-900">
             <div class="flex h-12 flex-row items-center justify-center">
                 <Icons icon="logo" centered={false} size="12" />
                 <h1 class="pl-1 text-2xl">

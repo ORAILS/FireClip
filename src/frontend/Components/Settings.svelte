@@ -36,10 +36,9 @@
 </script>
 
 <div class="settings flex cursor-pointer flex-col justify-items-start">
-    <MenuItem title="Go back to the items list">
-        <div class="flex flex-row ">
-            <Icons icon="arrow-circle" centered={false} extraClass="stroke-2 rotate-[-90deg]" size="8" />
-            <p class="text-xl" on:click={() => currentPage.set(IPages.items)}>Back to items</p>
+    <MenuItem title="Items">
+        <div class="flex flex-row " on:click={() => currentPage.set(IPages.items)}>
+            <p class="text-xl">&lt; Items</p>
         </div>
     </MenuItem>
     <MenuItem title="Open shortcuts configuration">

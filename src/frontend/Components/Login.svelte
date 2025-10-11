@@ -136,9 +136,9 @@
             </h1>
         </div>
         {#if $isUserRemembered}
-            <div class="dark:bg-zincw-80 bg-white p-6">
+            <div class="w-80 bg-white dark:bg-zinc-900 p-6">
                 <div class="flex w-full flex-col items-center space-y-3">
-                    <p>Your clipboard manager is locked</p>
+                    <p class="text-center">The clipboard manager is locked</p>
                     <div class="relative my-3 w-full ">
                         <div class="absolute inset-y-0 right-0 flex items-center px-2">
                             <input class="js-$password-toggle hidden" id="toggle" type="checkbox" />
@@ -183,7 +183,7 @@
             </div>
         {:else}
             <div class="h-96 w-80">
-                <div class="dark:bg-zincw-full bg-white p-6">
+                <div class="dark:bg-zinc-900 w-full bg-white p-6">
                     <div class="mt-2">
                         <p class="text-center text-sm">Login or Register</p>
                         <div class="inputs">

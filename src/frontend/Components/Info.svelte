@@ -13,7 +13,7 @@
                 currentPage.set(IPages.settings)
             }}
         >
-            &lt; Back to settings
+            &lt; Settings
         </p>
     </MenuItem>
     <MenuItem>
