@@ -2,11 +2,11 @@
 </script>
 
 <svg
-    class="mx-0 my-auto h-5 w-5 rounded bg-neutral-50 fill-black stroke-neutral-800 p-1 hover:cursor-pointer hover:bg-green-600 hover:fill-white 
+    class="mx-0 my-auto h-5 w-5 rounded bg-neutral-50 fill-black stroke-neutral-800 p-1 hover:cursor-pointer hover:bg-green-700 hover:fill-white 
 hover:p-1 
 dark:bg-zinc-900
 dark:fill-white
-hover:dark:bg-green-700
+hover:dark:bg-green-800
 "
     aria-hidden="true"
     focusable="false"
