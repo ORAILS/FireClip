@@ -35,7 +35,7 @@
 
 <main class="flex flex-col {appClasses}">
     <TitleBar {title} on:clickMinimize={minimize} />
-    <div class="nosbar page bg-white dark:bg-stone-900">
+    <div class="nosbar page bg-white dark:bg-neutral-900">
         <slot />
     </div>
     <SearchBar height={10} />

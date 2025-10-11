@@ -17,7 +17,6 @@
         if (lastFire != hash) {
             lastFire = hash
             events.notifyBackend(eventsToBackend.itemsLoadBeforeHash, hash)
-            // console.log('loading items')
             if (resetFire != undefined) {
                 clearTimeout(resetFire)
             }
@@ -45,7 +44,6 @@
         visibleHashes = visibleHashes
         if (visibleHashes.includes($clipListFiltered[$clipListFiltered.length - 6][1].hash)) {
             loadMoreItemsBefore($clipListFiltered[$clipListFiltered.length - 1][1].hash)
-            // console.log('5th at the end is visible')
         }
     }
     const handleExit = (hash: string) => {
@@ -111,22 +109,20 @@
                                 <img src={item.content} alt="Base64png" />
                                 <div class="ml-1 flex flex-col">
                                     <button
-                                        class="m-1 h-8 rounded bg-gray-200 p-1 px-2 shadow dark:bg-stone-900"
+                                        class="m-1 h-8 rounded bg-gray-200 p-1 px-2 shadow dark:bg-neutral-900"
                                         on:click|stopPropagation={async () => {
                                             const img = new Image()
                                             img.src = item.content
                                             await img.decode()
-                                            console.log(img.width)
                                             events.notify(eventsToBackend.openImage, item.hash, img.width, img.height)
                                         }}
                                     >
                                         preview</button
                                     >
                                     <button
-                                        class="m-1 h-8 rounded bg-gray-200 p-1 px-2 shadow dark:bg-stone-900"
+                                        class="m-1 h-8 rounded bg-gray-200 p-1 px-2 shadow dark:bg-neutral-900"
                                         on:click|stopPropagation={async () => {
                                             const content = item.content.substring(22)
-                                            console.log(content)
                                             const decodedData = atob(content)
                                             const uInt8Array = new Uint8Array(decodedData.length)
 
