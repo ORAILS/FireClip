@@ -10,8 +10,7 @@
     export let value: any = undefined
     export let title: string | undefined = undefined
 
-    onMount(() => {
-    })
+    onMount(() => {})
 
     function handleClick(event) {
         if (selectOptions) return
@@ -35,7 +34,7 @@
 <div class="slider" style="font-size:{fontSize}px" title={title ? title : ''}>
     {#if type === 'select'}
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
-        <select class="cursor-pointer border border-gray-500 bg-gray-100 dark:bg-slate-900" bind:value on:change={handleSelectChange}>
+        <select class="cursor-pointer border border-neutral-500 bg-neutral-100 dark:bg-zinc-900" bind:value on:change={handleSelectChange}>
             {#each selectOptions as option}
                 {#if option === value}
                     <option selected value={option}>{option}</option>
@@ -51,13 +50,13 @@
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
         <input
             type="number"
-            class="w-16 cursor-pointer rounded bg-gray-100 text-right dark:bg-slate-900"
+            class="w-16 cursor-pointer rounded bg-neutral-100 text-right dark:bg-zinc-900"
             bind:value
             on:change={handleSelectChange}
         />
     {:else if type === 'string'}
         <span style="font-size: {fontSize * 1.3}px">{label}</span>
-        <input type="text" on:input={handleSelectChange} class="w-64 cursor-pointer bg-gray-100 dark:bg-slate-900" bind:value />
+        <input type="text" on:input={handleSelectChange} class="w-64 cursor-pointer bg-neutral-100 dark:bg-zinc-900" bind:value />
     {/if}
 </div>
 
@@ -81,7 +80,7 @@
         position: relative;
         border: none;
         border-radius: 1.5em;
-        @apply m-0 h-5 min-h-[1.25rem] w-9 min-w-[2.25rem] shadow duration-500 dark:bg-gray-800;
+        @apply m-0 h-5 min-h-[1.25rem] w-9 min-w-[2.25rem] shadow duration-500 dark:bg-neutral-800;
     }
 
     .slider button::before {
@@ -89,15 +88,15 @@
         position: absolute;
         right: 1.5em;
         transition: transform 0.3s;
-        @apply top-[0.125rem] h-4 w-4 bg-gray-300 dark:bg-slate-900;
+        @apply top-[0.125rem] h-4 w-4 bg-neutral-300 dark:bg-zinc-900;
     }
 
     .slider button[aria-checked='true'] {
-        @apply bg-gray-300 dark:bg-slate-500;
+        @apply bg-neutral-300 dark:bg-zinc-500;
     }
 
     .slider button[aria-checked='true']::before {
-        @apply translate-x-4 bg-gray-50 transition-transform duration-300 dark:bg-gray-800;
+        @apply translate-x-4 bg-neutral-50 transition-transform duration-300 dark:bg-neutral-800;
     }
 
     .slider button::before {

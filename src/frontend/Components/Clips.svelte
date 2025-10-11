@@ -79,9 +79,9 @@
                     on:enterViewport={() => handleEnter(key)}
                     on:exitViewport={() => handleExit(key)}
                     title={getTitle(item)}
-                    class="clipboard-item border-slate-800 {$selectedClipId === item.hash
-                        ? 'bg-gray-300 even:bg-gray-300 hover:bg-gray-100 dark:bg-slate-700 even:dark:bg-slate-700 dark:hover:bg-slate-500'
-                        : 'bg-gray-100 even:bg-white hover:bg-gray-300 dark:bg-rock even:dark:bg-slate-900 dark:hover:bg-slate-700'} dark:text-gray-100 dark:even:border-y"
+                    class="clipboard-item border-zinc-800 {$selectedClipId === item.hash
+                        ? 'bg-neutral-300 even:bg-neutral-300 hover:bg-neutral-100 dark:bg-zinc-700 even:dark:bg-zinc-700 dark:hover:bg-zinc-500'
+                        : 'bg-neutral-100 even:bg-white hover:bg-neutral-300 dark:bg-rock even:dark:bg-zinc-900 dark:hover:bg-zinc-700'} dark:text-neutral-100 dark:even:border-y"
                     id={item.hash}
                     on:click|preventDefault={() => handleClick(item)}
                 >
@@ -108,7 +108,7 @@
             {/if}
         {/each}
     {:else}
-        <p class="mt-3 text-gray-600">No items!</p>
+        <p class="mt-3 text-neutral-600">No items!</p>
     {/if}
 </div>
 
@@ -123,6 +123,6 @@
     }
 
     ::selection {
-        @apply bg-gray-500 text-white;
+        @apply bg-neutral-500 text-white;
     }
 </style>

@@ -38,8 +38,8 @@
     <svg
         class="mx-0 my-auto h-{size} w-{size}
 rounded 
-stroke-gray-800 hover:cursor-pointer dark:stroke-gray-200
-{filled ? 'fill-gray-800 dark:fill-gray-200' : ''}
+stroke-neutral-800 hover:cursor-pointer dark:stroke-neutral-200
+{filled ? 'fill-neutral-800 dark:fill-neutral-200' : ''}
 {extraClass}
 "
         focusable="false"

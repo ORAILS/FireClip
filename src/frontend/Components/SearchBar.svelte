@@ -31,11 +31,11 @@
 
 {#if $currentPage == IPages.items}
     <footer
-        class="flex h-{height} w-full items-center border-t border-t-gray-300 bg-white p-1  font-bold dark:border-t-gray-800 dark:bg-slate-900"
+        class="flex h-{height} w-full items-center border-t border-t-neutral-300 bg-white p-1  font-bold dark:border-t-neutral-800 dark:bg-zinc-900"
     >
         <input
             bind:this={element}
-            class="ml-3 w-full border-none bg-white pr-3 text-gray-600 outline-none dark:bg-slate-900 dark:text-gray-100"
+            class="ml-3 w-full border-none bg-white pr-3 text-neutral-600 outline-none dark:bg-zinc-900 dark:text-neutral-100"
             type="text"
             placeholder="Search"
             bind:value={text}

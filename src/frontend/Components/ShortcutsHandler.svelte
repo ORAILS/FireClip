@@ -3,7 +3,15 @@
     import { delay } from '../KeyboardEventUtil'
     import { sendShortcuts } from '../backendActions'
     import { events, eventsToBackend } from '../events'
-    import { currentPage, currentSearchedText, isAppHidden, isFocused, pressedKeysSizeLimit, shortcutsJson, userPreferences } from '../stores'
+    import {
+        currentPage,
+        currentSearchedText,
+        isAppHidden,
+        isFocused,
+        pressedKeysSizeLimit,
+        shortcutsJson,
+        userPreferences
+    } from '../stores'
     import { IPages, type IShortCut } from '../types'
     import { clipListFiltered, currentScrollIndex, pressedKeys, selectedClipId } from './../stores'
     import Button from './Button.svelte'
@@ -370,10 +378,10 @@
     >
     {#each entries(shortcuts) as shortcut}
         <div
-            class="bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
-dark:text-gray-200 
-even:dark:border-gray-800 
-even:dark:bg-slate-900"
+            class="bg-neutral-100 px-2 py-2 pl-3 text-neutral-900 even:border-y even:bg-white dark:bg-rock 
+dark:text-neutral-200 
+even:dark:border-neutral-800 
+even:dark:bg-zinc-900"
         >
             <div class="my-2 flex flex-col">
                 <div class="flex flex-row justify-between">

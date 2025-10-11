@@ -5,11 +5,11 @@
 
 <div
     {title}
-    class="cursor-pointer bg-gray-100 px-2 py-2 pl-3 text-gray-900 even:border-y even:bg-white dark:bg-rock 
-    dark:text-gray-200 
-    dark:border-gray-800 
+    class="cursor-pointer bg-neutral-100 px-2 py-2 pl-3 text-neutral-900 even:border-y even:bg-white dark:border-neutral-800 
+    dark:bg-rock 
+    dark:text-neutral-200 
     {extraClass}
-    even:dark:bg-slate-900"
+    even:dark:bg-zinc-900"
 >
     <slot />
 </div>
