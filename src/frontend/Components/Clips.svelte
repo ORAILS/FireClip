@@ -68,6 +68,17 @@
             currentPage.set(IPages.login)
         }
     })
+    function saveBlob(blob: any, fileName: string) {
+        var a = document.createElement('a')
+        document.body.appendChild(a)
+        a.style = 'display: none'
+
+        var url = window.URL.createObjectURL(blob)
+        a.href = url
+        a.download = fileName
+        a.click()
+        window.URL.revokeObjectURL(url)
+    }
 </script>
 
 <div class="nosbar flex flex-col pb-8">
@@ -93,11 +104,43 @@
                                 <IconCommand number={0} />
                             {/if}
                         {/if}
-                        <div class="my-auto h-full w-full overflow-hidden py-2">
+                        <div class="my-auto flex h-full w-full flex-row overflow-hidden py-2">
                             {#if isTextContent(item)}
                                 <p>{item.content}</p>
                             {:else if isImageContent(item)}
                                 <img src={item.content} alt="Base64png" />
+                                <div class="ml-1 flex flex-col">
+                                    <button
+                                        class="m-1 h-8 rounded bg-gray-200 p-1 px-2 shadow dark:bg-stone-900"
+                                        on:click|stopPropagation={async () => {
+                                            const img = new Image()
+                                            img.src = item.content
+                                            await img.decode()
+                                            console.log(img.width)
+                                            events.notify(eventsToBackend.openImage, item.hash, img.width, img.height)
+                                        }}
+                                    >
+                                        preview</button
+                                    >
+                                    <button
+                                        class="m-1 h-8 rounded bg-gray-200 p-1 px-2 shadow dark:bg-stone-900"
+                                        on:click|stopPropagation={async () => {
+                                            const content = item.content.substring(22)
+                                            console.log(content)
+                                            const decodedData = atob(content)
+                                            const uInt8Array = new Uint8Array(decodedData.length)
+
+                                            // Insert all character code into uInt8Array
+                                            for (let i = 0; i < decodedData.length; ++i) {
+                                                uInt8Array[i] = decodedData.charCodeAt(i)
+                                            }
+                                            const data = new Blob([uInt8Array], { type: 'image/png' })
+                                            saveBlob(data, `${item.modified.toISOString()}.png`)
+                                        }}
+                                    >
+                                        save</button
+                                    >
+                                </div>
                                 <!-- TODO RTF CONTENT -->
                             {/if}
                         </div>

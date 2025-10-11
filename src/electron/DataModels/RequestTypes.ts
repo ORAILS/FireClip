@@ -1,4 +1,4 @@
-import { IClipboardItemEncrypted } from "./DataTypes";
+import { IClipboardItemEncrypted } from './DataTypes'
 
 export interface CommonRes {
     message: string
@@ -13,20 +13,19 @@ export interface LoginResTotp {
 }
 
 export interface TotpRes {
-    qr : string
-    secret : string
-    token : string
+    qr: string
+    secret: string
+    token: string
 }
 
 export interface RefreshRes {
-    access_token: string;
-    type: string;
+    access_token: string
+    type: string
 }
 
 export interface LoginRes extends RefreshRes {
-    refresh_token: string;
+    refresh_token: string
 }
-
 
 export interface BulkRes {
     clips: IClipboardItemEncrypted[]

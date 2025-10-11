@@ -38,7 +38,6 @@ const update = (item: IClipboardItem): boolean => {
     return false
 }
 
-
 const remove = async (hash: string) => {
     items.delete(hash)
     await RequestService.clips.delete(hash)
@@ -96,7 +95,7 @@ async function loadItemsBeforeDate(date: DateTime, limit: number, masterKey: str
     }
     let needsLoading = false
     if (!state.user) {
-        throw new Error("user not found")
+        throw new Error('user not found')
     }
     // console.log("received items: " + res.data.clips.length)
     for (const clip of res.data.clips) {
@@ -136,18 +135,18 @@ export const ItemRepo = {
     loadItemsBeforeHash: async (hash: string, password: string, limit = 50) => {
         const item = items.get(hash)
         if (!item) {
-            throw new Error("tried to read before unexisting hash!")
+            throw new Error('tried to read before unexisting hash!')
         }
         return loadItemsBeforeDate(DateTime.fromJSDate(item.modified), limit, password)
     },
     cleanUp: async (maxAgeInSeconds: number, maxNumberTotal: number): Promise<boolean> => {
         let changed = false
-        changed = changed || await removeOldUnfavored(maxAgeInSeconds)
-        changed = changed || await limitMapSize(maxNumberTotal)
+        changed = changed || (await removeOldUnfavored(maxAgeInSeconds))
+        changed = changed || (await limitMapSize(maxNumberTotal))
         return changed
     },
     syncWithRemote: async (password: string) => {
-        console.log("syncing")
+        console.log('syncing')
         const res = await RequestService.clips.getSince(oldestPull)
         if (!res.ok || !res.data) {
             actionsExported.logFrontend(messages().generic.fail + `.\nFetch of items since ${oldestPull.toISO()}.`)
@@ -156,9 +155,9 @@ export const ItemRepo = {
         oldestPull = DateTime.now()
         let needsLoading = false
         if (!state.user) {
-            throw new Error("user not found")
+            throw new Error('user not found')
         }
-        console.log("received items after sync: " + res.data.clips.length)
+        console.log('received items after sync: ' + res.data.clips.length)
         for (const clip of res.data.clips) {
             needsLoading = true
             try {
@@ -185,8 +184,7 @@ export const ItemRepo = {
                     item[1].remoteStatus = RemoteItemStatus.pushedToRemote
                 } else if (res.status == 409) {
                     item[1].remoteStatus = RemoteItemStatus.needsUpdateOnRemote
-                }
-                else {
+                } else {
                     console.log(await res.text())
                 }
                 needsLoading = true
@@ -204,7 +202,7 @@ export const ItemRepo = {
         }
         console.log('done syncing')
         if (needsLoading) {
-            console.log("needs loading after remote sync")
+            console.log('needs loading after remote sync')
             actionsExported.sendCurrentItems()
         }
     }
