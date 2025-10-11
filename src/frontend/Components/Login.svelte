@@ -10,8 +10,8 @@
         passwordButtonText,
         showPassword
     } from '../stores'
-    import Icons from './icons/Icons.svelte'
     import { IPages } from '../types'
+    import Icons from './icons/Icons.svelte'
 
     function togglePasswordInput() {
         $passwordButtonText === 'show' ? ($passwordButtonText = 'hide') : ($passwordButtonText = 'show')
@@ -75,7 +75,11 @@
     }
     const onKeyEnter = async (e: KeyboardEvent) => {
         if (e.key == 'Enter') {
-            sendRequest()
+            if ($isUserRemembered) {
+                unlock()
+            } else {
+                sendRequest()
+            }
         }
     }
     const onOkay = (e: Event) => {
