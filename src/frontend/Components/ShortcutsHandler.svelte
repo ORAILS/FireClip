@@ -378,7 +378,7 @@
     >
     {#each entries(shortcuts) as shortcut}
         <div
-            class="bg-neutral-100 px-2 py-2 pl-3 text-neutral-900 even:border-y even:bg-white dark:bg-rock 
+            class="bg-neutral-100 px-2 py-2 pl-3 text-neutral-900 even:border-y even:bg-white dark:bg-stone-900 
 dark:text-neutral-200 
 even:dark:border-neutral-800 
 even:dark:bg-zinc-900"

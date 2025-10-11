@@ -70,7 +70,7 @@
     })
 </script>
 
-<div class="nosbar flex flex-col pb-8 pt-1">
+<div class="nosbar flex flex-col pb-8">
     {#if $clipListFiltered}
         {#each $clipListFiltered as [key, item]}
             {#if visibleHashes.includes(key) || visibleHashes.includes(getPreviousHash(key, -1)) || visibleHashes.includes(getPreviousHash(key, 1)) || visibleHashes.includes(getPreviousHash(key, -2)) || visibleHashes.includes(getPreviousHash(key, 2)) || visibleHashes.includes(getPreviousHash(key, -3)) || visibleHashes.includes(getPreviousHash(key, 3))}
@@ -81,7 +81,7 @@
                     title={getTitle(item)}
                     class="clipboard-item border-zinc-800 {$selectedClipId === item.hash
                         ? 'bg-neutral-300 even:bg-neutral-300 hover:bg-neutral-100 dark:bg-zinc-700 even:dark:bg-zinc-700 dark:hover:bg-zinc-500'
-                        : 'bg-neutral-100 even:bg-white hover:bg-neutral-300 dark:bg-rock even:dark:bg-zinc-900 dark:hover:bg-zinc-700'} dark:text-neutral-100 dark:even:border-y"
+                        : 'bg-neutral-100 even:bg-white hover:bg-neutral-300 dark:bg-neutral-900 even:dark:bg-zinc-900 dark:hover:bg-zinc-700'} dark:text-neutral-100 dark:even:border-y"
                     id={item.hash}
                     on:click|preventDefault={() => handleClick(item)}
                 >
